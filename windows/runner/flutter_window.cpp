@@ -32,11 +32,6 @@ bool FlutterWindow::OnCreate() {
   
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
-  // 首帧渲染后显示窗口
-  flutter_controller_->engine()->SetNextFrameCallback([&]() {
-    this->Show();
-  });
-
   flutter_controller_->ForceRedraw();
 
   return true;
