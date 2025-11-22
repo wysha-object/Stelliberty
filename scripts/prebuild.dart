@@ -402,8 +402,28 @@ Future<void> downloadAndSetupCore({
       final apiUrl = Uri.parse(
         "https://api.github.com/repos/$githubRepo/releases/latest",
       );
+      
+      // 从环境变量获取 GitHub Token（优先 GITHUB_TOKEN，其次 GH_TOKEN）
+      final githubToken = Platform.environment['GITHUB_TOKEN'] ??
+                          Platform.environment['GH_TOKEN'];
+      
+      // 构建请求头
+      final headers = <String, String>{
+        'Accept': 'application/vnd.github+json',
+      };
+      
+      // 如果有 Token，添加认证头
+      if (githubToken != null && githubToken.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $githubToken';
+        if (attempt == 1) {
+          log('🔐 使用 GitHub Token 认证请求');
+        }
+      } else if (attempt == 1) {
+        log('⚠️  未检测到 GITHUB_TOKEN，使用未认证请求（每小时限制 60 次）');
+      }
+      
       final response = await http
-          .get(apiUrl)
+          .get(apiUrl, headers: headers)
           .timeout(
             const Duration(seconds: 15),
             onTimeout: () => throw TimeoutException('获取 Release 信息超时'),
@@ -692,11 +712,26 @@ Future<void> setupInnoSetup({required String projectRoot}) async {
   String downloadUrl;
 
   try {
+    // 从环境变量获取 GitHub Token
+    final githubToken = Platform.environment['GITHUB_TOKEN'] ??
+                        Platform.environment['GH_TOKEN'];
+    
+    // 构建请求头
+    final headers = <String, String>{
+      'Accept': 'application/vnd.github+json',
+    };
+    
+    // 如果有 Token，添加认证头
+    if (githubToken != null && githubToken.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $githubToken';
+    }
+    
     final response = await http
         .get(
           Uri.parse(
             'https://api.github.com/repos/jrsoftware/issrc/releases/latest',
           ),
+          headers: headers,
         )
         .timeout(const Duration(seconds: 10));
 
