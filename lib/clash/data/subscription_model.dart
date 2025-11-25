@@ -144,9 +144,9 @@ class Subscription {
     if (lastUpdateTime == null) {
       return true;
     }
-    // 检查是否到了更新时间
+    // 检查是否到了更新时间（包含相等的情况，避免卡在"待更新"状态）
     final nextUpdateTime = lastUpdateTime!.add(autoUpdateInterval);
-    return DateTime.now().isAfter(nextUpdateTime);
+    return !DateTime.now().isBefore(nextUpdateTime);
   }
 
   // 获取配置文件路径
