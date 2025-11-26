@@ -226,7 +226,8 @@
     "saveSuccess": "文件保存成功",
     "saveFailed": "文件保存失败",
     "saveError": "保存失败: {error}",
-    "readError": "读取文件失败: {error}"
+    "readError": "读取文件失败: {error}",
+    "loading": "加载中..."
   },
   "connection": {
     "title": "连接",

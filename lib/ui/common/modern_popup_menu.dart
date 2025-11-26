@@ -240,7 +240,7 @@ class ModernPopupMenu extends StatelessWidget {
   const ModernPopupMenu({
     super.key,
     required this.items,
-    this.minWidth = 200,
+    this.minWidth = 220,
     this.minItemVerticalPadding = 16,
     this.fontSize = 15,
   });

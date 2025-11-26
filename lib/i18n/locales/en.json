@@ -226,7 +226,8 @@
     "saveSuccess": "File saved successfully",
     "saveFailed": "File save failed",
     "saveError": "Save failed: {error}",
-    "readError": "Failed to read file: {error}"
+    "readError": "Failed to read file: {error}",
+    "loading": "Loading..."
   },
   "connection": {
     "title": "Connections",

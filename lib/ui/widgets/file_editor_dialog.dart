@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stelliberty/utils/logger.dart';
 import 'package:re_editor/re_editor.dart';
@@ -68,8 +69,8 @@ class _FileEditorDialogState extends State<FileEditorDialog>
   // 是否正在保存
   bool _isSaving = false;
 
-  // 是否正在初始化编辑器（用于大文件异步加载）
-  bool _isInitializing = true;
+  // 编辑器是否已准备好显示内容
+  bool _editorReady = false;
 
   // 缓存的行数（避免频繁计算）
   int _lineCount = 0;
@@ -80,6 +81,9 @@ class _FileEditorDialogState extends State<FileEditorDialog>
   @override
   void initState() {
     super.initState();
+
+    // 先创建空编辑器（不添加 listener，避免触发修改检测）
+    _controller = CodeLineEditingController.fromText('');
 
     // 初始化动画控制器
     _animationController = AnimationController(
@@ -97,24 +101,34 @@ class _FileEditorDialogState extends State<FileEditorDialog>
 
     _animationController.forward();
 
-    // 异步初始化编辑器（避免阻塞 UI 线程）
-    _initializeEditor();
+    // 等对话框完全显示后再加载内容
+    _loadContentAfterDialogReady();
   }
 
-  // 异步初始化编辑器
-  // 使用 microtask 避免大文本加载时阻塞 UI
-  Future<void> _initializeEditor() async {
+  // 等对话框加载完成后再异步填充内容
+  Future<void> _loadContentAfterDialogReady() async {
+    // 等待对话框动画完成（300ms）+ 缓冲时间
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    if (!mounted) return;
+
+    // 加载文本内容
     await Future.microtask(() {
-      _controller = CodeLineEditingController.fromText(widget.initialContent);
-      _controller.addListener(_onContentChanged);
+      _controller.text = widget.initialContent;
       _updateStats();
     });
 
-    if (mounted) {
-      setState(() {
-        _isInitializing = false;
-      });
-    }
+    if (!mounted) return;
+
+    // 内容加载完成后，添加 listener 并显示编辑器
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _controller.addListener(_onContentChanged);
+        setState(() {
+          _editorReady = true;
+        });
+      }
+    });
   }
 
   @override
@@ -128,8 +142,12 @@ class _FileEditorDialogState extends State<FileEditorDialog>
   void _onContentChanged() {
     final isModified = _controller.text != widget.initialContent;
     if (isModified != _isModified) {
-      setState(() {
-        _isModified = isModified;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _isModified = isModified;
+          });
+        }
       });
     }
     _updateStats();
@@ -143,12 +161,14 @@ class _FileEditorDialogState extends State<FileEditorDialog>
     final newLineCount = text.split('\n').length;
 
     if (newCharCount != _charCount || newLineCount != _lineCount) {
-      if (mounted) {
-        setState(() {
-          _charCount = newCharCount;
-          _lineCount = newLineCount;
-        });
-      }
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _charCount = newCharCount;
+            _lineCount = newLineCount;
+          });
+        }
+      });
     }
   }
 
@@ -221,11 +241,7 @@ class _FileEditorDialogState extends State<FileEditorDialog>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildHeader(),
-                  Flexible(
-                    child: _isInitializing
-                        ? _buildLoadingIndicator()
-                        : _buildEditor(),
-                  ),
+                  Flexible(child: _buildEditor()),
                   _buildActions(),
                 ],
               ),
@@ -233,16 +249,6 @@ class _FileEditorDialogState extends State<FileEditorDialog>
           ),
         ),
       ),
-    );
-  }
-
-  // 构建加载指示器（初始化编辑器时显示）
-  Widget _buildLoadingIndicator() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      ),
-      child: const Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -380,59 +386,99 @@ class _FileEditorDialogState extends State<FileEditorDialog>
         borderRadius: BorderRadius.circular(12),
         child: Stack(
           children: [
-            CodeEditor(
-              controller: _controller,
-              padding: const EdgeInsets.only(
-                left: 5,
-                right: 0,
-                top: 0,
-                bottom: 0,
-              ),
-              scrollbarBuilder: (context, child, details) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 6, bottom: 6),
-                  child: Scrollbar(
-                    controller: details.controller,
-                    thumbVisibility: false,
-                    child: Transform.translate(
-                      offset: const Offset(0, -0),
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 0),
-                        child: child,
+            // 编辑器（内容加载完成后平滑淡入）
+            AnimatedOpacity(
+              opacity: _editorReady ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeIn,
+              child: CodeEditor(
+                controller: _controller,
+                padding: const EdgeInsets.only(
+                  left: 5,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                ),
+                scrollbarBuilder: (context, child, details) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 6, bottom: 6),
+                    child: Scrollbar(
+                      controller: details.controller,
+                      thumbVisibility: false,
+                      child: Transform.translate(
+                        offset: const Offset(0, -0),
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 0),
+                          child: child,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-              indicatorBuilder:
-                  (context, editingController, chunkController, notifier) {
-                    return Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8, right: 8),
-                          child: DefaultCodeLineNumber(
-                            controller: editingController,
-                            notifier: notifier,
+                  );
+                },
+                indicatorBuilder:
+                    (context, editingController, chunkController, notifier) {
+                      return Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8, right: 8),
+                            child: DefaultCodeLineNumber(
+                              controller: editingController,
+                              notifier: notifier,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 16), // 分隔线1px + 右侧间距15px
-                      ],
-                    );
-                  },
-              style: CodeEditorStyle(
-                fontSize: 14,
-                fontFamily: GoogleFonts.notoSansMono().fontFamily,
-                selectionColor: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.3),
-                codeTheme: CodeHighlightTheme(
-                  languages: {'yaml': CodeHighlightThemeMode(mode: langYaml)},
-                  theme: Theme.of(context).brightness == Brightness.dark
-                      ? githubDarkTheme
-                      : atomOneDarkTheme,
+                          const SizedBox(width: 16), // 分隔线1px + 右侧间距15px
+                        ],
+                      );
+                    },
+                style: CodeEditorStyle(
+                  fontSize: 14,
+                  fontFamily: GoogleFonts.notoSansMono().fontFamily,
+                  selectionColor: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.3),
+                  codeTheme: CodeHighlightTheme(
+                    languages: {'yaml': CodeHighlightThemeMode(mode: langYaml)},
+                    theme: Theme.of(context).brightness == Brightness.dark
+                        ? githubDarkTheme
+                        : atomOneDarkTheme,
+                  ),
                 ),
               ),
             ),
+            // 加载中的占位提示
+            if (!_editorReady)
+              Container(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.02)
+                    : Colors.black.withValues(alpha: 0.02),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        context.translate.fileEditor.loading,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             // 分隔线独立覆盖（固定在行号右侧）
             Positioned(
               left: 50, // 左边距5 + 行号宽度约40 + 右边距5
@@ -557,38 +603,9 @@ class _FileEditorDialogState extends State<FileEditorDialog>
     );
   }
 
-  // 处理取消操作
+  // 处理取消操作（直接关闭，不弹确认对话框）
   void _handleCancel() {
-    if (_isModified) {
-      // 有未保存修改时显示确认对话框
-      showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(context.translate.fileEditor.discardTitle),
-          content: Text(context.translate.fileEditor.discardMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(context.translate.fileEditor.cancelButton),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-              child: Text(context.translate.fileEditor.discardConfirm),
-            ),
-          ],
-        ),
-      ).then((confirmed) {
-        if (confirmed == true) {
-          _closeDialog();
-        }
-      });
-    } else {
-      _closeDialog();
-    }
+    _closeDialog();
   }
 
   // 关闭对话框（带退出动画）
