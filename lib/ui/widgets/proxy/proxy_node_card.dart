@@ -88,109 +88,92 @@ class _ProxyNodeCardState extends State<ProxyNodeCard> {
           ),
           boxShadow: [
             BoxShadow(
-              color: widget.isSelected
-                  ? colorScheme.primary.withValues(alpha: isDark ? 0.3 : 0.15)
-                  : Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
               blurRadius: widget.isSelected ? 12 : 8,
               offset: Offset(0, widget.isSelected ? 3 : 2),
             ),
           ],
         ),
-        child: Container(
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: widget.onTap,
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
-                children: [
-                  // 选中指示器
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 4,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: widget.isSelected
-                          ? colorScheme.primary
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(2),
-                      boxShadow: widget.isSelected
-                          ? [
-                              BoxShadow(
-                                color: colorScheme.primary.withValues(
-                                  alpha: 0.5,
-                                ),
-                                blurRadius: 8,
-                              ),
-                            ]
-                          : null,
-                    ),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                // 选中指示器
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 4,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: widget.isSelected
+                        ? colorScheme.primary
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  const SizedBox(width: 12),
+                ),
+                const SizedBox(width: 12),
 
-                  // 标题和类型
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          widget.node.name,
-                          style: TextStyle(
-                            fontWeight: widget.isSelected
-                                ? FontWeight.w600
-                                : FontWeight.w500,
-                            fontSize: 14,
-                            color: colorScheme.onSurface.withValues(
-                              alpha: isDark ? 0.95 : 0.9,
-                            ),
+                // 标题和类型
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        widget.node.name,
+                        style: TextStyle(
+                          fontWeight: widget.isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w500,
+                          fontSize: 14,
+                          color: colorScheme.onSurface.withValues(
+                            alpha: isDark ? 0.95 : 0.9,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
                         ),
-                        const SizedBox(height: 6),
-                        Transform.translate(
-                          offset: const Offset(-6, 0),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colorScheme.surfaceContainerHighest
-                                  .withValues(alpha: 0.4),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              _formatProxyType(widget.node.type),
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.5,
-                                color: colorScheme.onSurface.withValues(
-                                  alpha: 0.6,
-                                ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      const SizedBox(height: 8),
+                      Transform.translate(
+                        offset: const Offset(-6, 0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.4),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            _formatProxyType(widget.node.type),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.6,
                               ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
+                ),
+                const SizedBox(width: 8),
 
-                  // 延迟显示区域
-                  SizedBox(
-                    width: 85,
-                    child: widget.isClashRunning
-                        ? _buildDelaySection(context, colorScheme, isDark)
-                        : empty,
-                  ),
-                ],
-              ),
+                // 延迟显示区域
+                SizedBox(
+                  width: 85,
+                  child: widget.isClashRunning
+                      ? _buildDelaySection(context, colorScheme, isDark)
+                      : empty,
+                ),
+              ],
             ),
           ),
         ),
@@ -236,14 +219,14 @@ class _ProxyNodeCardState extends State<ProxyNodeCard> {
   Widget _buildDelayBadge(ColorScheme colorScheme, bool isDark) {
     return _HoverableWidget(
       builder: (isHovering, onEnter, onExit) {
-        return MouseRegion(
-          cursor: SystemMouseCursors.click,
-          onEnter: onEnter,
-          onExit: onExit,
-          child: GestureDetector(
-            onTap: _testDelay,
-            child: Align(
-              alignment: Alignment.centerRight,
+        return Align(
+          alignment: Alignment.centerRight,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            onEnter: onEnter,
+            onExit: onExit,
+            child: GestureDetector(
+              onTap: _testDelay,
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 200),
                 opacity: isHovering ? 0.7 : 1.0,
@@ -278,14 +261,14 @@ class _ProxyNodeCardState extends State<ProxyNodeCard> {
   Widget _buildTestIcon(ColorScheme colorScheme) {
     return _HoverableWidget(
       builder: (isHovering, onEnter, onExit) {
-        return MouseRegion(
-          cursor: SystemMouseCursors.click,
-          onEnter: onEnter,
-          onExit: onExit,
-          child: GestureDetector(
-            onTap: _testDelay,
-            child: Align(
-              alignment: Alignment.centerRight,
+        return Align(
+          alignment: Alignment.centerRight,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            onEnter: onEnter,
+            onExit: onExit,
+            child: GestureDetector(
+              onTap: _testDelay,
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 200),
                 opacity: isHovering ? 0.7 : 1.0,

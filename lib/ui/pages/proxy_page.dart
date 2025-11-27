@@ -54,7 +54,7 @@ class ProxyPage extends StatefulWidget {
 
 class _ProxyPageWidgetState extends State<ProxyPage>
     with WidgetsBindingObserver {
-  final ScrollController _nodeListScrollController = ScrollController();
+  late ScrollController _nodeListScrollController;
   final ScrollController _tabScrollController = ScrollController();
   late ProxyNotifier _viewModel;
   int _currentCrossAxisCount = 2;
@@ -70,6 +70,9 @@ class _ProxyPageWidgetState extends State<ProxyPage>
   static const String _scrollOffsetKey = 'proxy_page_scroll_offset';
   static const String _subscriptionPathKey = 'proxy_page_subscription_path';
 
+  // 保存上次的订阅路径，用于检测订阅切换
+  String? _lastSubscriptionPath;
+
   // UI 常量
   static const double _mouseScrollSpeedMultiplier = 2.0;
   static const double _tabScrollDistance = 200.0;
@@ -84,17 +87,17 @@ class _ProxyPageWidgetState extends State<ProxyPage>
 
     _viewModel = ProxyNotifier(clashProvider: clashProvider);
 
+    // 创建默认 ScrollController
+    _nodeListScrollController = ScrollController();
+
     WidgetsBinding.instance.addObserver(this);
     _nodeListScrollController.addListener(_updateScrollOffset);
 
-    // 初始化 SharedPreferences
-    _initPreferences();
+    // 在第一帧之前初始化并恢复位置
+    _initializeWithScrollPosition();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _initializePage();
-      // 等待数据加载完成后再恢复滚动位置
-      await Future.delayed(const Duration(milliseconds: 100));
-      await _restoreScrollPosition();
 
       // 延迟一帧触发 setState 以更新按钮状态
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -105,12 +108,51 @@ class _ProxyPageWidgetState extends State<ProxyPage>
     });
   }
 
-  // 初始化 SharedPreferences 实例
-  Future<void> _initPreferences() async {
+  // 初始化并立即恢复滚动位置（在首帧渲染前）
+  Future<void> _initializeWithScrollPosition() async {
     try {
       _prefs = await SharedPreferences.getInstance();
+
+      // 在 await 之后检查 mounted
+      if (!mounted) return;
+
+      final subscriptionProvider = context.read<SubscriptionProvider>();
+      final currentPath = subscriptionProvider.getSubscriptionConfigPath();
+      final savedPath = _prefs!.getString(_subscriptionPathKey);
+      final savedOffset = _prefs!.getDouble(_scrollOffsetKey);
+
+      // 记录当前订阅路径
+      _lastSubscriptionPath = currentPath;
+
+      // 如果订阅路径匹配且有保存的偏移量，在构建完成后立即设置
+      if (currentPath != null &&
+          currentPath == savedPath &&
+          savedOffset != null &&
+          savedOffset > 0) {
+        Logger.info('准备使用保存的滚动位置：$savedOffset');
+
+        // 在第一帧渲染时设置滚动位置
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_nodeListScrollController.hasClients) {
+            // 获取当前滚动范围并限制偏移量
+            final maxExtent =
+                _nodeListScrollController.position.maxScrollExtent;
+            final minExtent =
+                _nodeListScrollController.position.minScrollExtent;
+            final clampedOffset = savedOffset.clamp(minExtent, maxExtent);
+
+            if (clampedOffset != savedOffset) {
+              Logger.info('滚动位置超出范围，已限制：$savedOffset -> $clampedOffset');
+            }
+
+            // 使用 jumpTo 而不是 animateTo，避免动画效果
+            _nodeListScrollController.jumpTo(clampedOffset);
+            Logger.info('已设置初始滚动位置：$clampedOffset');
+          }
+        });
+      }
     } catch (e) {
-      Logger.error('初始化 SharedPreferences 失败：$e');
+      Logger.error('初始化滚动位置失败：$e');
     }
   }
 
@@ -138,57 +180,6 @@ class _ProxyPageWidgetState extends State<ProxyPage>
     if (!_nodeListScrollController.hasClients) return;
 
     _lastScrollOffset = _nodeListScrollController.offset;
-  }
-
-  Future<void> _restoreScrollPosition() async {
-    try {
-      if (_prefs == null) {
-        Logger.warning('SharedPreferences 未初始化，无法恢复滚动位置');
-        return;
-      }
-
-      // 在异步操作前获取所有需要的值
-      final subscriptionProvider = context.read<SubscriptionProvider>();
-      final currentPath = subscriptionProvider.getSubscriptionConfigPath();
-
-      final savedPath = _prefs!.getString(_subscriptionPathKey);
-      final savedOffset = _prefs!.getDouble(_scrollOffsetKey);
-
-      Logger.info('尝试恢复滚动位置：保存的位置=$savedOffset');
-
-      if (currentPath != null &&
-          currentPath == savedPath &&
-          savedOffset != null) {
-        Logger.info('恢复滚动位置：$savedOffset');
-        _restoreScrollToOffset(savedOffset);
-      } else {
-        Logger.info('订阅变化或首次加载，重置滚动位置');
-        await _prefs!.setString(_subscriptionPathKey, currentPath ?? '');
-        await _prefs!.remove(_scrollOffsetKey);
-      }
-    } catch (e) {
-      Logger.error('恢复滚动位置失败：$e');
-    }
-  }
-
-  void _restoreScrollToOffset(double savedOffset) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_nodeListScrollController.hasClients) {
-        Logger.warning('ScrollController 未附加');
-        return;
-      }
-
-      final maxExtent = _nodeListScrollController.position.maxScrollExtent;
-      final minExtent = _nodeListScrollController.position.minScrollExtent;
-
-      final clampedOffset = savedOffset.clamp(minExtent, maxExtent);
-      if (clampedOffset != savedOffset) {
-        Logger.warning('位置超出范围：$savedOffset -> $clampedOffset');
-      }
-
-      _nodeListScrollController.jumpTo(clampedOffset);
-      Logger.info('滚动位置已恢复：$clampedOffset');
-    });
   }
 
   void _saveScrollPositionSync() {
@@ -306,8 +297,21 @@ class _ProxyPageWidgetState extends State<ProxyPage>
       return Center(child: Text(context.translate.proxy.noProxyGroups));
     }
 
+    // 检测订阅是否切换
+    final subscriptionProvider = context.read<SubscriptionProvider>();
+    final currentPath = subscriptionProvider.getSubscriptionConfigPath();
+    if (currentPath != _lastSubscriptionPath) {
+      // 订阅已切换，重置代理组索引
+      Logger.info('检测到订阅切换：$_lastSubscriptionPath -> $currentPath');
+      _currentGroupIndex = 0;
+      _lastSubscriptionPath = currentPath;
+    }
+
     // 确保当前选中的代理组索引有效
     if (_currentGroupIndex >= clashProvider.proxyGroups.length) {
+      Logger.warning(
+        '代理组索引越界，重置为 0：$_currentGroupIndex >= ${clashProvider.proxyGroups.length}',
+      );
       _currentGroupIndex = 0;
     }
     final selectedGroup = clashProvider.proxyGroups[_currentGroupIndex];

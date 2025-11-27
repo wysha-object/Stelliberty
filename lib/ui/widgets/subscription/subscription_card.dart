@@ -94,11 +94,7 @@ class SubscriptionCard extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: isSelected
-                        ? colorScheme.primary.withValues(
-                            alpha: isDark ? 0.3 : 0.15,
-                          )
-                        : Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
+                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
                     blurRadius: isSelected ? 12 : 8,
                     offset: Offset(0, isSelected ? 3 : 2),
                   ),
