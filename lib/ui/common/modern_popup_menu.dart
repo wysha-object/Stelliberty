@@ -1,5 +1,32 @@
 import 'package:flutter/material.dart';
 
+// 弹出菜单样式配置常量
+class _PopupMenuStyle {
+  // 菜单容器上下内边距（第一个项目距上和最后一个项目距下）
+  static const double menuVerticalPadding = 8.0;
+
+  // 项目之间的间距（相邻两个项目之间的实际距离）
+  static const double itemGap = 7.0;
+
+  // 菜单项距容器左右边缘的间距
+  static const double itemHorizontalSpacing = 8.0;
+
+  // 菜单项内容的左右内边距
+  static const double itemContentHorizontalPadding = 14.0;
+
+  // 菜单项内容的上下内边距
+  static const double itemContentVerticalPadding = 12.0;
+
+  // 菜单容器圆角半径
+  static const double menuBorderRadius = 10.0;
+
+  // 菜单项圆角半径
+  static const double itemBorderRadius = 6.0;
+
+  // 分割线左右间距
+  static const double dividerHorizontalSpacing = 6.0;
+}
+
 // 弹出菜单项数据模型
 // 定义菜单项的基本属性：图标、文本、回调和危险标识
 class PopupMenuItemData {
@@ -262,7 +289,9 @@ class ModernPopupMenu extends StatelessWidget {
     final foregroundColor = disabled ? color.withValues(alpha: 0.3) : color;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      padding: const EdgeInsets.symmetric(
+        horizontal: _PopupMenuStyle.itemHorizontalSpacing,
+      ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -272,20 +301,22 @@ class ModernPopupMenu extends StatelessWidget {
                   onPressed();
                 }
               : null,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(_PopupMenuStyle.itemBorderRadius),
           splashFactory: InkRipple.splashFactory,
           hoverColor: item.danger
               ? colorScheme.error.withValues(alpha: 0.1)
               : null,
           child: Container(
             constraints: BoxConstraints(minWidth: minWidth - 16),
-            padding: EdgeInsets.only(
-              left: 12,
-              right: 12,
-              top: minItemVerticalPadding - 4,
-              bottom: minItemVerticalPadding - 4,
+            padding: const EdgeInsets.symmetric(
+              horizontal: _PopupMenuStyle.itemContentHorizontalPadding,
+              vertical: _PopupMenuStyle.itemContentVerticalPadding,
             ),
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(
+                _PopupMenuStyle.itemBorderRadius,
+              ),
+            ),
             child: Row(
               mainAxisSize: MainAxisSize.max,
               children: [
@@ -321,7 +352,9 @@ class ModernPopupMenu extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(
+              _PopupMenuStyle.menuBorderRadius,
+            ),
             border: Border.all(
               color: colorScheme.outline.withValues(alpha: isDark ? 0.3 : 0.2),
               width: 1,
@@ -342,18 +375,20 @@ class ModernPopupMenu extends StatelessWidget {
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 3),
+            padding: const EdgeInsets.symmetric(
+              vertical: _PopupMenuStyle.menuVerticalPadding,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 for (final item in items.asMap().entries) ...[
                   _popupMenuItem(context, item: item.value, index: item.key),
-                  if (item.value != items.last)
+                  if (item.value != items.last) ...[
+                    SizedBox(height: _PopupMenuStyle.itemGap),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 3,
+                        horizontal: _PopupMenuStyle.dividerHorizontalSpacing,
                       ),
                       child: Divider(
                         height: 0,
@@ -363,6 +398,8 @@ class ModernPopupMenu extends StatelessWidget {
                         ),
                       ),
                     ),
+                    SizedBox(height: _PopupMenuStyle.itemGap),
+                  ],
                 ],
               ],
             ),

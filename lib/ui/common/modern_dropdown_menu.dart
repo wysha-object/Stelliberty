@@ -1,5 +1,29 @@
 import 'package:flutter/material.dart';
 
+// 下拉菜单样式配置常量
+class _DropdownMenuStyle {
+  // 菜单容器上下内边距（第一个项目距上和最后一个项目距下）
+  static const double menuVerticalPadding = 8.0;
+
+  // 项目之间的间距（相邻两个项目之间的实际距离）
+  static const double itemGap = 8.0;
+
+  // 菜单项距容器左右边缘的间距
+  static const double itemHorizontalSpacing = 9.0;
+
+  // 菜单项内容的左右内边距
+  static const double itemContentHorizontalPadding = 8.0;
+
+  // 菜单项内容的上下内边距
+  static const double itemContentVerticalPadding = 10.0;
+
+  // 菜单容器圆角半径
+  static const double menuBorderRadius = 10.0;
+
+  // 菜单项圆角半径
+  static const double itemBorderRadius = 6.0;
+}
+
 // 现代化下拉菜单路由
 // 基于 ModernPopupRoute 的架构，实现 Q弹效果
 class _ModernDropdownRoute<T> extends PopupRoute<T> {
@@ -346,7 +370,9 @@ class _DropdownMenuUIState<T> extends State<_DropdownMenuUI<T>> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      padding: const EdgeInsets.symmetric(
+        horizontal: _DropdownMenuStyle.itemHorizontalSpacing,
+      ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -354,22 +380,24 @@ class _DropdownMenuUIState<T> extends State<_DropdownMenuUI<T>> {
             Navigator.of(context).pop();
             widget.onSelected(item);
           },
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(
+            _DropdownMenuStyle.itemBorderRadius,
+          ),
           splashFactory: InkRipple.splashFactory,
           hoverColor: colorScheme.onSurface.withValues(alpha: 0.05),
           child: Container(
             constraints: const BoxConstraints(minWidth: 120),
-            padding: const EdgeInsets.only(
-              left: 6,
-              right: 10,
-              top: 10,
-              bottom: 10,
+            padding: EdgeInsets.symmetric(
+              horizontal: _DropdownMenuStyle.itemContentHorizontalPadding,
+              vertical: _DropdownMenuStyle.itemContentVerticalPadding,
             ),
             decoration: BoxDecoration(
               color: isSelected
                   ? colorScheme.onSurface.withValues(alpha: 0.08)
                   : Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(
+                _DropdownMenuStyle.itemBorderRadius,
+              ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -505,7 +533,9 @@ class _DropdownMenuUIState<T> extends State<_DropdownMenuUI<T>> {
           constraints: const BoxConstraints(minWidth: 200, maxWidth: 400),
           decoration: BoxDecoration(
             color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(
+              _DropdownMenuStyle.menuBorderRadius,
+            ),
             border: Border.all(
               color: colorScheme.outline.withValues(alpha: isDark ? 0.2 : 0.15),
               width: 1,
@@ -526,17 +556,24 @@ class _DropdownMenuUIState<T> extends State<_DropdownMenuUI<T>> {
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(
+              vertical: _DropdownMenuStyle.menuVerticalPadding,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // 显示当前页的项目
-                ..._currentPageItems.map((item) {
-                  return _dropdownMenuItem(context, item: item);
-                }),
+                for (var i = 0; i < _currentPageItems.length; i++) ...[
+                  _dropdownMenuItem(context, item: _currentPageItems[i]),
+                  if (i < _currentPageItems.length - 1)
+                    SizedBox(height: _DropdownMenuStyle.itemGap),
+                ],
                 // 如果需要分页，显示翻页按钮
-                if (needsPagination) _buildPaginationButtons(context),
+                if (needsPagination) ...[
+                  SizedBox(height: _DropdownMenuStyle.itemGap),
+                  _buildPaginationButtons(context),
+                ],
               ],
             ),
           ),
