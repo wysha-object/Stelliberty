@@ -288,9 +288,6 @@ For developers, the project includes a test framework for isolated feature testi
 # Run override system test
 flutter run --dart-define=TEST_TYPE=override
 
-# Run IPC communication test
-flutter run --dart-define=TEST_TYPE=ipc
-
 # Run IPC API test
 flutter run --dart-define=TEST_TYPE=ipc-api
 ```
@@ -309,7 +306,7 @@ assets/test/
 
 > 💡 **Note**: Test mode is only available in Debug builds and automatically disabled in Release mode.
 
-Test implementations: `lib/dev_test/` (`override_test.dart`, `ipc_test_self.dart`, `ipc_api_test.dart`)
+Test implementations: `lib/dev_test/` (`override_test.dart`, `ipc_api_test.dart`)
 
 ---
 

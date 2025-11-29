@@ -288,9 +288,6 @@ flutter run
 # 运行覆写系统测试
 flutter run --dart-define=TEST_TYPE=override
 
-# 运行 IPC 通信测试
-flutter run --dart-define=TEST_TYPE=ipc
-
 # 运行 IPC API 测试
 flutter run --dart-define=TEST_TYPE=ipc-api
 ```
@@ -309,7 +306,7 @@ assets/test/
 
 > 💡 **注意**：测试模式仅在 Debug 构建中可用，Release 模式下自动禁用。
 
-测试实现：`lib/dev_test/`（`override_test.dart`、`ipc_test_self.dart`、`ipc_api_test.dart`）
+测试实现：`lib/dev_test/`（`override_test.dart`、`ipc_api_test.dart`）
 
 ---
 

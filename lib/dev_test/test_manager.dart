@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:stelliberty/dev_test/override_test.dart';
-import 'package:stelliberty/dev_test/ipc_test_self.dart';
 import 'package:stelliberty/dev_test/ipc_api_test.dart';
 
 // 开发测试管理器
@@ -28,9 +27,6 @@ class TestManager {
     switch (testType) {
       case 'override':
         await OverrideTest.run();
-        break;
-      case 'ipc':
-        await IpcTestSelf.run();
         break;
       case 'ipc-api':
         await IpcApiTest.run();
