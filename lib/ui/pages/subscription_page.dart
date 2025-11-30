@@ -386,11 +386,35 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         (s) => s.id == subscription.id,
         orElse: () => subscription,
       );
-      final errorMsg =
-          updatedSubscription.lastError ??
-          context.translate.subscription.updateFailed;
+      final errorMsg = _getErrorMessage(context, updatedSubscription.lastError);
 
       ModernToast.error(context, '${subscription.name}: $errorMsg');
+    }
+  }
+
+  // 将错误类型转换为翻译文本
+  String _getErrorMessage(BuildContext context, String? errorTypeName) {
+    if (errorTypeName == null) {
+      return context.translate.subscription.updateFailed;
+    }
+
+    switch (errorTypeName) {
+      case 'network':
+        return context.translate.subscription.updateFailedNetwork;
+      case 'timeout':
+        return context.translate.subscription.updateFailedTimeout;
+      case 'notFound':
+        return context.translate.subscription.updateFailedNotFound;
+      case 'forbidden':
+        return context.translate.subscription.updateFailedForbidden;
+      case 'serverError':
+        return context.translate.subscription.updateFailedServer;
+      case 'formatError':
+        return context.translate.subscription.updateFailedFormat;
+      case 'certificate':
+        return context.translate.subscription.updateFailedCertificate;
+      default:
+        return context.translate.subscription.updateFailedUnknown;
     }
   }
 
@@ -409,7 +433,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         context.translate.subscription.updateAllSuccess,
       );
     } else {
-      // 显示部分成功或全部失败的提示
+      // 只显示成功/失败统计，不显示具体错误
       final successCount = provider.subscriptions.length - errors.length;
       if (successCount > 0) {
         ModernToast.warning(

@@ -130,12 +130,6 @@ class SubscriptionCard extends StatelessWidget {
                             _buildStatusWithTraffic(context)
                           else
                             _buildStatusChips(context),
-
-                          // 错误信息显示
-                          if (subscription.lastError != null) ...[
-                            const SizedBox(height: 12),
-                            _buildErrorInfo(context),
-                          ],
                         ],
                       ),
                     ),
@@ -394,31 +388,6 @@ class SubscriptionCard extends StatelessWidget {
         ModernToast.error(context, '复制失败: $e');
       }
     }
-  }
-
-  // 构建错误信息
-  Widget _buildErrorInfo(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.red.withValues(alpha: 0.3), width: 1),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.error_outline, color: Colors.red, size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              subscription.lastError!,
-              style: const TextStyle(color: Colors.red, fontSize: 12),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   // 格式化字节数

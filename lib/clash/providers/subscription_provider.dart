@@ -15,6 +15,18 @@ import 'package:stelliberty/clash/config/clash_defaults.dart';
 import 'package:stelliberty/clash/storage/preferences.dart';
 import 'package:stelliberty/src/bindings/signals/signals.dart';
 
+// 订阅更新错误类型
+enum SubscriptionUpdateErrorType {
+  network, // 网络连接错误
+  timeout, // 超时
+  notFound, // 404 未找到
+  forbidden, // 403/401 访问被拒绝
+  serverError, // 服务器错误
+  formatError, // 配置格式错误
+  certificate, // 证书错误
+  unknown, // 未知错误
+}
+
 // 订阅状态管理
 class SubscriptionProvider extends ChangeNotifier {
   final SubscriptionService _service = SubscriptionService();
@@ -336,6 +348,53 @@ class SubscriptionProvider extends ChangeNotifier {
     }
   }
 
+  // 分类错误类型
+  SubscriptionUpdateErrorType _classifyError(String errorMsg) {
+    final lowerError = errorMsg.toLowerCase();
+
+    // 网络相关错误
+    if (lowerError.contains('socketexception') ||
+        lowerError.contains('failed host lookup') ||
+        lowerError.contains('network is unreachable') ||
+        lowerError.contains('no route to host')) {
+      return SubscriptionUpdateErrorType.network;
+    }
+
+    // 超时错误
+    if (lowerError.contains('timeout') || lowerError.contains('timed out')) {
+      return SubscriptionUpdateErrorType.timeout;
+    }
+
+    // HTTP 错误
+    if (lowerError.contains('http 4') || lowerError.contains('http 5')) {
+      if (lowerError.contains('404')) {
+        return SubscriptionUpdateErrorType.notFound;
+      }
+      if (lowerError.contains('403') || lowerError.contains('401')) {
+        return SubscriptionUpdateErrorType.forbidden;
+      }
+      return SubscriptionUpdateErrorType.serverError;
+    }
+
+    // 配置格式错误
+    if (lowerError.contains('配置文件') ||
+        lowerError.contains('格式') ||
+        lowerError.contains('解析') ||
+        lowerError.contains('yaml') ||
+        lowerError.contains('proxies')) {
+      return SubscriptionUpdateErrorType.formatError;
+    }
+
+    // 证书错误
+    if (lowerError.contains('certificate') ||
+        lowerError.contains('handshake')) {
+      return SubscriptionUpdateErrorType.certificate;
+    }
+
+    // 其他未知错误
+    return SubscriptionUpdateErrorType.unknown;
+  }
+
   // 更新订阅
   Future<bool> updateSubscription(String subscriptionId) async {
     // 不清除全局错误，单个订阅更新不影响全局状态
@@ -392,13 +451,17 @@ class SubscriptionProvider extends ChangeNotifier {
 
       return true;
     } catch (e) {
-      final errorMsg = e.toString();
-      Logger.error('更新订阅失败：${subscription.name} - $errorMsg');
+      final rawError = e.toString();
+      Logger.error('更新订阅失败：${subscription.name} - $rawError');
 
-      // 保存错误到订阅对象（只影响该订阅，不影响全局状态）
+      // 分析错误类型并保存
+      final errorType = _classifyError(rawError);
+      Logger.info('错误类型：$errorType');
+
+      // 保存错误类型的字符串表示，供 UI 层转换为翻译文本
       _subscriptions[index] = subscription.copyWith(
         isUpdating: false,
-        lastError: errorMsg,
+        lastError: errorType.name, // 保存枚举名称
       );
       await _service.saveSubscriptionList(_subscriptions);
 

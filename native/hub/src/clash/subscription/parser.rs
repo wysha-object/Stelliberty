@@ -25,19 +25,15 @@ impl ProxyParser {
     pub fn parse_subscription(content: &str) -> Result<String, String> {
         let content = content.trim();
 
-        // 尝试作为 YAML 解析
-        if Self::is_yaml_config(content) {
-            log::info!("检测到标准 Clash YAML 配置");
-            return Ok(content.to_string());
-        }
-
-        // 尝试 Base64 解码
+        // 优先尝试 Base64 解码
         let decoded = if Self::is_base64(content) {
             log::info!("检测到 Base64 编码内容，开始解码…");
-            match BASE64.decode(content.as_bytes()) {
+            // 移除所有空白字符（换行、空格等）
+            let clean = content.replace(|c: char| c.is_whitespace(), "");
+            match BASE64.decode(clean.as_bytes()) {
                 Ok(bytes) => match String::from_utf8(bytes) {
                     Ok(s) => {
-                        log::info!("Base64 解码成功");
+                        log::info!("Base64 解码成功（解码后长度：{} 字节）", s.len());
                         s
                     }
                     Err(_) => {
@@ -45,14 +41,28 @@ impl ProxyParser {
                         content.to_string()
                     }
                 },
-                Err(_) => {
-                    log::warn!("Base64 解码失败，使用原始内容");
+                Err(e) => {
+                    log::warn!("Base64 解码失败：{}，使用原始内容", e);
                     content.to_string()
                 }
             }
         } else {
             content.to_string()
         };
+
+        // 检查解码后的内容是否为 YAML 配置
+        if Self::is_yaml_config(&decoded) {
+            log::info!("检测到标准 Clash YAML 配置");
+            return Ok(decoded);
+        }
+
+        // 尝试解析为 YAML + JSON 混合格式
+        if let Ok(proxies) = Self::parse_yaml_json_proxies(&decoded)
+            && !proxies.is_empty()
+        {
+            log::info!("成功解析 YAML + JSON 混合格式，{}个代理节点", proxies.len());
+            return Self::generate_clash_config(proxies);
+        }
 
         // 解析代理链接
         log::info!("开始解析代理链接…");
@@ -69,20 +79,52 @@ impl ProxyParser {
     }
 
     // 判断是否为 YAML 配置
+    // 必须是合法的 YAML 格式且包含 Clash 配置的关键字段
     fn is_yaml_config(content: &str) -> bool {
-        content.contains("proxies:")
-            || content.contains("proxy-groups:")
-            || content.contains("rules:")
+        // 首先尝试解析为 YAML
+        let yaml_parse_ok = serde_yaml_ng::from_str::<serde_yaml_ng::Value>(content).is_ok();
+
+        if !yaml_parse_ok {
+            return false;
+        }
+
+        // 确保包含 Clash 配置的必需字段
+        // 必须同时包含 proxies 和至少一个其他关键字段
+        let has_proxies = content.contains("proxies:");
+        let has_groups_or_rules = content.contains("proxy-groups:") || content.contains("rules:");
+
+        has_proxies && has_groups_or_rules
     }
 
     // 判断是否为 Base64
     fn is_base64(content: &str) -> bool {
-        // Base64 通常不包含换行且只包含特定字符
-        !content.contains('\n')
-            && content.len() > 50
-            && content
+        // 移除所有空白字符后检查
+        let clean = content.replace(|c: char| c.is_whitespace(), "");
+
+        // Base64 内容长度应该 > 50 且只包含特定字符
+        clean.len() > 50
+            && clean
                 .chars()
                 .all(|c| c.is_alphanumeric() || c == '+' || c == '/' || c == '=')
+    }
+
+    // 解析 YAML + JSON 混合格式（例如：proxies: 后面跟 JSON 对象列表）
+    fn parse_yaml_json_proxies(content: &str) -> Result<Vec<JsonValue>, String> {
+        // 尝试解析为 YAML
+        let yaml_value: serde_yaml_ng::Value =
+            serde_yaml_ng::from_str(content).map_err(|e| format!("YAML 解析失败：{}", e))?;
+
+        // 提取 proxies 字段
+        let proxies_value = yaml_value.get("proxies").ok_or("未找到 proxies 字段")?;
+
+        // 转换为 JSON
+        let proxies_json =
+            serde_json::to_value(proxies_value).map_err(|e| format!("转换为 JSON 失败：{}", e))?;
+
+        // 确保是数组
+        let proxies_array = proxies_json.as_array().ok_or("proxies 不是数组")?;
+
+        Ok(proxies_array.clone())
     }
 
     // 解析代理链接列表
@@ -98,7 +140,13 @@ impl ProxyParser {
             match Self::parse_single_proxy(line) {
                 Ok(proxy) => proxies.push(proxy),
                 Err(e) => {
-                    log::warn!("跳过无效代理：{} - {}", &line[..line.len().min(50)], e);
+                    // 使用 char_indices 避免 UTF-8 字符边界问题
+                    let preview = line
+                        .char_indices()
+                        .take(50)
+                        .map(|(_, c)| c)
+                        .collect::<String>();
+                    log::warn!("跳过无效代理：{} - {}", preview, e);
                 }
             }
         }
