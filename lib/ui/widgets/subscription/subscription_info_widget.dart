@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stelliberty/clash/data/provider_model.dart';
 import 'package:stelliberty/i18n/i18n.dart';
-import 'package:stelliberty/ui/common/empty.dart';
 import 'package:intl/intl.dart';
 
 class SubscriptionInfoWidget extends StatelessWidget {
@@ -34,7 +33,7 @@ class SubscriptionInfoWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (subscriptionInfo.total == 0) {
-      return empty;
+      return const SizedBox.shrink();
     }
 
     final used = subscriptionInfo.upload + subscriptionInfo.download;

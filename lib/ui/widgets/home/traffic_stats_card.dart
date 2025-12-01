@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:stelliberty/clash/manager/manager.dart';
 import 'package:stelliberty/clash/data/traffic_data_model.dart';
 import 'package:stelliberty/ui/widgets/home/base_card.dart';
-import 'package:stelliberty/ui/common/empty.dart';
 import 'package:stelliberty/i18n/i18n.dart';
 
 // 流量统计卡片
@@ -18,13 +17,13 @@ class TrafficStatsCard extends StatefulWidget {
 
 class _TrafficStatsCardState extends State<TrafficStatsCard> {
   // 缓存最后一次的流量数据，避免页面切换时显示零值
-  TrafficData? _lastTrafficData;
+  TrafficData? _trafficDataCache;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // 在 Widget 树构建完成后获取缓存数据，避免 initState 中使用 context 的问题
-    _lastTrafficData ??= context.read<ClashManager>().lastTrafficData;
+    _trafficDataCache ??= context.read<ClashManager>().lastTrafficData;
   }
 
   @override
@@ -40,11 +39,11 @@ class _TrafficStatsCardState extends State<TrafficStatsCard> {
             builder: (context, snapshot) {
               // 优先使用流中的数据，如果没有则使用缓存的最后数据
               final traffic =
-                  snapshot.data ?? _lastTrafficData ?? TrafficData.zero;
+                  snapshot.data ?? _trafficDataCache ?? TrafficData.zero;
 
               // 缓存最新的数据（只在有新数据时更新）
               if (snapshot.hasData) {
-                _lastTrafficData = snapshot.data;
+                _trafficDataCache = snapshot.data;
               }
 
               return BaseCard(
@@ -190,7 +189,7 @@ class _TrafficStatsCardState extends State<TrafficStatsCard> {
             if (isRunning)
               _ResetButton(onPressed: () => _resetTraffic(context))
             else
-              empty,
+              const SizedBox.shrink(),
 
             // 右侧：上传下载速度 - 使用 Flexible 避免溢出
             Flexible(
@@ -261,7 +260,7 @@ class _TrafficStatsCardState extends State<TrafficStatsCard> {
     clashManager.resetTrafficStats();
     // 清空本地缓存
     setState(() {
-      _lastTrafficData = TrafficData.zero;
+      _trafficDataCache = TrafficData.zero;
     });
   }
 }

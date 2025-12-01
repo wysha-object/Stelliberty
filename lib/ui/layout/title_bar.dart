@@ -141,6 +141,9 @@ class WindowButtons extends StatelessWidget {
 
       await windowManager.setOpacity(0.99);
       await windowManager.hide();
+
+      // 窗口隐藏后立即更新托盘菜单，恢复"显示窗口"选项
+      AppTrayManager().updateTrayMenuManually();
       return;
     }
 

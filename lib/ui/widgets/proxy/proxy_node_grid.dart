@@ -69,7 +69,7 @@ class ProxyNodeGrid extends StatefulWidget {
 }
 
 class _ProxyNodeGridWidgetState extends State<ProxyNodeGrid> {
-  int _lastCrossAxisCount = 0;
+  int _crossAxisCountCache = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -120,8 +120,8 @@ class _ProxyNodeGridWidgetState extends State<ProxyNodeGrid> {
                         .clamp(2, 4);
 
                     // 只在列数变化时调用回调
-                    if (crossAxisCount != _lastCrossAxisCount) {
-                      _lastCrossAxisCount = crossAxisCount;
+                    if (crossAxisCount != _crossAxisCountCache) {
+                      _crossAxisCountCache = crossAxisCount;
                       widget.onCrossAxisCountChanged(crossAxisCount);
                     }
 
