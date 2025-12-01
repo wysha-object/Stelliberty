@@ -88,6 +88,8 @@ app.*.map.json
 
 # 托盘图标（由 prebuild.dart 自动复制）
 /assets/icons/
+/assets/*.png
+/assets/*.ico
 
 # 测试文件
 /assets/test/*

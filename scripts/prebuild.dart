@@ -650,17 +650,24 @@ Future<void> copyTrayIcons({
     await targetDirectory.create(recursive: true);
   }
 
-  // 根据平台选择源目录
+  // 根据平台选择源目录和文件扩展名
   String platformSubDir;
   String fileExtension;
 
   if (platform == 'windows') {
     platformSubDir = 'windows';
     fileExtension = '.ico';
-  } else {
-    // darwin, linux 等其他平台使用 PNG
-    platformSubDir = 'others';
+  } else if (platform == 'darwin') {
+    // macOS 使用 PNG
+    platformSubDir = 'macos';
     fileExtension = '.png';
+  } else if (platform == 'linux') {
+    // Linux 使用 PNG
+    platformSubDir = 'linux';
+    fileExtension = '.png';
+  } else {
+    log('⚠️  不支持的平台: $platform');
+    return;
   }
 
   final platformSourceDir = p.join(sourceDir, platformSubDir);
@@ -671,8 +678,13 @@ Future<void> copyTrayIcons({
     return;
   }
 
-  // 复制三个图标文件
-  final iconFiles = ['running', 'stopping', 'tun_mode'];
+  // 复制四个图标文件
+  final iconFiles = [
+    'disabled',
+    'proxy_enabled',
+    'tun_enabled',
+    'proxy_tun_enabled',
+  ];
 
   for (final iconName in iconFiles) {
     final sourceFile = File(
