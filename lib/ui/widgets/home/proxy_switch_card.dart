@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:stelliberty/clash/manager/manager.dart';
 import 'package:stelliberty/clash/providers/clash_provider.dart';
 import 'package:stelliberty/tray/tray_manager.dart';
 import 'package:stelliberty/ui/widgets/home/base_card.dart';
@@ -32,9 +31,8 @@ class ProxySwitchCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final clashProvider = context.watch<ClashProvider>();
-    final clashManager = context.watch<ClashManager>();
     final isRunning = clashProvider.isRunning;
-    final isProxyEnabled = clashManager.isSystemProxyEnabled;
+    final isProxyEnabled = clashProvider.isSystemProxyEnabled;
     final isLoading = clashProvider.isLoading;
 
     return BaseCard(

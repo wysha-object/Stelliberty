@@ -864,6 +864,9 @@ class ClashProvider extends ChangeNotifier {
     }
   }
 
+  // 获取系统代理状态（代理 ClashManager）
+  bool get isSystemProxyEnabled => _clashManager.isSystemProxyEnabled;
+
   /// 启用系统代理
   Future<void> enableSystemProxy() async {
     try {

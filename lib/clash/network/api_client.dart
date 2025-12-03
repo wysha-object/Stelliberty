@@ -86,7 +86,14 @@ class ClashApiClient {
         // 简化日志：只在第 1 次、每 5 次、最后 3 次打印
         final shouldLog = i == 0 || (i + 1) % 5 == 0 || i >= maxRetries - 3;
         if (shouldLog) {
-          Logger.debug('等待 Clash API 就绪…（${i + 1}/$maxRetries）- 错误: $e');
+          // 首次失败且是 Named Pipe 未创建，显示友好提示
+          if (i == 0 &&
+              (e.toString().contains('系统找不到指定的文件') ||
+                  e.toString().contains('os error 2'))) {
+            Logger.debug('等待 Clash API 就绪…（1/$maxRetries）- Named Pipe 正在创建中');
+          } else {
+            Logger.debug('等待 Clash API 就绪…（${i + 1}/$maxRetries）- 错误: $e');
+          }
         }
       }
 

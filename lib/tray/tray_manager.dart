@@ -9,6 +9,7 @@ import 'package:stelliberty/clash/providers/service_provider.dart';
 import 'package:stelliberty/clash/providers/subscription_provider.dart';
 import 'package:stelliberty/clash/manager/manager.dart';
 import 'package:stelliberty/i18n/i18n.dart';
+import 'package:stelliberty/services/permission_service.dart';
 
 // 系统托盘管理器,负责初始化、配置和生命周期管理
 class AppTrayManager {
@@ -33,6 +34,13 @@ class AppTrayManager {
   void setClashProvider(ClashProvider provider) {
     _clashProvider = provider;
     _eventHandler.setClashProvider(provider);
+
+    // 监听 ClashManager（系统代理和虚拟网卡状态）
+    // 注意：不监听 ClashProvider，避免双重触发
+    if (!_isListeningToClashManager) {
+      ClashManager.instance.addListener(_updateTrayMenuOnStateChange);
+      _isListeningToClashManager = true;
+    }
 
     // 立即同步当前状态到托盘
     if (_isInitialized) {
@@ -285,23 +293,25 @@ class AppTrayManager {
 
     bool isAvailable;
     if (Platform.isWindows) {
-      // Windows: 使用 ServiceProvider 的缓存状态
+      // Windows: 检查服务安装状态 或 管理员权限
       try {
         final serviceProvider = ServiceProvider();
-        isAvailable = serviceProvider.isInstalled;
+        final isServiceInstalled = serviceProvider.isInstalled;
+
+        if (isServiceInstalled) {
+          // 服务已安装，可以使用 TUN
+          isAvailable = true;
+        } else {
+          // 服务未安装，检查是否以管理员权限运行
+          isAvailable = await PermissionService.isElevated();
+        }
       } catch (e) {
+        Logger.error('检查 TUN 可用性失败：$e');
         isAvailable = false;
       }
     } else {
       // Linux/macOS: 检查是否为 root 用户
-      try {
-        final result = await Process.run('id', ['-u']);
-        final uid = int.tryParse(result.stdout.toString().trim()) ?? -1;
-        isAvailable = uid == 0; // root 用户 UID 为 0
-      } catch (e) {
-        Logger.error('检查 root 权限失败：$e');
-        isAvailable = false;
-      }
+      isAvailable = await PermissionService.isElevated();
     }
 
     // 缓存结果
