@@ -157,6 +157,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         
       - name: 安装项目依赖
+        shell: bash
         run: |
           echo "📦 正在安装项目依赖..."
           if [ "$RUNNER_OS" = "Linux" ]; then
