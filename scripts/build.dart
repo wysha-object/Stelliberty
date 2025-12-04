@@ -294,6 +294,7 @@ String _generateInnoSetupConfig({
 #define MyAppVersion "$version"
 #define MyAppPublisher "$publisher"
 #define MyAppExeName "$appExeName"
+#define MyAppPackageName "${appName.toLowerCase()}"
 
 [Setup]
 ; 应用程序基本信息
@@ -365,6 +366,8 @@ Type: filesandordirs; Name: "{app}\\data"
 [Code]
 var
   ResetDirButton: TButton;
+  ClearAppDataCheckbox: Boolean;
+  UninstallDataForm: TSetupForm;
 
 // 获取 Windows 系统盘符（如 C:）
 function GetSystemDrive(): String;
@@ -459,6 +462,7 @@ begin
   ResetDirButton.Hint := 'Reset to default installation directory';
   ResetDirButton.ShowHint := True;
 end;
+
 
 // 目录选择验证
 function NextButtonClick(CurPageID: Integer): Boolean;
@@ -614,6 +618,46 @@ begin
     DeleteFile(TempFile);
 end;
 
+// 询问用户卸载方式
+function AskClearAppData(): Boolean;
+var
+  MsgText: String;
+  ButtonResult: Integer;
+begin
+  MsgText := 'Please choose uninstall option:' + #13#10#13#10 +
+             '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' + #13#10#13#10 +
+             '【Clean Uninstall】' + #13#10 +
+             'Remove the program AND all user data:' + #13#10 +
+             '  • Scheduled tasks' + #13#10 +
+             '  • Settings and preferences' + #13#10 +
+             '  • Data in: ' + ExpandConstant('{userappdata}\\{#MyAppPackageName}') + #13#10#13#10 +
+             '【Standard Uninstall】' + #13#10 +
+             'Only remove the program, keep your settings' + #13#10#13#10 +
+             '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' + #13#10#13#10 +
+             'Click YES for Clean Uninstall' + #13#10 +
+             'Click NO for Standard Uninstall' + #13#10 +
+             'Click CANCEL to abort uninstallation';
+  
+  ButtonResult := MsgBox(MsgText, mbConfirmation, MB_YESNOCANCEL or MB_DEFBUTTON2);
+  
+  if ButtonResult = IDYES then
+  begin
+    // 干净卸载
+    Result := True;
+  end
+  else if ButtonResult = IDNO then
+  begin
+    // 直接卸载（标准卸载）
+    Result := False;
+  end
+  else
+  begin
+    // 取消卸载
+    Result := False;
+    // 注意：这里不能直接退出，需要在调用处处理
+  end;
+end;
+
 function InitializeUninstall(): Boolean;
 var
   ResultCode: Integer;
@@ -621,7 +665,11 @@ var
   MsgText: String;
   AppRunning: Boolean;
   ClashRunning: Boolean;
+  ButtonResult: Integer;
 begin
+  // 初始化
+  ClearAppDataCheckbox := False;
+  
   // 检查主程序和相关进程是否在运行
   AppRunning := CheckForMutexes('Global\\StelliibertyMutex') or IsProcessRunning('{#MyAppExeName}');
   ClashRunning := IsProcessRunning('clash-core.exe');
@@ -629,42 +677,58 @@ begin
   // 动态查询 Windows 服务路径
   ServicePath := GetServicePath();
   
-  // 构建提示信息
+  // 构建提示信息，直接合并到卸载选项对话框
+  MsgText := 'Uninstall {#MyAppName}?' + #13#10#13#10;
+  
   if ServicePath <> '' then
   begin
-    MsgText := 'Windows Service detected at:' #13#10 + ServicePath + #13#10#13#10 +
-               'The uninstaller will automatically:' #13#10 +
-               '1. Stop and close {#MyAppName} application' #13#10 +
-               '2. Stop the Windows Service' #13#10 +
-               '3. Remove the Windows Service' #13#10 +
-               '4. Stop Clash process' #13#10 +
-               '5. Delete service files' #13#10 +
-               '6. Uninstall the application' #13#10#13#10;
-    
-    if AppRunning or ClashRunning then
-      MsgText := MsgText + 'Note: Active processes will be forcefully terminated.' #13#10#13#10;
-    
-    MsgText := MsgText + 'Continue with uninstallation?';
+    MsgText := MsgText + 'Windows Service detected at:' + #13#10 + ServicePath + #13#10#13#10;
+  end;
+  
+  MsgText := MsgText + 'The uninstaller will automatically:' + #13#10;
+  
+  if ServicePath <> '' then
+  begin
+    MsgText := MsgText +
+               '  • Stop and close application' + #13#10 +
+               '  • Stop and remove Windows Service' + #13#10 +
+               '  • Stop Clash process' + #13#10 +
+               '  • Delete service files' + #13#10#13#10;
   end
   else
   begin
-    MsgText := 'The uninstaller will automatically:' #13#10 +
-               '1. Stop and close {#MyAppName} application' #13#10 +
-               '2. Stop Clash process' #13#10 +
-               '3. Uninstall the application' #13#10#13#10;
-    
-    if AppRunning or ClashRunning then
-      MsgText := MsgText + 'Note: Active processes will be forcefully terminated.' #13#10#13#10;
-    
-    MsgText := MsgText + 'Continue with uninstallation?';
+    MsgText := MsgText +
+               '  • Stop and close application' + #13#10 +
+               '  • Stop Clash process' + #13#10#13#10;
   end;
   
-  // 显示确认对话框
-  if MsgBox(MsgText, mbConfirmation, MB_YESNO) = IDNO then
+  if AppRunning or ClashRunning then
+    MsgText := MsgText + 'Note: Active processes will be forcefully terminated.' + #13#10#13#10;
+  
+  MsgText := MsgText + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' + #13#10#13#10 +
+             '【Clean Uninstall】' + #13#10 +
+             'Remove program AND all user data:' + #13#10 +
+             '  • Scheduled tasks' + #13#10 +
+             '  • Settings and preferences' + #13#10 +
+             '  • Data in: ' + ExpandConstant('{userappdata}') + '\\stelliberty' + #13#10#13#10 +
+             '【Standard Uninstall】' + #13#10 +
+             'Remove program only, keep settings' + #13#10#13#10 +
+             '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' + #13#10#13#10 +
+             'YES = Clean Uninstall' + #13#10 +
+             'NO = Standard Uninstall' + #13#10 +
+             'CANCEL = Abort';
+  
+  // 直接显示三按钮选择对话框
+  ButtonResult := MsgBox(MsgText, mbConfirmation, MB_YESNOCANCEL or MB_DEFBUTTON2);
+  
+  if ButtonResult = IDCANCEL then
   begin
     Result := False;
     Exit;
   end;
+  
+  // YES = 干净卸载，NO = 标准卸载
+  ClearAppDataCheckbox := (ButtonResult = IDYES);
   
   // 强制终止主程序
   if AppRunning then
@@ -700,11 +764,47 @@ begin
   Result := True;
 end;
 
+// 删除计划任务
+procedure RemoveScheduledTask();
+var
+  ResultCode: Integer;
+  TaskName: String;
+begin
+  TaskName := '{#MyAppName}';
+  
+  // 先检查任务是否存在
+  if Exec('cmd.exe', '/c schtasks /query /tn ' + TaskName, '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+  begin
+    if ResultCode = 0 then
+    begin
+      // 任务存在，删除它
+      Exec('cmd.exe', '/c schtasks /delete /tn ' + TaskName + ' /f', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    end;
+  end;
+end;
+
+// 删除 AppData 文件夹
+procedure RemoveAppDataFolder();
+var
+  AppDataPath: String;
+  ResultCode: Integer;
+begin
+  // 获取 %APPDATA%\{#MyAppPackageName} 路径（Roaming 目录，使用小写包名）
+  AppDataPath := ExpandConstant('{userappdata}\\{#MyAppPackageName}');
+  
+  if DirExists(AppDataPath) then
+  begin
+    // 使用 cmd 的 rmdir 命令递归删除整个文件夹
+    Exec('cmd.exe', '/c rmdir /s /q "' + AppDataPath + '"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  end;
+end;
+
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
   AppDir: String;
   ServicePath: String;
   ServiceDir: String;
+  ShouldClearAppData: Boolean;
 begin
   // 卸载完成后，清理服务文件和残留目录
   if CurUninstallStep = usPostUninstall then
@@ -730,6 +830,16 @@ begin
       begin
         RemoveDir(ServiceDir);
       end;
+    end;
+    
+    // 检查用户是否选择清除应用数据
+    if ClearAppDataCheckbox then
+    begin
+      // 删除计划任务
+      RemoveScheduledTask();
+      
+      // 删除 AppData 文件夹
+      RemoveAppDataFolder();
     end;
     
     // 尝试删除安装目录（如果为空）
