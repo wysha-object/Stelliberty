@@ -3,7 +3,7 @@ description: "星辰自由"
 
 publish_to: 'none'
 
-version: 1.1.1+1
+version: 1.1.20+1
 
 environment:
   sdk: '^3.8.0'
@@ -89,3 +89,8 @@ flutter:
     - assets/clash-core/
     - assets/clash-core/data/
     - assets/service/
+
+rinf:
+  gen_input_crates:
+    - hub
+  gen_output_dir: lib/src/bindings

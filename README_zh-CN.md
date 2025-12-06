@@ -10,7 +10,7 @@
 ![Rust](https://img.shields.io/badge/Rust-1.91%2B-orange?style=flat-square&logo=rust)
 ![License](https://img.shields.io/badge/license-Stelliberty-green?style=flat-square)
 
-![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows&logoColor=white)
+![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows11&logoColor=white)
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black)
 ![macOS](https://img.shields.io/badge/macOS-未经验证-gray?style=flat-square&logo=apple&logoColor=white)
 ![Android](https://img.shields.io/badge/Android-暂不支持-lightgray?style=flat-square&logo=android&logoColor=white)
@@ -157,7 +157,7 @@ dart pub get
 全局安装 Rust-Flutter 桥接工具：
 
 ```bash
-cargo install rinf
+cargo install rinf_cli
 ```
 
 #### 3. 安装项目依赖
@@ -196,7 +196,7 @@ dart run scripts/prebuild.dart
 # 显示帮助信息
 dart run scripts/prebuild.dart --help
 
-# 安装 Windows 安装器工具（Inno Setup）
+# 安装平台打包工具（Windows: Inno Setup，Linux: dpkg/rpm/appimagetool）
 dart run scripts/prebuild.dart --installer
 
 # Android 支持（暂未实现）
@@ -216,32 +216,39 @@ dart run scripts/prebuild.dart --android
 使用构建脚本编译和打包：
 
 ```bash
+# 显示帮助信息
+dart run scripts/build.dart --help
+
 # 构建 Release 版本（默认：仅 ZIP）
 dart run scripts/build.dart
 
 # 同时构建 Debug 版本
 dart run scripts/build.dart --with-debug
 
-# 同时生成安装包（Windows：ZIP + EXE）
+# 同时生成安装包（Windows：ZIP + EXE，Linux：ZIP + DEB/RPM/AppImage）
 dart run scripts/build.dart --with-installer
 
-# 仅生成安装包（Windows：仅 EXE）
+# 仅生成安装包，不含 ZIP（Windows：EXE，Linux：DEB/RPM/AppImage）
 dart run scripts/build.dart --installer-only
 
-# 完整构建（Release + Debug，ZIP + EXE）
+# 完整构建（Release + Debug，含安装包）
 dart run scripts/build.dart --with-debug --with-installer
 
 # 干净构建
 dart run scripts/build.dart --clean
+
+# 构建 Android APK（暂不支持）
+dart run scripts/build.dart --android
 ```
 
 **构建脚本参数：**
 
 | 参数 | 说明 |
 |------|------|
+| `-h, --help` | 显示帮助信息 |
 | `--with-debug` | 同时构建 Release 和 Debug 版本 |
-| `--with-installer` | 生成 ZIP + 平台安装包（Windows：ZIP + EXE） |
-| `--installer-only` | 仅生成平台安装包（Windows：仅 EXE） |
+| `--with-installer` | 生成 ZIP + 安装包（Windows：EXE，Linux：DEB/RPM/AppImage） |
+| `--installer-only` | 仅生成安装包，不含 ZIP |
 | `--clean` | 构建前运行 `flutter clean` |
 | `--android` | 构建 Android APK（暂不支持） |
 
@@ -378,31 +385,7 @@ taskkill /F /PID XXX
 
 ---
 
-## 📂 项目结构
-
-```
-stelliberty/
-├── lib/                    # Flutter (Dart) 代码
-│   ├── clash/             # Clash 核心集成
-│   ├── ui/                # 用户界面组件
-│   ├── i18n/              # 国际化（自动生成）
-│   └── src/bindings/      # Rust-Flutter 桥接（自动生成）
-├── native/                # Rust 代码
-│   ├── hub/              # 主要 Rust 逻辑（含信号定义）
-│   └── stelliberty_service/  # 桌面服务可执行文件
-├── scripts/              # 构建和预构建脚本
-│   ├── prebuild.dart     # 预构建准备
-│   └── build.dart        # 构建和打包
-└── assets/               # 运行时资源（由 prebuild 生成）
-```
-
----
-
-## 🤝 贡献
-
-欢迎贡献！请 Fork 本仓库，进行修改后提交 Pull Request。
-
-### 代码规范
+## 📋 代码规范
 
 - ✅ `flutter analyze` 和 `cargo clippy` 无警告
 - ✅ 提交前使用 `dart format` 和 `cargo fmt` 格式化代码
