@@ -44,8 +44,6 @@ class ConfigParser {
         map[key.toString()] = _convertYamlToMap(value);
       });
       return map;
-    } else if (yamlData is YamlList) {
-      return yamlData.map((item) => _convertYamlToMap(item)).toList();
     } else if (yamlData is List) {
       return yamlData.map((item) => _convertYamlToMap(item)).toList();
     } else if (yamlData is Map) {

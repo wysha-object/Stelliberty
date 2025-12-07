@@ -273,10 +273,8 @@ class _ThemeSelectorState extends State<ThemeSelector> {
     final colorOption = colorOptions[index];
     final isSelected = index == selectedIndex;
 
-    Widget child;
-    if (colorOption is StaticThemeColor) {
-      // --- 静态颜色选项 ---
-      child = Container(
+    final Widget child = switch (colorOption) {
+      StaticThemeColor() => Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
@@ -290,10 +288,8 @@ class _ThemeSelectorState extends State<ThemeSelector> {
             ),
           ],
         ),
-      );
-    } else if (colorOption is SystemAccentThemeColor) {
-      // --- 系统强调色选项 ---
-      child = Container(
+      ),
+      SystemAccentThemeColor() => Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
@@ -304,11 +300,8 @@ class _ThemeSelectorState extends State<ThemeSelector> {
           ),
         ),
         child: Icon(Icons.auto_fix_high, color: SystemTheme.accentColor.accent),
-      );
-    } else {
-      // --- 备用空容器 ---
-      child = const SizedBox(width: 40, height: 40);
-    }
+      ),
+    };
 
     return ModernFeatureCard(
       isSelected: isSelected,
