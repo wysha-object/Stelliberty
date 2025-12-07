@@ -27,6 +27,9 @@ migrate_working_dir/
 .vscode/
 *.code-workspace
 
+# Swift Package Manager
+.swiftpm/
+
 # ============================================================
 # Flutter/Dart/Pub 相关
 # ============================================================
