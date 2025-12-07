@@ -114,7 +114,7 @@ String getCurrentArch() {
   if (version.contains('arm64') || version.contains('aarch64')) {
     return 'arm64';
   }
-  return 'x64';
+  return 'amd64';
 }
 
 // 配置 HttpClient 的代理设置
