@@ -527,7 +527,7 @@
       },
       "logsDebug": {
         "title": "日志与调试",
-        "subtitle": "日志等级、延迟测试网址、User-Agent"
+        "subtitle": "日志等级、延迟测试网址"
       }
     },
     "networkSettings": {
@@ -668,16 +668,16 @@
     "listenHint": "DNS 服务监听的地址和端口",
     "enhancedMode": "增强模式",
     "enhancedModeHint": "选择 DNS 解析模式：normal（标准模式）、fake-ip（性能最佳）、redir-host（兼容性最佳）、hosts（仅hosts）",
-    "enhancedModeNormal": "普通模式 (Normal)",
+    "enhancedModeNormal": "普通模式",
     "enhancedModeFakeIp": "Fake IP",
     "enhancedModeRedirHost": "Redir Host",
-    "enhancedModeHosts": "Hosts 模式",
+    "enhancedModeHosts": "Hosts",
     "fakeIpRange": "Fake IP 地址范围",
     "fakeIpRangeHint": "Fake IP 模式使用的 IP 地址池",
     "fakeIpFilterMode": "Fake IP 过滤模式",
     "fakeIpFilterModeHint": "blacklist: 黑名单模式，whitelist: 白名单模式",
-    "fakeIpFilterModeBlacklist": "黑名单 (Blacklist)",
-    "fakeIpFilterModeWhitelist": "白名单 (Whitelist)",
+    "fakeIpFilterModeBlacklist": "黑名单",
+    "fakeIpFilterModeWhitelist": "白名单",
     "ipv6Support": "IPv6 支持",
     "ipv6SupportHint": "启用 IPv6 DNS 解析",
     "preferH3": "优先 HTTP/3",
@@ -692,13 +692,10 @@
     "directNameserverFollowPolicyHint": "直连 DNS 遵循 nameserver-policy 规则",
     "nameserverPolicy": "域名 DNS 覆写",
     "nameserverPolicyHint": "为特定域名指定 DNS 服务器",
-    "nameserverPolicyPlaceholder": "*.google.com=8.8.8.8;8.8.4.4, +.cn=223.5.5.5",
     "hosts": "Hosts 映射",
     "hostsHint": "自定义域名到 IP 的映射",
-    "hostsPlaceholder": "localhost=127.0.0.1, *.test.com=1.2.3.4",
     "nameserver": "主 DNS 服务器",
     "nameserverHint": "主要使用的 DNS 服务器列表",
-    "nameserverPlaceholder": "8.8.8.8, https://doh.pub/dns-query",
     "defaultNameserver": "默认 DNS 服务器",
     "defaultNameserverHint": "用于解析其他 DNS 服务器的地址",
     "fallback": "备用 DNS 服务器",

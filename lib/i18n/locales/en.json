@@ -528,7 +528,7 @@
       },
       "logsDebug": {
         "title": "Logs & Debug",
-        "subtitle": "Log Level, Delay Test URL, User-Agent"
+        "subtitle": "Log Level, Delay Test URL"
       }
     },
     "networkSettings": {
@@ -699,13 +699,10 @@
     "directNameserverFollowPolicyHint": "Direct DNS follows nameserver-policy rules",
     "nameserverPolicy": "Domain DNS Override",
     "nameserverPolicyHint": "Specify DNS servers for specific domains",
-    "nameserverPolicyPlaceholder": "*.google.com=8.8.8.8;8.8.4.4, +.cn=223.5.5.5",
     "hosts": "Hosts Mapping",
     "hostsHint": "Custom domain to IP mapping",
-    "hostsPlaceholder": "localhost=127.0.0.1, *.test.com=1.2.3.4",
     "nameserver": "Primary DNS Servers",
     "nameserverHint": "List of primary DNS servers to use",
-    "nameserverPlaceholder": "8.8.8.8, https://doh.pub/dns-query",
     "defaultNameserver": "Default DNS Servers",
     "defaultNameserverHint": "Used to resolve addresses of other DNS servers",
     "fallback": "Fallback DNS Servers",

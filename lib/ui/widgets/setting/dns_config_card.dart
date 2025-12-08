@@ -141,8 +141,8 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
           // 加载 Fallback 过滤器配置
           _fallbackGeoip = config.fallbackGeoip;
           _fallbackGeoipCodeController.text = config.fallbackGeoipCode;
-          _fallbackIpcidrController.text = config.fallbackIpcidr.join('，');
-          _fallbackDomainController.text = config.fallbackDomain.join('，');
+          _fallbackIpcidrController.text = config.fallbackIpcidr.join(',');
+          _fallbackDomainController.text = config.fallbackDomain.join(',');
 
           // 填充表单控制器
           _listenController.text = config.listen;
@@ -151,15 +151,15 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
             config.nameserverPolicy,
           );
           _hostsController.text = DnsConfig.formatHosts(config.hosts);
-          _nameserverController.text = config.nameserver.join('，');
+          _nameserverController.text = config.nameserver.join(',');
           _defaultNameserverController.text = config.defaultNameserver.join(
-            '，',
+            ',',
           );
-          _fallbackController.text = config.fallback.join('，');
+          _fallbackController.text = config.fallback.join(',');
           _proxyServerNameserverController.text = config.proxyServerNameserver
-              .join('，');
-          _directNameserverController.text = config.directNameserver.join('，');
-          _fakeIpFilterController.text = config.fakeIpFilter.join('，');
+              .join(',');
+          _directNameserverController.text = config.directNameserver.join(',');
+          _fakeIpFilterController.text = config.fakeIpFilter.join(',');
         });
       }
     } catch (e, stackTrace) {
@@ -303,25 +303,25 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
         // 重置 Fallback 过滤器配置
         _fallbackGeoip = defaultConfig.fallbackGeoip;
         _fallbackGeoipCodeController.text = defaultConfig.fallbackGeoipCode;
-        _fallbackIpcidrController.text = defaultConfig.fallbackIpcidr.join('，');
-        _fallbackDomainController.text = defaultConfig.fallbackDomain.join('，');
+        _fallbackIpcidrController.text = defaultConfig.fallbackIpcidr.join(',');
+        _fallbackDomainController.text = defaultConfig.fallbackDomain.join(',');
 
         // 重置表单控制器
         _listenController.text = defaultConfig.listen;
         _fakeIpRangeController.text = defaultConfig.fakeIpRange;
         _nameserverPolicyController.text = '';
         _hostsController.text = '';
-        _nameserverController.text = defaultConfig.nameserver.join('，');
+        _nameserverController.text = defaultConfig.nameserver.join(',');
         _defaultNameserverController.text = defaultConfig.defaultNameserver
-            .join('，');
-        _fallbackController.text = defaultConfig.fallback.join('，');
+            .join(',');
+        _fallbackController.text = defaultConfig.fallback.join(',');
         _proxyServerNameserverController.text = defaultConfig
             .proxyServerNameserver
-            .join('，');
+            .join(',');
         _directNameserverController.text = defaultConfig.directNameserver.join(
-          '，',
+          ',',
         );
-        _fakeIpFilterController.text = defaultConfig.fakeIpFilter.join('，');
+        _fakeIpFilterController.text = defaultConfig.fakeIpFilter.join(',');
       });
     }
   }
@@ -330,7 +330,7 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
   List<String> _parseList(String input) {
     if (input.trim().isEmpty) return [];
     return input
-        .split('，')
+        .split(',')
         .map((s) => s.trim())
         .where((s) => s.isNotEmpty)
         .toList();
@@ -641,7 +641,7 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
       _buildMultilineTextField(
         controller: _nameserverPolicyController,
         label: context.translate.dnsSettings.nameserverPolicy,
-        hint: context.translate.dnsSettings.nameserverPolicyPlaceholder,
+        hint: '*.google.com=8.8.8.8,8.8.4.4, +.cn=223.5.5.5',
         maxLines: 3,
       ),
 
@@ -650,7 +650,7 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
       _buildMultilineTextField(
         controller: _hostsController,
         label: context.translate.dnsSettings.hosts,
-        hint: context.translate.dnsSettings.hostsPlaceholder,
+        hint: 'localhost=127.0.0.1,*.test.com=1.2.3.4',
         maxLines: 3,
       ),
 
@@ -659,7 +659,7 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
       _buildMultilineTextField(
         controller: _nameserverController,
         label: context.translate.dnsSettings.nameserver,
-        hint: context.translate.dnsSettings.nameserverPlaceholder,
+        hint: '8.8.8.8,https://doh.pub/dns-query',
         maxLines: 2,
       ),
 
@@ -668,7 +668,7 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
       _buildMultilineTextField(
         controller: _defaultNameserverController,
         label: context.translate.dnsSettings.defaultNameserver,
-        hint: context.translate.dnsSettings.nameserverPlaceholder,
+        hint: '8.8.8.8,https://doh.pub/dns-query',
         maxLines: 2,
       ),
 
@@ -677,7 +677,7 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
       _buildMultilineTextField(
         controller: _fallbackController,
         label: context.translate.dnsSettings.fallback,
-        hint: context.translate.dnsSettings.nameserverPlaceholder,
+        hint: '8.8.8.8,https://doh.pub/dns-query',
         maxLines: 2,
       ),
 
@@ -686,7 +686,7 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
       _buildMultilineTextField(
         controller: _proxyServerNameserverController,
         label: context.translate.dnsSettings.proxyServerNameserver,
-        hint: 'https://doh.pub/dns-query, https://dns.alidns.com/dns-query',
+        hint: 'https://doh.pub/dns-query,https://dns.alidns.com/dns-query',
         maxLines: 2,
       ),
 
@@ -695,7 +695,7 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
       _buildMultilineTextField(
         controller: _directNameserverController,
         label: context.translate.dnsSettings.directNameserver,
-        hint: 'system, 223.6.6.6',
+        hint: 'system,223.6.6.6',
         maxLines: 2,
       ),
 
@@ -704,7 +704,7 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
       _buildMultilineTextField(
         controller: _fakeIpFilterController,
         label: context.translate.dnsSettings.fakeIpFilter,
-        hint: '*.lan, *.local, localhost.ptlogin2.qq.com',
+        hint: '*.lan,*.local,localhost.ptlogin2.qq.com',
         maxLines: 3,
       ),
 
@@ -742,7 +742,7 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
       _buildMultilineTextField(
         controller: _fallbackIpcidrController,
         label: context.translate.dnsSettings.fallbackIpcidr,
-        hint: '240.0.0.0/4, 0.0.0.0/32',
+        hint: '240.0.0.0/4,0.0.0.0/32',
         maxLines: 2,
       ),
 
@@ -751,7 +751,7 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
       _buildMultilineTextField(
         controller: _fallbackDomainController,
         label: context.translate.dnsSettings.fallbackDomain,
-        hint: '+.google.com, +.facebook.com, +.youtube.com',
+        hint: '+.google.com,+.facebook.com,+.youtube.com',
         maxLines: 2,
       ),
     ];
