@@ -71,11 +71,14 @@ class _ConnectionPageContentState extends State<ConnectionPageContent> {
 
             // 连接列表
             Expanded(
-              child: _buildConnectionList(
-                context,
-                connectionProvider,
-                connections,
-                isLoading,
+              child: Padding(
+                padding: SpacingConstants.scrollbarPadding,
+                child: _buildConnectionList(
+                  context,
+                  connectionProvider,
+                  connections,
+                  isLoading,
+                ),
               ),
             ),
           ],

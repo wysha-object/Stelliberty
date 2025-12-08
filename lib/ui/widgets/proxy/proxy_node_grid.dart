@@ -96,7 +96,7 @@ class _ProxyNodeGridWidgetState extends State<ProxyNodeGrid> {
   Widget build(BuildContext context) {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 3.0, 5.0),
+        padding: SpacingConstants.scrollbarPadding,
         child: ListenableBuilder(
           listenable: widget.viewModel, // 监听排序变化
           builder: (context, _) {
