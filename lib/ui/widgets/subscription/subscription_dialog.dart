@@ -142,9 +142,9 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
     _intervalController = TextEditingController(
       text: (widget.initialIntervalMinutes ?? 60).toString(),
     );
-    // 编辑模式：使用订阅的 UA；添加模式：使用全局默认 UA
+    // 编辑模式：使用订阅的 UA；添加模式：留空（使用 placeholder 显示默认值）
     _userAgentController = TextEditingController(
-      text: widget.initialUserAgent ?? _defaultUserAgent,
+      text: widget.initialUserAgent ?? '',
     );
 
     // 初始化自动更新模式和启动时更新
@@ -188,8 +188,10 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
         return true;
       }
 
-      if (_userAgentController.text.trim() !=
-          (widget.initialUserAgent ?? _defaultUserAgent)) {
+      // 比较 UA 变化：空值视为默认值
+      final currentUA = _userAgentController.text.trim();
+      final initialUA = widget.initialUserAgent ?? '';
+      if (currentUA != initialUA) {
         return true;
       }
     }
@@ -626,17 +628,12 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
 
   // 构建 User-Agent 输入字段
   Widget _buildUserAgentField() {
+    final trans = context.translate.subscriptionDialog;
     return TextInputField(
       controller: _userAgentController,
       label: 'User-Agent',
-      hint: ClashDefaults.defaultUserAgent,
+      hint: '${trans.userAgentDefault}: ${ClashDefaults.defaultUserAgent}',
       icon: Icons.badge,
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'User-Agent 不能为空';
-        }
-        return null;
-      },
     );
   }
 
@@ -709,6 +706,8 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
     setState(() => _isLoading = true);
 
     try {
+      // 获取 UA 值，如果为空则使用默认值
+      final userAgent = _userAgentController.text.trim();
       final result = SubscriptionDialogResult(
         name: _nameController.text.trim(),
         url: _importMethod == SubscriptionImportMethod.link
@@ -720,7 +719,7 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
         isLocalImport: _importMethod == SubscriptionImportMethod.localFile,
         localFilePath: _selectedFile?.file.path,
         proxyMode: _proxyMode,
-        userAgent: _userAgentController.text.trim(),
+        userAgent: userAgent.isEmpty ? _defaultUserAgent : userAgent,
       );
 
       // 如果有确认回调，调用它并等待结果
