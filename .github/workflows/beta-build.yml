@@ -132,9 +132,6 @@ jobs:
             os: ubuntu-22.04
             arch: x64
           - platform: macos
-            os: macos-13
-            arch: x64
-          - platform: macos
             os: macos-latest
             arch: arm64
     runs-on: ${{ matrix.os }}
@@ -354,7 +351,7 @@ jobs:
             支持平台：
             - **Windows**: `x64`, `arm64`
             - **Linux**: `amd64`, `arm64`
-            - **macOS**: `x64`, `arm64`
+            - **macOS**: `arm64`
             
             所有构建产物已打包上传，请根据需要下载。
 
