@@ -211,9 +211,13 @@ class _ProxyPageWidgetState extends State<ProxyPage>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
-    // 当应用从后台恢复时，记录日志即可
+    // 当应用从后台恢复时，刷新代理数据以同步外部控制器的节点切换
     if (state == AppLifecycleState.resumed) {
-      Logger.debug('应用恢复');
+      Logger.debug('应用恢复，刷新代理数据');
+      final clashProvider = context.read<ClashProvider>();
+      if (clashProvider.isCoreRunning) {
+        clashProvider.loadProxies();
+      }
     }
   }
 

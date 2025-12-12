@@ -330,9 +330,7 @@ class SubscriptionProvider extends ChangeNotifier {
 
               if (!reloadSuccess) {
                 Logger.warning('热重载失败，降级为重启核心');
-                await clashProvider.clashManager.restartToApplyConfig(
-                  reason: '首个订阅添加后热重载失败',
-                );
+                await clashProvider.clashManager.restartCore();
               } else {
                 // 热重载成功后，从 Clash API 重新加载代理列表
                 await clashProvider.loadProxies();
@@ -771,9 +769,7 @@ class SubscriptionProvider extends ChangeNotifier {
 
               if (!reloadSuccess) {
                 Logger.warning('热重载失败，降级为重启核心');
-                await clashProvider.clashManager.restartToApplyConfig(
-                  reason: '首个本地订阅添加后热重载失败',
-                );
+                await clashProvider.clashManager.restartCore();
               } else {
                 // 热重载成功后，从 Clash API 重新加载代理列表
                 await clashProvider.loadProxies();
@@ -844,14 +840,14 @@ class SubscriptionProvider extends ChangeNotifier {
 
               if (!reloadSuccess) {
                 Logger.warning('热重载失败，降级为重启核心');
-                await ClashManager.instance.restartToApplyConfig();
+                await ClashManager.instance.restartCore();
               } else {
                 // 热重载成功后，从 Clash API 重新加载代理列表
                 await clashProvider.loadProxies();
               }
             } catch (e) {
               Logger.error('热重载配置失败，尝试重启核心：$e');
-              await ClashManager.instance.restartToApplyConfig();
+              await ClashManager.instance.restartCore();
             }
           }
         }
@@ -1247,9 +1243,7 @@ class SubscriptionProvider extends ChangeNotifier {
         Logger.warning(
           '热重载失败 (耗时: ${reloadStopwatch.elapsedMilliseconds}ms)，降级为重启核心',
         );
-        await clashProvider.clashManager.restartToApplyConfig(
-          reason: '$reason后热重载失败',
-        );
+        await clashProvider.clashManager.restartCore();
       } else {
         Logger.info('配置热重载成功 (耗时: ${reloadStopwatch.elapsedMilliseconds}ms)');
 

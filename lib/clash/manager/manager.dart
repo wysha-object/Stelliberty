@@ -228,6 +228,32 @@ class ClashManager extends ChangeNotifier {
     return await _lifecycleManager.stopCore();
   }
 
+  // 重启核心（停止后重新启动）
+  // 用于应用配置更改（如端口、外部控制器等需要重启才能生效的配置）
+  Future<bool> restartCore({String? configPath}) async {
+    Logger.info('开始重启核心');
+
+    // 停止核心
+    final stopSuccess = await stopCore();
+    if (!stopSuccess) {
+      Logger.error('停止核心失败，中止重启');
+      return false;
+    }
+
+    // 等待一小段时间确保端口完全释放
+    await Future.delayed(const Duration(milliseconds: 50));
+
+    // 启动核心
+    final startSuccess = await startCore(configPath: configPath);
+    if (!startSuccess) {
+      Logger.error('启动核心失败');
+      return false;
+    }
+
+    Logger.info('核心重启成功');
+    return true;
+  }
+
   Future<Map<String, dynamic>> getProxies() async {
     return await _proxyManager.getProxies();
   }
@@ -345,14 +371,27 @@ class ClashManager extends ChangeNotifier {
   }
 
   Future<bool> setExternalController(bool enabled) async {
-    final address = '${ClashDefaults.apiHost}:${ClashDefaults.apiPort}';
-    return await _configManager.setExternalController(enabled, address);
+    // 使用 ConfigManager 的方法更新配置（同时更新内存和持久化）
+    final defaultAddress = ClashPreferences.instance.getExternalControllerAddress();
+    await _configManager.setExternalController(enabled, defaultAddress);
+
+    if (isCoreRunning) {
+      Logger.info('外部控制器配置已更改，重启核心以应用');
+      return await restartCore();
+    }
+
+    return true;
   }
 
   Future<bool> setKeepAlive(bool enabled) async {
-    return await _configManager.setKeepAlive(enabled, () {
-      restartToApplyConfig(reason: 'TCP 保持活动配置更改');
-    });
+    await ClashPreferences.instance.setKeepAliveEnabled(enabled);
+
+    if (isCoreRunning) {
+      Logger.info('TCP 保持活动配置已更改，重启核心以应用');
+      return await restartCore();
+    }
+
+    return true;
   }
 
   Future<bool> setTestUrl(String url) async {
@@ -430,28 +469,6 @@ class ClashManager extends ChangeNotifier {
 
   Future<bool> setTunMtu(int mtu) async {
     return await _configManager.setTunMtu(mtu);
-  }
-
-  Future<void> restartToApplyConfig({
-    Duration debounceDelay = const Duration(milliseconds: 1000),
-    String reason = '应用配置更改',
-  }) async {
-    // 获取当前订阅的覆写配置
-    final overrides = _getOverridesCallback?.call() ?? [];
-
-    await _lifecycleManager.restartToApplyConfig(
-      debounceDelay: debounceDelay,
-      reason: reason,
-      overrides: overrides,
-      startCallback: () async {
-        // 不传 configPath，让 startCore 使用缓存的原始订阅路径
-        return await startCore(overrides: overrides);
-      },
-    );
-  }
-
-  void cancelPendingRestart() {
-    _lifecycleManager.cancelPendingRestart();
   }
 
   Future<List<ConnectionInfo>> getConnections() async {

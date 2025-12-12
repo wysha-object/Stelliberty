@@ -57,8 +57,6 @@ class LifecycleManager {
   // 启动时实际使用的端口列表（用于停止时准确释放）
   List<int>? _actualPortsUsed;
 
-  // 防抖定时器
-  Timer? _restartDebounceTimer;
   // 服务心跳定时器
   Timer? _serviceHeartbeatTimer;
 
@@ -593,11 +591,6 @@ class LifecycleManager {
       return false;
     }
 
-    if (isRestarting) {
-      Logger.warning('Clash 正在重启中，请勿手动停止');
-      return false;
-    }
-
     if (!isCoreRunning) {
       Logger.info('Clash 未在运行');
       return true;
@@ -606,7 +599,6 @@ class LifecycleManager {
     _coreStateManager.setStopping(reason: '开始停止核心');
 
     try {
-      cancelPendingRestart();
 
       // 先停止监控服务（优雅关闭 WebSocket 连接）
       // 避免 Clash 核心停止后强制断开连接导致的错误日志
@@ -693,95 +685,6 @@ class LifecycleManager {
     );
   }
 
-  // 重启 Clash（用于应用启动前配置参数）
-  Future<void> restartToApplyConfig({
-    Duration? debounceDelay,
-    String reason = '应用配置更改',
-    List<OverrideConfig> overrides = const [],
-    required Future<bool> Function() startCallback,
-  }) async {
-    final actualDelay =
-        debounceDelay ??
-        Duration(milliseconds: ClashDefaults.restartDebounceMs);
-
-    _restartDebounceTimer?.cancel();
-
-    _restartDebounceTimer = Timer(actualDelay, () async {
-      await _performRestart(reason, startCallback);
-    });
-
-    Logger.info('已安排重启 Clash（${actualDelay.inMilliseconds}ms 后）：$reason');
-  }
-
-  // 执行实际的重启操作
-  Future<void> _performRestart(
-    String reason,
-    Future<bool> Function() startCallback,
-  ) async {
-    if (isRestarting) {
-      Logger.warning('Clash 正在重启中，跳过重复请求');
-      return;
-    }
-
-    if (!isCoreRunning) {
-      Logger.info('Clash 未在运行，无需重启');
-      return;
-    }
-
-    if (_originalConfigPath == null) {
-      Logger.error('无法重启：未找到配置文件路径');
-      return;
-    }
-
-    _coreStateManager.setRestarting(reason: reason);
-    _notifyListeners();
-
-    try {
-      Logger.info('重启 Clash - 原因：$reason');
-
-      Logger.info('正在停止 Clash 核心…');
-      final stopSuccess = await stopCore();
-      if (!stopSuccess) {
-        throw Exception('停止 Clash 核心失败');
-      }
-
-      await Future.delayed(
-        Duration(milliseconds: ClashDefaults.restartIntervalMs),
-      );
-
-      Logger.info('正在重新启动 Clash 核心…');
-      final startSuccess = await startCallback();
-      if (!startSuccess) {
-        throw Exception('重新启动 Clash 核心失败');
-      }
-
-      Logger.info('Clash 核心重启成功（系统代理状态未变更）');
-    } catch (e) {
-      Logger.error('Clash 重启失败：$e');
-    } finally {
-      // 确保状态正确 - 如果还在重启状态，根据实际情况设置
-      if (_coreStateManager.currentState == CoreState.restarting) {
-        // 注意：这里不能用 isRunning 判断，因为当前状态还是 restarting
-        // 需要通过其他方式判断是否真正在运行，比如检查启动模式
-        if (_currentStartMode != null) {
-          _coreStateManager.setRunning(reason: '重启完成');
-        } else {
-          _coreStateManager.setStopped(reason: '重启失败');
-        }
-      }
-      _notifyListeners();
-    }
-  }
-
-  // 取消待执行的重启
-  void cancelPendingRestart() {
-    if (_restartDebounceTimer != null) {
-      Logger.info('已取消待执行的 Clash 重启');
-    }
-    _restartDebounceTimer?.cancel();
-    _restartDebounceTimer = null;
-  }
-
   // 启动服务心跳定时器（仅服务模式使用）
   void _startServiceHeartbeat() {
     _serviceHeartbeatTimer?.cancel();
@@ -809,7 +712,6 @@ class LifecycleManager {
   }
 
   void dispose() {
-    _restartDebounceTimer?.cancel();
     _serviceHeartbeatTimer?.cancel();
   }
 }
