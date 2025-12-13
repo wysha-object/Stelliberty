@@ -1038,13 +1038,13 @@ class ClashProvider extends ChangeNotifier {
   // ========== 系统代理和 TUN 模式控制 ==========
 
   /// 获取 TUN 模式状态
-  bool get tunEnabled => _clashManager.tunEnable;
+  bool get tunEnabled => _clashManager.tunEnabled;
 
   /// 切换 TUN 模式
   Future<bool> setTunMode(bool enabled) async {
     try {
       Logger.info('切换虚拟网卡模式：${enabled ? "启用" : "禁用"}');
-      return await _clashManager.setTunEnable(enabled);
+      return await _clashManager.setTunEnabled(enabled);
     } catch (e) {
       Logger.error('切换虚拟网卡模式失败：$e');
       return false;

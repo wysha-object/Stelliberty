@@ -176,10 +176,10 @@ class ServiceProvider {
       final currentConfigPath = ClashManager.instance.currentConfigPath;
 
       // 检查并禁用虚拟网卡（普通模式不支持虚拟网卡，需提前禁用并持久化）
-      if (ClashManager.instance.tunEnable) {
+      if (ClashManager.instance.tunEnabled) {
         Logger.info('检测到虚拟网卡已启用，卸载服务前先禁用虚拟网卡...');
         try {
-          await ClashManager.instance.setTunEnable(false);
+          await ClashManager.instance.setTunEnabled(false);
           Logger.info('虚拟网卡已禁用并持久化');
         } catch (e) {
           Logger.error('禁用虚拟网卡失败：$e');

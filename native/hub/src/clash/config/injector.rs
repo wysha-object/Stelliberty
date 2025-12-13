@@ -146,8 +146,8 @@ pub fn inject_runtime_params(
 
     // 9. 注入 TUN 模式配置（始终注入完整配置，只切换 enable 字段）
     log::debug!(
-        "🔍 Rust 收到的 TUN 参数：enable={}，stack={}，device={}，auto_route={}，auto_redirect={}，auto_detect_interface={}，strict_route={}，disable_icmp_forwarding={}，mtu={}，route_exclude_address={:?}",
-        params.tun_enable,
+        "🔍 Rust 收到的 TUN 参数：enabled={}，stack={}，device={}，auto_route={}，auto_redirect={}，auto_detect_interface={}，strict_route={}，disable_icmp_forwarding={}，mtu={}，route_exclude_address={:?}",
+        params.tun_enabled,
         params.tun_stack,
         params.tun_device,
         params.tun_auto_route,
@@ -162,7 +162,7 @@ pub fn inject_runtime_params(
     let mut tun_config = Mapping::new();
     tun_config.insert(
         YamlValue::String("enable".to_string()),
-        YamlValue::Bool(params.tun_enable),
+        YamlValue::Bool(params.tun_enabled),
     );
     tun_config.insert(
         YamlValue::String("stack".to_string()),
@@ -230,10 +230,10 @@ pub fn inject_runtime_params(
         YamlValue::Mapping(tun_config),
     );
 
-    log::info!("TUN 配置已注入（enable={}）", params.tun_enable);
+    log::info!("TUN 配置已注入（enabled={}）", params.tun_enabled);
 
     // TUN 启用时，注入基本的 DNS 配置
-    if params.tun_enable {
+    if params.tun_enabled {
         inject_dns_config(config_map, params)?;
     }
 

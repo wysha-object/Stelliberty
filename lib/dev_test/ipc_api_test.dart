@@ -37,7 +37,7 @@ class IpcApiTest {
         configPath: testConfigPath,
         httpPort: 17890,
         ipv6: false,
-        tunEnable: false,
+        tunEnabled: false,
         tunStack: 'mixed',
         tunDevice: 'Stelliberty-Test',
         tunAutoRoute: false,

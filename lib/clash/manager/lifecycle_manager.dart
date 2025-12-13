@@ -101,7 +101,7 @@ class LifecycleManager {
     Future<void> Function()? onOverridesFailed,
     required int mixedPort, // 混合端口
     required bool ipv6,
-    required bool tunEnable,
+    required bool tunEnabled,
     required String tunStack,
     required String tunDevice,
     required bool tunAutoRoute,
@@ -167,7 +167,7 @@ class LifecycleManager {
         overrides: overrides,
         httpPort: mixedPort, // 传递混合端口给配置注入器
         ipv6: ipv6,
-        tunEnable: tunEnable,
+        tunEnabled: tunEnabled,
         tunStack: tunStack,
         tunDevice: tunDevice,
         tunAutoRoute: tunAutoRoute,
@@ -271,7 +271,7 @@ class LifecycleManager {
           overrides: const [], // 不使用覆写
           mixedPort: mixedPort, // 混合端口
           ipv6: ipv6,
-          tunEnable: tunEnable,
+          tunEnabled: tunEnabled,
           tunStack: tunStack,
           tunDevice: tunDevice,
           tunAutoRoute: tunAutoRoute,

@@ -73,7 +73,7 @@ class ClashManager extends ChangeNotifier {
   bool get isExternalControllerEnabled =>
       _configManager.isExternalControllerEnabled;
   String get testUrl => _configManager.testUrl;
-  bool get tunEnable => _configManager.tunEnable;
+  bool get tunEnabled => _configManager.tunEnabled;
   String get tunStack => _configManager.tunStack;
   String get tunDevice => _configManager.tunDevice;
   bool get tunAutoRoute => _configManager.tunAutoRoute;
@@ -192,7 +192,7 @@ class ClashManager extends ChangeNotifier {
       onOverridesFailed: onOverridesFailed,
       mixedPort: _configManager.mixedPort, // 传递混合端口
       ipv6: _configManager.ipv6,
-      tunEnable: _configManager.tunEnable,
+      tunEnabled: _configManager.tunEnabled,
       tunStack: _configManager.tunStack,
       tunDevice: _configManager.tunDevice,
       tunAutoRoute: _configManager.tunAutoRoute,
@@ -436,9 +436,9 @@ class ClashManager extends ChangeNotifier {
     return await _configManager.setHttpPort(port);
   }
 
-  Future<bool> setTunEnable(bool enabled) async {
+  Future<bool> setTunEnabled(bool enabled) async {
     // 先更新本地状态和持久化
-    final success = await _configManager.setTunEnable(enabled);
+    final success = await _configManager.setTunEnabled(enabled);
 
     // 如果核心正在运行且更新成功，重新生成配置并热重载
     // 即使 currentConfigPath 为 null（无订阅），也支持热重载（使用默认配置）

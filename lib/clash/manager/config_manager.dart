@@ -26,7 +26,7 @@ class ConfigManager {
   String _outboundMode = ClashDefaults.defaultOutboundMode;
 
   // 虚拟网卡模式配置缓存
-  bool _tunEnable = false;
+  bool _tunEnabled = false;
   String _tunStack = ClashDefaults.defaultTunStack;
   String _tunDevice = ClashDefaults.defaultTunDevice;
   bool _tunAutoRoute = false;
@@ -54,7 +54,7 @@ class ConfigManager {
   String get externalController => _externalController;
   String get testUrl => _testUrl;
   String get outboundMode => _outboundMode;
-  bool get tunEnable => _tunEnable;
+  bool get tunEnabled => _tunEnabled;
   String get tunStack => _tunStack;
   String get tunDevice => _tunDevice;
   bool get tunAutoRoute => _tunAutoRoute;
@@ -100,7 +100,7 @@ class ConfigManager {
     _geodataLoader = ClashPreferences.instance.getGeodataLoader();
     _findProcessMode = ClashPreferences.instance.getFindProcessMode();
 
-    _tunEnable = ClashPreferences.instance.getTunEnable();
+    _tunEnabled = ClashPreferences.instance.getTunEnable();
     _tunStack = ClashPreferences.instance.getTunStack();
     _tunDevice = ClashPreferences.instance.getTunDevice();
     _tunAutoRoute = ClashPreferences.instance.getTunAutoRoute();
@@ -119,7 +119,7 @@ class ConfigManager {
 
     // 🔍 调试日志：打印加载的配置
     Logger.debug(
-      '🔍 ConfigManager 已加载配置: tunEnable=$_tunEnable, tunStack=$_tunStack, tunDevice=$_tunDevice, tunAutoRoute=$_tunAutoRoute, tunAutoDetectInterface=$_tunAutoDetectInterface, tunStrictRoute=$_tunStrictRoute, tunMtu=$_tunMtu',
+      '🔍 ConfigManager 已加载配置: tunEnabled=$_tunEnabled, tunStack=$_tunStack, tunDevice=$_tunDevice, tunAutoRoute=$_tunAutoRoute, tunAutoDetectInterface=$_tunAutoDetectInterface, tunStrictRoute=$_tunStrictRoute, tunMtu=$_tunMtu',
     );
   }
 
@@ -151,7 +151,7 @@ class ConfigManager {
       }
 
       Logger.debug(
-        '热重载参数：configPath=$configPath, tunEnable=$_tunEnable, ipv6=$_ipv6, allowLan=$_allowLan',
+        '热重载参数：configPath=$configPath, tunEnabled=$_tunEnabled, ipv6=$_ipv6, allowLan=$_allowLan',
       );
 
       String? actualConfigPath;
@@ -162,7 +162,7 @@ class ConfigManager {
         overrides: overrides,
         httpPort: _mixedPort,
         ipv6: _ipv6,
-        tunEnable: _tunEnable,
+        tunEnabled: _tunEnabled,
         tunStack: _tunStack,
         tunDevice: _tunDevice,
         tunAutoRoute: _tunAutoRoute,
@@ -544,14 +544,14 @@ class ConfigManager {
   }
 
   // 设置虚拟网卡模式启用状态
-  Future<bool> setTunEnable(bool enabled) async {
+  Future<bool> setTunEnabled(bool enabled) async {
     try {
       Logger.debug(
-        '🔍 setTunEnable 被调用: enabled=$enabled, 当前 _tunEnable=$_tunEnable, isRunning=${_isCoreRunning()}',
+        '🔍 setTunEnabled 被调用: enabled=$enabled, 当前 _tunEnabled=$_tunEnabled, isRunning=${_isCoreRunning()}',
       );
 
       // 更新本地状态和持久化（不管核心是否运行）
-      _tunEnable = enabled;
+      _tunEnabled = enabled;
       await ClashPreferences.instance.setTunEnable(enabled);
       _notifyListeners();
 
@@ -562,7 +562,7 @@ class ConfigManager {
     } catch (e) {
       Logger.error('设置虚拟网卡模式失败：$e');
       // 失败时回滚本地状态
-      _tunEnable = !enabled;
+      _tunEnabled = !enabled;
       _notifyListeners();
       return false;
     }

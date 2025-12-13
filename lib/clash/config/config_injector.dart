@@ -38,7 +38,7 @@ class ConfigInjector {
     List<OverrideConfig> overrides = const [],
     required int httpPort,
     required bool ipv6,
-    required bool tunEnable,
+    required bool tunEnabled,
     required String tunStack,
     required String tunDevice,
     required bool tunAutoRoute,
@@ -96,7 +96,7 @@ class ConfigInjector {
         tcpConcurrent: tcpConcurrent,
         unifiedDelay: unifiedDelay,
         outboundMode: outboundMode,
-        tunEnable: tunEnable,
+        tunEnabled: tunEnabled,
         tunStack: tunStack,
         tunDevice: tunDevice,
         tunAutoRoute: tunAutoRoute,
@@ -149,7 +149,7 @@ class ConfigInjector {
       ).writeAsString(response.message.resultConfig);
 
       Logger.info(
-        '运行时配置已生成 (${(response.message.resultConfig.length / 1024).toStringAsFixed(1)}KB，虚拟网卡：${tunEnable ? "启用" : "禁用"})',
+        '运行时配置已生成 (${(response.message.resultConfig.length / 1024).toStringAsFixed(1)}KB，虚拟网卡：${tunEnabled ? "启用" : "禁用"})',
       );
 
       return runtimeConfigPath;

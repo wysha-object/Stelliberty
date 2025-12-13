@@ -236,13 +236,13 @@ class TrayEventHandler with TrayListener {
     _isSwitching = true;
 
     final manager = ClashManager.instance;
-    final isTunEnabled = manager.tunEnable;
+    final isTunEnabled = manager.tunEnabled;
 
     Logger.info('从托盘切换虚拟网卡模式 - 当前状态：${isTunEnabled ? "已启用" : "未启用"}');
 
     try {
       // 切换虚拟网卡模式（等待结果）
-      await manager.setTunEnable(!isTunEnabled);
+      await manager.setTunEnabled(!isTunEnabled);
     } catch (e) {
       Logger.error('从托盘切换虚拟网卡模式失败：$e');
     } finally {
