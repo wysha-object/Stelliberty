@@ -327,9 +327,6 @@ flutter run --dart-define=TEST_TYPE=override
 
 # 运行 IPC API 测试
 flutter run --dart-define=TEST_TYPE=ipc-api
-
-# 运行配置验证测试
-flutter run --dart-define=TEST_TYPE=validation
 ```
 
 **所需测试文件** 位于 `assets/test/`：
@@ -354,17 +351,9 @@ flutter run --dart-define=TEST_TYPE=validation
       └── test.yaml          # 用于测试的基础配置文件
   ```
 
-- **`validation` 测试所需文件：**
-  ```
-  assets/test/
-  └── config_validation_tests/
-      ├── valid_config_1.yaml
-      └── invalid_config_2.yml
-  ```
-
 > 💡 **注意**：测试模式仅在 Debug 构建中可用，Release 模式下自动禁用。
 
-测试实现：`lib/dev_test/`（`override_test.dart`、`ipc_api_test.dart`、`validation_test.dart`）
+测试实现：`lib/dev_test/`（`override_test.dart`、`ipc_api_test.dart`）
 
 ---
 

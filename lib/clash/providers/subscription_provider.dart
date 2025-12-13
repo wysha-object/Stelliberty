@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:stelliberty/clash/core/subscription_state.dart';
 import 'package:stelliberty/clash/data/subscription_model.dart';
 import 'package:stelliberty/clash/data/override_model.dart' as app_override;
@@ -8,13 +8,14 @@ import 'package:stelliberty/clash/services/subscription_service.dart';
 import 'package:stelliberty/clash/services/override_service.dart';
 import 'package:stelliberty/clash/providers/clash_provider.dart';
 import 'package:stelliberty/clash/providers/override_provider.dart';
-import 'package:stelliberty/ui/widgets/modern_toast.dart';
 import 'package:stelliberty/clash/manager/manager.dart';
 import 'package:stelliberty/services/path_service.dart';
 import 'package:stelliberty/utils/logger.dart';
 import 'package:stelliberty/clash/config/clash_defaults.dart';
 import 'package:stelliberty/clash/storage/preferences.dart';
 import 'package:stelliberty/src/bindings/signals/signals.dart';
+import 'package:stelliberty/i18n/i18n.dart';
+import 'package:stelliberty/ui/widgets/modern_toast.dart';
 
 // 订阅更新错误类型
 enum SubscriptionUpdateErrorType {
@@ -74,7 +75,7 @@ class SubscriptionProvider extends ChangeNotifier {
   bool get isLoading => _stateManager.isLoading;
   int get updateProgress => _stateManager.updateProgress.current;
   int get updateTotal => _stateManager.updateProgress.total;
-  bool get isUpdatingSubscription => _stateManager.updateProgress.isUpdating;
+  bool get isUpdating => _stateManager.updateProgress.isUpdating;
   bool get isBatchUpdatingSubscriptions => _stateManager.isBatchUpdating;
   String? get errorMessage => _stateManager.errorMessage;
 
@@ -354,7 +355,6 @@ class SubscriptionProvider extends ChangeNotifier {
     } catch (e) {
       // 不设置全局错误，只记录日志
       Logger.error('添加订阅失败：$name - $e');
-
       return false;
     }
   }
@@ -439,7 +439,7 @@ class SubscriptionProvider extends ChangeNotifier {
       );
       notifyListeners();
 
-      // 下载并验证订阅（验证在内存中进行，失败时原文件不会被修改）
+      // 下载订阅
       final updatedSubscription = await _service.downloadSubscription(
         subscription,
       );
@@ -454,27 +454,11 @@ class SubscriptionProvider extends ChangeNotifier {
         // 暂停 ConfigWatcher，避免重复触发重载
         _clashProvider?.pauseConfigWatcher();
         try {
-          final reloadSuccess = await _reloadCurrentSubscriptionConfig(
-            reason: '订阅更新',
-          );
-
-          if (!reloadSuccess) {
-            // 重载失败（配置可能有问题，但已经写入文件）
-            Logger.error('订阅更新后重载失败，尝试重启核心');
-            await _clashProvider?.clashManager.restartCore();
-
-            ModernToast.error(
-              null,
-              '订阅「${subscription.name}」更新成功，但配置无法加载，已重启核心',
-            );
-
-            return false;
-          }
+          await _reloadCurrentSubscriptionConfig(reason: '订阅更新');
         } finally {
           await _clashProvider?.resumeConfigWatcher();
         }
       }
-
       Logger.info('更新订阅成功：${subscription.name}');
 
       // 注意：不在这里重启定时器，避免批量更新时频繁重启
@@ -495,9 +479,6 @@ class SubscriptionProvider extends ChangeNotifier {
         lastError: errorType.name, // 保存枚举名称
       );
       await _service.saveSubscriptionList(_subscriptions);
-
-      // 显示 Toast 提示用户
-      ModernToast.error(null, '订阅「${subscription.name}」更新失败：$rawError');
 
       return false;
     } finally {
@@ -812,7 +793,6 @@ class SubscriptionProvider extends ChangeNotifier {
     } catch (e) {
       // 不设置全局错误，只记录日志
       Logger.error('添加本地订阅失败：$name - $e');
-
       return false;
     }
   }
@@ -1085,7 +1065,7 @@ class SubscriptionProvider extends ChangeNotifier {
     );
 
     try {
-      // 保存文件到订阅目录（会进行验证）
+      // 保存文件到订阅目录
       await _service.saveLocalSubscription(subscription, content);
       Logger.info('订阅文件已保存：${subscription.name}');
 
@@ -1103,7 +1083,6 @@ class SubscriptionProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       Logger.error('保存订阅文件失败：${subscription.name} - $e');
-
       return false;
     }
   }
@@ -1126,19 +1105,19 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   // 重新加载当前订阅的配置文件
-  Future<bool> _reloadCurrentSubscriptionConfig({
+  Future<void> _reloadCurrentSubscriptionConfig({
     String reason = '配置重载',
   }) async {
     final configPath = getSubscriptionConfigPath();
     if (configPath == null) {
       Logger.warning('无法获取配置路径，跳过重载');
-      return false;
+      return;
     }
 
     final clashProvider = _clashProvider;
     if (clashProvider == null) {
       Logger.warning('ClashProvider 未设置，跳过重载');
-      return false;
+      return;
     }
     Logger.info('$reason，重新加载配置文件：$configPath');
 
@@ -1263,13 +1242,103 @@ class SubscriptionProvider extends ChangeNotifier {
       reloadStopwatch.stop();
 
       if (!reloadSuccess) {
-        Logger.warning(
-          '热重载失败 (耗时: ${reloadStopwatch.elapsedMilliseconds}ms)，降级为重启核心',
+        Logger.error(
+          '配置重载失败 (耗时: ${reloadStopwatch.elapsedMilliseconds}ms)，开始回退流程',
         );
-        await clashProvider.clashManager.restartCore();
-        return false;
+
+        // 获取当前订阅信息
+        final failedSubscription = currentSubscription;
+        final subscriptionName = failedSubscription?.name ?? '未知订阅';
+
+        // 标记订阅配置失败并保存
+        if (failedSubscription != null) {
+          final index = _subscriptions.indexWhere(
+            (s) => s.id == failedSubscription.id,
+          );
+          if (index != -1) {
+            _subscriptions[index] = failedSubscription.copyWith(
+              configLoadFailed: true,
+            );
+            await _service.saveSubscriptionList(_subscriptions);
+          }
+        }
+
+        // 取消选中当前订阅
+        _currentSubscriptionId = null;
+        await ClashPreferences.instance.setCurrentSubscriptionId(null);
+
+        // 统一通知 UI 更新（避免多次 notifyListeners）
+        notifyListeners();
+
+        Logger.info('已取消选中失败的订阅：$subscriptionName');
+
+        // 显示配置异常提示
+        _showToast((context) {
+          ModernToast.error(
+            context,
+            context.translate.subscription.configAbnormal.replaceAll(
+              '{name}',
+              subscriptionName,
+            ),
+          );
+        });
+
+        // 尝试使用默认配置重载核心
+        Logger.info('尝试使用空配置重载核心');
+        final emptyReloadSuccess = await clashProvider.clashManager
+            .reloadWithEmptyConfig();
+
+        if (emptyReloadSuccess) {
+          Logger.info('空配置重载成功');
+          _showToast((context) {
+            ModernToast.success(
+              context,
+              context.translate.subscription.fallbackToDefaultConfig,
+            );
+          });
+        } else {
+          Logger.error('空配置重载失败，尝试使用空配置重启核心');
+
+          // 使用空配置重启核心
+          final emptyRestartSuccess = await clashProvider.clashManager
+              .restartWithEmptyConfig();
+
+          if (emptyRestartSuccess) {
+            Logger.info('空配置重启成功');
+            _showToast((context) {
+              ModernToast.success(
+                context,
+                context.translate.subscription.coreRestartedWithDefaultConfig,
+              );
+            });
+          } else {
+            Logger.error('空配置重启失败');
+            _showToast((context) {
+              ModernToast.error(
+                context,
+                context.translate.subscription.coreRestartFailed,
+              );
+            });
+          }
+        }
       } else {
         Logger.info('配置热重载成功 (耗时: ${reloadStopwatch.elapsedMilliseconds}ms)');
+
+        // 清除配置失败标记（如果之前失败过）
+        if (currentSubscription != null &&
+            currentSubscription!.configLoadFailed) {
+          final index = _subscriptions.indexWhere(
+            (s) => s.id == currentSubscription!.id,
+          );
+          if (index != -1) {
+            _subscriptions[index] = currentSubscription!.copyWith(
+              configLoadFailed: false,
+            );
+            await _service.saveSubscriptionList(_subscriptions);
+            notifyListeners();
+            Logger.info('已清除订阅 ${currentSubscription!.name} 的配置失败标记');
+          }
+        }
 
         // 热重载成功后，从 Clash API 重新加载代理信息
         final proxyLoadStopwatch = Stopwatch()..start();
@@ -1285,11 +1354,9 @@ class SubscriptionProvider extends ChangeNotifier {
             '重新加载代理信息失败 (耗时: ${proxyLoadStopwatch.elapsedMilliseconds}ms): $e',
           );
         }
-        return true;
       }
     } else {
       Logger.warning('Clash 未运行，无法重载配置');
-      return false;
     }
   }
 
@@ -1414,13 +1481,20 @@ class SubscriptionProvider extends ChangeNotifier {
     });
   }
 
+  // Toast 辅助方法：每次调用时获取最新的 context，确保时效性
+  void _showToast(void Function(BuildContext context) show) {
+    final context = ModernToast.navigatorKey.currentContext;
+    if (context != null && context.mounted) {
+      show(context);
+    }
+  }
+
   @override
   void dispose() {
     // 取消自动更新定时器
     _autoUpdateTimer?.cancel();
     Logger.debug('自动更新定时器已取消');
 
-    // SubscriptionService 不再需要 dispose
     super.dispose();
   }
 }

@@ -326,9 +326,6 @@ flutter run --dart-define=TEST_TYPE=override
 
 # Run IPC API test
 flutter run --dart-define=TEST_TYPE=ipc-api
-
-# Run config validation test
-flutter run --dart-define=TEST_TYPE=validation
 ```
 
 **Required test files** in `assets/test/`:
@@ -353,17 +350,9 @@ flutter run --dart-define=TEST_TYPE=validation
       └── test.yaml          # Base configuration file for testing
   ```
 
-- **For `validation` test:**
-  ```
-  assets/test/
-  └── config_validation_tests/
-      ├── valid_config_1.yaml
-      └── invalid_config_2.yml
-  ```
-
 > 💡 **Note**: Test mode is only available in Debug builds and automatically disabled in Release mode.
 
-Test implementations: `lib/dev_test/` (`override_test.dart`, `ipc_api_test.dart`, `validation_test.dart`)
+Test implementations: `lib/dev_test/` (`override_test.dart`, `ipc_api_test.dart`)
 
 ---
 

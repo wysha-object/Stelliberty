@@ -133,6 +133,7 @@ class Subscription {
   final List<String> overrideSortPreference; // 规则覆写排序偏好（完整顺序，包括未选中的）
   final List<String> failedOverrideIds; // 失败的覆写ID列表(启动失败时记录)
   final String userAgent; // User-Agent（仅远程订阅有效，默认为 clash.meta）
+  final bool configLoadFailed; // 配置加载失败标记（用于 UI 显示警告）
 
   const Subscription({
     required this.id,
@@ -151,6 +152,7 @@ class Subscription {
     this.overrideSortPreference = const [],
     this.failedOverrideIds = const [],
     this.userAgent = ClashDefaults.defaultUserAgent,
+    this.configLoadFailed = false,
   });
 
   // 创建新订阅
@@ -210,6 +212,7 @@ class Subscription {
     List<String>? overrideSortPreference,
     List<String>? failedOverrideIds,
     String? userAgent,
+    bool? configLoadFailed,
   }) {
     return Subscription(
       id: id ?? this.id,
@@ -229,6 +232,7 @@ class Subscription {
           overrideSortPreference ?? this.overrideSortPreference,
       failedOverrideIds: failedOverrideIds ?? this.failedOverrideIds,
       userAgent: userAgent ?? this.userAgent,
+      configLoadFailed: configLoadFailed ?? this.configLoadFailed,
     );
   }
 
@@ -248,6 +252,7 @@ class Subscription {
     'overrideSortPreference': overrideSortPreference,
     'failedOverrideIds': failedOverrideIds,
     'userAgent': userAgent,
+    'configLoadFailed': configLoadFailed,
   };
 
   factory Subscription.fromJson(Map<String, dynamic> json) {
@@ -281,6 +286,7 @@ class Subscription {
           ? List<String>.from(json['failedOverrideIds'] as List)
           : const [],
       userAgent: json['userAgent'] as String? ?? ClashDefaults.defaultUserAgent,
+      configLoadFailed: json['configLoadFailed'] as bool? ?? false,
     );
   }
 

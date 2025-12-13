@@ -103,6 +103,10 @@
     "remainingMonths": "{n}个月",
     "remainingDays": "{n}天",
     "expired": "已过期",
+    "configAbnormal": "订阅 {name} 配置异常，请检查",
+    "fallbackToDefaultConfig": "已回退到默认配置",
+    "coreRestartedWithDefaultConfig": "核心已重启，使用默认配置",
+    "coreRestartFailed": "默认配置重启失败，请重启应用",
     "overrideManagement": "覆写管理",
     "menu": {
       "configEdit": "配置编辑",

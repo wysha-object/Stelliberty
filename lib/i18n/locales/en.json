@@ -103,6 +103,10 @@
     "remainingMonths": "{n} months",
     "remainingDays": "{n} days",
     "expired": "Expired",
+    "configAbnormal": "Subscription {name} config abnormal, please check",
+    "fallbackToDefaultConfig": "Fallback to default config",
+    "coreRestartedWithDefaultConfig": "Core restarted with default config",
+    "coreRestartFailed": "Default config restart failed, please restart app",
     "overrideManagement": "Override Management",
     "menu": {
       "configEdit": "Config Edit",

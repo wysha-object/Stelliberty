@@ -1,11 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:stelliberty/dev_test/override_test.dart';
 import 'package:stelliberty/dev_test/ipc_api_test.dart';
-import 'package:stelliberty/dev_test/validation_test.dart';
 
 // 开发测试管理器
 // 用法：flutter run --dart-define=TEST_TYPE=override
-// 或：flutter run --dart-define=TEST_TYPE=validation
 // 测试模式仅在 Debug 模式可用，Release 模式下禁用
 class TestManager {
   // 获取测试类型
@@ -32,9 +30,6 @@ class TestManager {
         break;
       case 'ipc-api':
         await IpcApiTest.run();
-        break;
-      case 'validation':
-        await ValidationTest.run();
         break;
       default:
         throw Exception('未知的测试类型: $testType');

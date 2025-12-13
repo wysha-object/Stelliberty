@@ -19,7 +19,6 @@ pub use service::{
     GetServiceStatus, InstallService, SendServiceHeartbeat, StartClash, StopClash, UninstallService,
 };
 pub use signals::{StartClashProcess, StopClashProcess};
-pub use subscription::ValidateSubscriptionRequest;
 
 /// 初始化 Clash 模块
 ///
@@ -149,15 +148,4 @@ pub fn init() {
 
     // 启动配置生成监听器
     config::init_message_listeners();
-
-    // 订阅配置验证监听器
-    spawn(async {
-        let receiver = ValidateSubscriptionRequest::get_dart_signal_receiver();
-        while let Some(dart_signal) = receiver.recv().await {
-            let message = dart_signal.message;
-            tokio::spawn(async move {
-                message.handle();
-            });
-        }
-    });
 }
