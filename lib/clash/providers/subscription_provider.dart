@@ -8,6 +8,7 @@ import 'package:stelliberty/clash/services/subscription_service.dart';
 import 'package:stelliberty/clash/services/override_service.dart';
 import 'package:stelliberty/clash/providers/clash_provider.dart';
 import 'package:stelliberty/clash/providers/override_provider.dart';
+import 'package:stelliberty/ui/widgets/modern_toast.dart';
 import 'package:stelliberty/clash/manager/manager.dart';
 import 'package:stelliberty/services/path_service.dart';
 import 'package:stelliberty/utils/logger.dart';
@@ -353,6 +354,7 @@ class SubscriptionProvider extends ChangeNotifier {
     } catch (e) {
       // 不设置全局错误，只记录日志
       Logger.error('添加订阅失败：$name - $e');
+
       return false;
     }
   }
@@ -437,7 +439,7 @@ class SubscriptionProvider extends ChangeNotifier {
       );
       notifyListeners();
 
-      // 下载订阅
+      // 下载并验证订阅（验证在内存中进行，失败时原文件不会被修改）
       final updatedSubscription = await _service.downloadSubscription(
         subscription,
       );
@@ -452,11 +454,27 @@ class SubscriptionProvider extends ChangeNotifier {
         // 暂停 ConfigWatcher，避免重复触发重载
         _clashProvider?.pauseConfigWatcher();
         try {
-          await _reloadCurrentSubscriptionConfig(reason: '订阅更新');
+          final reloadSuccess = await _reloadCurrentSubscriptionConfig(
+            reason: '订阅更新',
+          );
+
+          if (!reloadSuccess) {
+            // 重载失败（配置可能有问题，但已经写入文件）
+            Logger.error('订阅更新后重载失败，尝试重启核心');
+            await _clashProvider?.clashManager.restartCore();
+
+            ModernToast.error(
+              null,
+              '订阅「${subscription.name}」更新成功，但配置无法加载，已重启核心',
+            );
+
+            return false;
+          }
         } finally {
           await _clashProvider?.resumeConfigWatcher();
         }
       }
+
       Logger.info('更新订阅成功：${subscription.name}');
 
       // 注意：不在这里重启定时器，避免批量更新时频繁重启
@@ -477,6 +495,9 @@ class SubscriptionProvider extends ChangeNotifier {
         lastError: errorType.name, // 保存枚举名称
       );
       await _service.saveSubscriptionList(_subscriptions);
+
+      // 显示 Toast 提示用户
+      ModernToast.error(null, '订阅「${subscription.name}」更新失败：$rawError');
 
       return false;
     } finally {
@@ -791,6 +812,7 @@ class SubscriptionProvider extends ChangeNotifier {
     } catch (e) {
       // 不设置全局错误，只记录日志
       Logger.error('添加本地订阅失败：$name - $e');
+
       return false;
     }
   }
@@ -1063,7 +1085,7 @@ class SubscriptionProvider extends ChangeNotifier {
     );
 
     try {
-      // 保存文件到订阅目录
+      // 保存文件到订阅目录（会进行验证）
       await _service.saveLocalSubscription(subscription, content);
       Logger.info('订阅文件已保存：${subscription.name}');
 
@@ -1081,6 +1103,7 @@ class SubscriptionProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       Logger.error('保存订阅文件失败：${subscription.name} - $e');
+
       return false;
     }
   }
@@ -1103,19 +1126,19 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   // 重新加载当前订阅的配置文件
-  Future<void> _reloadCurrentSubscriptionConfig({
+  Future<bool> _reloadCurrentSubscriptionConfig({
     String reason = '配置重载',
   }) async {
     final configPath = getSubscriptionConfigPath();
     if (configPath == null) {
       Logger.warning('无法获取配置路径，跳过重载');
-      return;
+      return false;
     }
 
     final clashProvider = _clashProvider;
     if (clashProvider == null) {
       Logger.warning('ClashProvider 未设置，跳过重载');
-      return;
+      return false;
     }
     Logger.info('$reason，重新加载配置文件：$configPath');
 
@@ -1244,6 +1267,7 @@ class SubscriptionProvider extends ChangeNotifier {
           '热重载失败 (耗时: ${reloadStopwatch.elapsedMilliseconds}ms)，降级为重启核心',
         );
         await clashProvider.clashManager.restartCore();
+        return false;
       } else {
         Logger.info('配置热重载成功 (耗时: ${reloadStopwatch.elapsedMilliseconds}ms)');
 
@@ -1261,9 +1285,11 @@ class SubscriptionProvider extends ChangeNotifier {
             '重新加载代理信息失败 (耗时: ${proxyLoadStopwatch.elapsedMilliseconds}ms): $e',
           );
         }
+        return true;
       }
     } else {
       Logger.warning('Clash 未运行，无法重载配置');
+      return false;
     }
   }
 

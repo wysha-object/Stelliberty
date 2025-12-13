@@ -77,65 +77,68 @@ class SubscriptionCard extends StatelessWidget {
 
         return Stack(
           children: [
-            // 整个卡片（更新时置灰）
-            Opacity(
-              opacity: isUpdating ? 0.5 : 1.0,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: Color.alphaBlend(
-                    mixColor.withValues(alpha: mixOpacity),
-                    isSelected
-                        ? colorScheme.primaryContainer.withValues(alpha: 0.2)
-                        : colorScheme.surface.withValues(
-                            alpha: isDark ? 0.7 : 0.85,
-                          ),
-                  ),
-                  border: Border.all(
-                    color: isSelected
-                        ? colorScheme.primary.withValues(
-                            alpha: isDark ? 0.7 : 0.6,
-                          )
-                        : colorScheme.outline.withValues(alpha: 0.4),
-                    width: 2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
-                      blurRadius: isSelected ? 12 : 8,
-                      offset: Offset(0, isSelected ? 3 : 2),
-                    ),
-                  ],
+            // 整个卡片
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Color.alphaBlend(
+                  mixColor.withValues(alpha: mixOpacity),
+                  isSelected
+                      ? colorScheme.primaryContainer.withValues(alpha: 0.2)
+                      : colorScheme.surface.withValues(
+                          alpha: isDark ? 0.7 : 0.85,
+                        ),
                 ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: isUpdating ? null : onTap,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 标题行
-                          _buildTitleRow(context, isUpdating, isBatchUpdating),
+                border: Border.all(
+                  color: isSelected
+                      ? colorScheme.primary.withValues(
+                          alpha: isDark ? 0.7 : 0.6,
+                        )
+                      : colorScheme.outline.withValues(alpha: 0.4),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
+                    blurRadius: isSelected ? 12 : 8,
+                    offset: Offset(0, isSelected ? 3 : 2),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: isUpdating ? null : onTap,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 标题行
+                        _buildTitleRow(context, isUpdating, isBatchUpdating),
 
-                          const SizedBox(height: 4),
+                        const SizedBox(height: 4),
 
-                          // URL
-                          _buildUrlText(),
+                        // URL（更新时置灰）
+                        Opacity(
+                          opacity: isUpdating ? 0.5 : 1.0,
+                          child: _buildUrlText(),
+                        ),
 
-                          // 弹性空间，让状态标签推到底部
-                          const Spacer(),
+                        // 弹性空间，让状态标签推到底部
+                        const Spacer(),
 
-                          // 状态标签与流量进度条并排（只有真正有流量数据时才显示进度条）
-                          if (subscription.info != null &&
-                              subscription.info!.total > 0)
-                            _buildStatusWithTraffic(context)
-                          else
-                            _buildStatusChips(context),
-                        ],
-                      ),
+                        // 状态标签与流量进度条并排（更新时置灰）
+                        Opacity(
+                          opacity: isUpdating ? 0.5 : 1.0,
+                          child:
+                              subscription.info != null &&
+                                  subscription.info!.total > 0
+                              ? _buildStatusWithTraffic(context)
+                              : _buildStatusChips(context),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -158,24 +161,33 @@ class SubscriptionCard extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(
-          Icons.rss_feed,
-          color: isSelected ? colorScheme.primary : Colors.grey,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            subscription.name,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            ),
-            overflow: TextOverflow.ellipsis,
+        // RSS 图标（更新时置灰）
+        Opacity(
+          opacity: isUpdating ? 0.5 : 1.0,
+          child: Icon(
+            Icons.rss_feed,
+            color: isSelected ? colorScheme.primary : Colors.grey,
           ),
         ),
+        const SizedBox(width: 12),
+        // 订阅名称（更新时置灰）
+        Expanded(
+          child: Opacity(
+            opacity: isUpdating ? 0.5 : 1.0,
+            child: Text(
+              subscription.name,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+        // 选中图标（不置灰，保持颜色）
         if (isSelected) Icon(Icons.check_circle, color: colorScheme.primary),
         const SizedBox(width: 8),
-        // 独立更新按钮（更新时显示转圈指示器）
+        // 独立更新按钮（不置灰，保持颜色）
         if (!subscription.isLocalFile)
           ModernTooltip(
             message: context.translate.subscription.updateCard,
@@ -206,8 +218,11 @@ class SubscriptionCard extends StatelessWidget {
               ),
             ),
           ),
-        // 更多操作菜单（使用自定义弹出菜单）
-        _buildModernPopupMenu(context, isDisabled),
+        // 更多操作菜单（更新时置灰）
+        Opacity(
+          opacity: isUpdating ? 0.5 : 1.0,
+          child: _buildModernPopupMenu(context, isDisabled),
+        ),
       ],
     );
   }

@@ -140,20 +140,26 @@ class SubscriptionService {
           },
         );
 
-        // 验证配置文件
-        _validateConfig(parsedConfigContent);
+        // 验证配置文件（内存验证，失败时不影响原文件）
+        await _validateConfigWithRust(parsedConfigContent);
 
-        // 【重要】保存原始订阅文件，不应用任何覆写
-        // 覆写将在生成 runtime_config.yaml 时应用
+        // 【原子写入】先写临时文件再重命名，避免 IO 异常导致文件损坏
         final configPath = PathService.instance.getSubscriptionConfigPath(
           subscription.id,
         );
-        final configFile = File(configPath);
-        // 确保父目录存在
-        await configFile.parent.create(recursive: true);
-        await configFile.writeAsString(parsedConfigContent);
+        final tempPath = '$configPath.tmp';
+        final tempFile = File(tempPath);
 
-        Logger.info('订阅下载成功（已保存原始配置）：${subscription.name}');
+        // 确保父目录存在
+        await tempFile.parent.create(recursive: true);
+
+        // 写入临时文件
+        await tempFile.writeAsString(parsedConfigContent);
+
+        // 移动到目标位置（原子操作）
+        await tempFile.rename(configPath);
+
+        Logger.info('订阅下载成功（已验证并保存原始配置）：${subscription.name}');
 
         // 返回更新后的订阅
         return subscription.copyWith(
@@ -201,52 +207,70 @@ class SubscriptionService {
     }
   }
 
-  // 验证配置文件格式
-  // 增强验证：检查 YAML 基本语法和必需字段
-  void _validateConfig(String content) {
+  // 验证配置文件格式（使用 Rust 实现）
+  // 提供详细的 Clash 配置验证，包括：
+  // - YAML 语法验证
+  // - 必需字段验证
+  // - 代理节点配置验证
+  // - 代理组配置验证
+  // - 规则验证
+  // - 循环引用检测
+  //
+  // 注意：详细错误信息会在 Rust 端通过日志打印，Dart 端只向用户显示简单的错误提示
+  Future<void> _validateConfigWithRust(String content) async {
     if (content.isEmpty) {
       throw Exception('配置文件为空');
     }
 
-    // 1. 检查必需字段
-    final hasProxies = content.contains('proxies:');
-    final hasProxyGroups = content.contains('proxy-groups:');
+    Logger.debug('开始验证配置文件（使用 Rust）...');
 
-    if (!hasProxies && !hasProxyGroups) {
-      throw Exception('配置文件格式不正确，缺少 proxies 或 proxy-groups 字段');
+    // 创建验证请求
+    final request = ValidateSubscriptionRequest(content: content);
+
+    // 创建 Completer 等待验证结果
+    final completer = Completer<void>();
+    StreamSubscription? streamListener;
+
+    try {
+      // 订阅验证结果流
+      streamListener = ValidateSubscriptionResponse.rustSignalStream.listen((
+        result,
+      ) {
+        if (!completer.isCompleted) {
+          if (result.message.isValid) {
+            Logger.info('配置文件验证通过');
+            completer.complete();
+          } else {
+            final errorMsg = result.message.errorMessage ?? '配置文件格式不正确';
+            Logger.error('配置文件验证失败：$errorMsg');
+            completer.completeError(Exception(errorMsg));
+          }
+        }
+      });
+
+      // 发送验证请求到 Rust
+      request.sendSignalToRust();
+
+      // 等待验证结果（30秒超时）
+      await completer.future.timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw Exception('配置文件验证超时');
+        },
+      );
+    } finally {
+      // 停止监听信号流
+      await streamListener?.cancel();
     }
+  }
 
-    // 2. 基本的 YAML 语法检查
-    // 检查是否有明显的格式错误
-    final lines = content.split('\n');
-    for (int i = 0; i < lines.length; i++) {
-      final line = lines[i];
-      final trimmed = line.trimLeft();
-
-      // 跳过空行和注释
-      if (trimmed.isEmpty || trimmed.startsWith('#')) {
-        continue;
-      }
-
-      // 检查缩进是否使用了 Tab（YAML 不允许）
-      if (line.startsWith('\t')) {
-        throw Exception('配置文件格式错误：第 ${i + 1} 行使用了 Tab 缩进，YAML 只允许空格缩进');
-      }
-    }
-
-    // 3. 检查是否有基本的代理节点（如果有 proxies 字段）
-    if (hasProxies) {
-      // 简单检查：proxies 后面应该有内容
-      final proxiesIndex = content.indexOf('proxies:');
-      final afterProxies = content
-          .substring(proxiesIndex + 'proxies:'.length)
-          .trim();
-      if (afterProxies.isEmpty || afterProxies.startsWith('proxy-groups:')) {
-        throw Exception('配置文件 proxies 字段为空，没有有效的代理节点');
-      }
-    }
-
-    Logger.info('配置文件验证通过（${lines.length} 行）');
+  // 检查订阅配置文件是否存在
+  Future<bool> subscriptionExists(Subscription subscription) async {
+    final configPath = PathService.instance.getSubscriptionConfigPath(
+      subscription.id,
+    );
+    final configFile = File(configPath);
+    return await configFile.exists();
   }
 
   // 读取订阅配置文件内容
@@ -271,14 +295,6 @@ class SubscriptionService {
   ) async {
     // 直接读取订阅配置（已包含所有覆写）
     return await readSubscriptionConfig(subscription);
-  }
-
-  // 检查订阅配置文件是否存在
-  Future<bool> subscriptionExists(Subscription subscription) async {
-    final configPath = PathService.instance.getSubscriptionConfigPath(
-      subscription.id,
-    );
-    return await File(configPath).exists();
   }
 
   // 删除订阅配置文件
@@ -366,8 +382,8 @@ class SubscriptionService {
     Subscription subscription,
     String content,
   ) async {
-    // 验证配置文件格式
-    _validateConfig(content);
+    // 验证配置文件格式（使用 Rust）
+    await _validateConfigWithRust(content);
 
     // 【重要】保存原始订阅文件，不应用任何覆写
     // 覆写将在生成 runtime_config.yaml 时应用
