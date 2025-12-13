@@ -326,14 +326,14 @@ class LifecycleManager {
     try {
       // 使用 ServiceProvider 单例
       final serviceProvider = ServiceProvider();
-      final isInstalled = serviceProvider.isInstalled;
+      final isServiceModeInstalled = serviceProvider.isServiceModeInstalled;
       final status = serviceProvider.status;
 
-      Logger.debug('检查服务状态：已安装=$isInstalled，状态=$status');
+      Logger.debug('检查服务状态：服务模式已安装=$isServiceModeInstalled，状态=$status');
 
       // 关键：只要服务已安装（stopped 或 running 都可以），就可以使用服务模式
       // 因为通过 IPC 发送 StartClash 命令时，服务会自动启动
-      return isInstalled;
+      return isServiceModeInstalled;
     } catch (e) {
       Logger.error('检查服务状态失败：$e');
       return false;

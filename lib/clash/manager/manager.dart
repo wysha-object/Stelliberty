@@ -295,21 +295,21 @@ class ClashManager extends ChangeNotifier {
     return success;
   }
 
-  // 使用空配置重载核心（用于订阅配置加载失败时的回退）
+  // 使用默认配置重载核心（用于订阅配置加载失败时的回退）
   Future<bool> reloadWithEmptyConfig() async {
-    Logger.info('使用空配置重载核心');
+    Logger.info('使用默认配置重载核心');
     return await reloadConfig(configPath: null);
   }
 
-  // 使用空配置重启核心（用于空配置重载也失败时的回退）
+  // 使用默认配置重启核心（用于默认配置重载也失败时的回退）
   Future<bool> restartWithEmptyConfig() async {
-    Logger.info('使用空配置重启核心');
+    Logger.info('使用默认配置重启核心');
     try {
       await stopCore();
       await Future.delayed(const Duration(seconds: 1));
       return await startCore(configPath: null);
     } catch (e) {
-      Logger.error('使用空配置重启核心失败：$e');
+      Logger.error('使用默认配置重启核心失败：$e');
       return false;
     }
   }

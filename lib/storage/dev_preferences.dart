@@ -37,13 +37,13 @@ class DeveloperPreferences {
         _data = json.decode(content) as Map<String, dynamic>;
         Logger.info('Dev 模式配置已加载：${_file!.path}');
       } catch (e) {
-        Logger.error('读取 Dev 配置失败：$e，将使用空配置');
+        Logger.error('读取 Dev 配置失败：$e，将使用默认配置');
         _data = {};
       }
     } else {
       Logger.info('Dev 配置文件不存在，创建新文件：${_file!.path}');
       _data = {};
-      // 立即创建空配置文件
+      // 立即创建默认配置文件
       await _save();
     }
 

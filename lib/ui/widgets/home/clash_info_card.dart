@@ -317,14 +317,14 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
     BuildContext context,
     ServiceStateManager serviceStateManager,
   ) {
-    final isServiceInstalled = serviceStateManager.isInstalled;
+    final isServiceModeInstalled = serviceStateManager.isServiceModeInstalled;
 
-    // 只要服务已安装，就显示服务模式（无论核心是否运行）
-    if (isServiceInstalled) {
+    // 只要服务模式已安装，就显示服务模式（无论核心是否运行）
+    if (isServiceModeInstalled) {
       return context.translate.home.serviceMode;
     }
 
-    // 服务未安装，使用普通模式
+    // 服务模式未安装，使用普通模式
     return context.translate.home.normalMode;
   }
 }

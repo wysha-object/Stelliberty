@@ -24,17 +24,17 @@ enum ServiceState {
 
 // 服务状态扩展方法
 extension ServiceStateExtension on ServiceState {
-  // 是否已安装（卸载中也视为已安装，直到卸载完成）
-  bool get isInstalled =>
+  // 服务模式是否已安装（卸载中也视为已安装，直到卸载完成）
+  bool get isServiceModeInstalled =>
       this == ServiceState.installed ||
       this == ServiceState.running ||
       this == ServiceState.uninstalling;
 
-  // 是否正在运行
-  bool get isRunning => this == ServiceState.running;
+  // 服务模式是否正在运行
+  bool get isServiceModeRunning => this == ServiceState.running;
 
-  // 是否正在处理操作（安装或卸载）
-  bool get isProcessing =>
+  // 服务模式是否正在处理操作（安装或卸载）
+  bool get isServiceModeProcessing =>
       this == ServiceState.installing || this == ServiceState.uninstalling;
 }
 
@@ -75,14 +75,14 @@ class ServiceStateManager extends ChangeNotifier {
   Stream<ServiceStateChangeEvent> get stateChangeStream =>
       _stateChangeController.stream;
 
-  // 便捷方法 - 是否已安装
-  bool get isInstalled => _currentState.isInstalled;
+  // 便捷方法 - 服务模式是否已安装
+  bool get isServiceModeInstalled => _currentState.isServiceModeInstalled;
 
-  // 便捷方法 - 是否正在运行
-  bool get isRunning => _currentState.isRunning;
+  // 便捷方法 - 服务模式是否正在运行
+  bool get isServiceModeRunning => _currentState.isServiceModeRunning;
 
-  // 便捷方法 - 是否正在处理操作
-  bool get isProcessing => _currentState.isProcessing;
+  // 便捷方法 - 服务模式是否正在处理操作
+  bool get isServiceModeProcessing => _currentState.isServiceModeProcessing;
 
   // 更新服务状态
   void updateState(ServiceState newState, {String? reason}) {

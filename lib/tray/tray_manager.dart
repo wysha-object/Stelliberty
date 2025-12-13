@@ -299,13 +299,13 @@ class AppTrayManager {
       // Windows: 检查服务安装状态 或 管理员权限
       try {
         final serviceProvider = ServiceProvider();
-        final isServiceInstalled = serviceProvider.isInstalled;
+        final isServiceModeInstalled = serviceProvider.isServiceModeInstalled;
 
-        if (isServiceInstalled) {
-          // 服务已安装，可以使用 TUN
+        if (isServiceModeInstalled) {
+          // 服务模式已安装，可以使用 TUN
           isAvailable = true;
         } else {
-          // 服务未安装，检查是否以管理员权限运行
+          // 服务模式未安装，检查是否以管理员权限运行
           isAvailable = await PermissionService.isElevated();
         }
       } catch (e) {

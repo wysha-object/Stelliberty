@@ -42,10 +42,10 @@ class _TunModeCardState extends State<TunModeCard> {
   @override
   Widget build(BuildContext context) {
     final serviceStateManager = context.watch<ServiceStateManager>();
-    final isServiceInstalled = serviceStateManager.isInstalled;
+    final isServiceModeInstalled = serviceStateManager.isServiceModeInstalled;
 
-    // TUN 模式可用条件：服务已安装 或 以管理员/root 权限运行
-    final canEnableTun = isServiceInstalled || _isElevated;
+    // TUN 模式可用条件：服务模式已安装 或 以管理员/root 权限运行
+    final canEnableTun = isServiceModeInstalled || _isElevated;
 
     // Android 平台不支持 TUN 模式
     if (Platform.isAndroid) {

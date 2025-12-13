@@ -1284,12 +1284,12 @@ class SubscriptionProvider extends ChangeNotifier {
         });
 
         // 尝试使用默认配置重载核心
-        Logger.info('尝试使用空配置重载核心');
+        Logger.info('尝试使用默认配置重载核心');
         final emptyReloadSuccess = await clashProvider.clashManager
             .reloadWithEmptyConfig();
 
         if (emptyReloadSuccess) {
-          Logger.info('空配置重载成功');
+          Logger.info('默认配置重载成功');
           _showToast((context) {
             ModernToast.success(
               context,
@@ -1297,14 +1297,14 @@ class SubscriptionProvider extends ChangeNotifier {
             );
           });
         } else {
-          Logger.error('空配置重载失败，尝试使用空配置重启核心');
+          Logger.error('默认配置重载失败，尝试使用默认配置重启核心');
 
-          // 使用空配置重启核心
+          // 使用默认配置重启核心
           final emptyRestartSuccess = await clashProvider.clashManager
               .restartWithEmptyConfig();
 
           if (emptyRestartSuccess) {
-            Logger.info('空配置重启成功');
+            Logger.info('默认配置重启成功');
             _showToast((context) {
               ModernToast.success(
                 context,
@@ -1312,7 +1312,7 @@ class SubscriptionProvider extends ChangeNotifier {
               );
             });
           } else {
-            Logger.error('空配置重启失败');
+            Logger.error('默认配置重启失败');
             _showToast((context) {
               ModernToast.error(
                 context,

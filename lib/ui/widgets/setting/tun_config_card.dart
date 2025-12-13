@@ -302,8 +302,8 @@ class _TunConfigCardState extends State<TunConfigCard> {
       Consumer<ServiceStateManager>(
         builder: (context, stateManager, _) {
           final serviceProvider = context.read<ServiceProvider>();
-          final isInstalled = stateManager.isInstalled;
-          final isProcessing = stateManager.isProcessing;
+          final isServiceModeInstalled = stateManager.isServiceModeInstalled;
+          final isServiceModeProcessing = stateManager.isServiceModeProcessing;
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -318,11 +318,11 @@ class _TunConfigCardState extends State<TunConfigCard> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      isInstalled
+                      isServiceModeInstalled
                           ? context.translate.tunConfig.serviceInstalled
                           : context.translate.tunConfig.serviceNotInstalled,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: isInstalled
+                        color: isServiceModeInstalled
                             ? Colors.green.shade700
                             : Colors.orange.shade700,
                       ),
@@ -331,8 +331,8 @@ class _TunConfigCardState extends State<TunConfigCard> {
                 ),
               ),
               ModernSwitch(
-                value: isInstalled,
-                onChanged: isProcessing
+                value: isServiceModeInstalled,
+                onChanged: isServiceModeProcessing
                     ? null
                     : (value) async {
                         if (value) {

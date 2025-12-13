@@ -22,9 +22,9 @@ class ServiceProvider {
 
   // Getters - 便捷访问状态（可选，UI 也可以直接访问 stateManager）
   ServiceState get status => stateManager.currentState;
-  bool get isInstalled => stateManager.isInstalled;
-  bool get isServiceRunning => stateManager.isRunning;
-  bool get isServiceOperationInProgress => stateManager.isProcessing;
+  bool get isServiceModeInstalled => stateManager.isServiceModeInstalled;
+  bool get isServiceModeRunning => stateManager.isServiceModeRunning;
+  bool get isServiceModeProcessing => stateManager.isServiceModeProcessing;
   String? get lastOperationError => _lastOperationError;
   bool? get lastOperationSuccess => _lastOperationSuccess;
 
@@ -67,7 +67,7 @@ class ServiceProvider {
   // 安装服务
   // 返回 true 表示成功，false 表示失败
   Future<bool> installService() async {
-    if (stateManager.isProcessing) return false;
+    if (stateManager.isServiceModeProcessing) return false;
 
     stateManager.setInstalling(reason: '用户请求安装服务');
     _lastOperationSuccess = null;
@@ -162,7 +162,7 @@ class ServiceProvider {
   // 卸载服务
   // 返回 true 表示成功，false 表示失败
   Future<bool> uninstallService() async {
-    if (stateManager.isProcessing) return false;
+    if (stateManager.isServiceModeProcessing) return false;
 
     stateManager.setUninstalling(reason: '用户请求卸载服务');
     _lastOperationSuccess = null;
