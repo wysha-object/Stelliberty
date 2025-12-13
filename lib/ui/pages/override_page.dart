@@ -112,10 +112,10 @@ class _OverridePageState extends State<OverridePage> {
               const SizedBox(width: 8),
               if (provider.overrides.any((o) => o.type == OverrideType.remote))
                 FilledButton.tonalIcon(
-                  onPressed: provider.isBatchUpdating
+                  onPressed: provider.isBatchUpdatingOverrides
                       ? null
                       : () => _updateAllRemoteOverrides(context, provider),
-                  icon: provider.isBatchUpdating
+                  icon: provider.isBatchUpdatingOverrides
                       ? SizedBox(
                           width: 16,
                           height: 16,
@@ -128,7 +128,7 @@ class _OverridePageState extends State<OverridePage> {
                         )
                       : const Icon(Icons.sync_rounded, size: 18),
                   label: Text(
-                    provider.isBatchUpdating
+                    provider.isBatchUpdatingOverrides
                         ? translate.kOverride.updating
                         : translate.kOverride.updateAll,
                   ),

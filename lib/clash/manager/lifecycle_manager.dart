@@ -61,15 +61,17 @@ class LifecycleManager {
   Timer? _serviceHeartbeatTimer;
 
   // 状态缓存
-  String _version = 'Unknown';
-  String get version => _version;
+  String _coreVersion = 'Unknown';
+  String get coreVersion => _coreVersion;
 
   // 运行状态（通过状态管理器获取）
   bool get isCoreRunning => _coreStateManager.currentState.isRunning;
-  bool get isRestarting =>
+  bool get isCoreRestarting =>
       _coreStateManager.currentState == CoreState.restarting;
-  bool get isStarting => _coreStateManager.currentState == CoreState.starting;
-  bool get isStopping => _coreStateManager.currentState == CoreState.stopping;
+  bool get isCoreStarting =>
+      _coreStateManager.currentState == CoreState.starting;
+  bool get isCoreStopping =>
+      _coreStateManager.currentState == CoreState.stopping;
 
   LifecycleManager({
     required ProcessService processService,
@@ -121,12 +123,12 @@ class LifecycleManager {
     int? socksPort,
     int? httpPort, // 单独 HTTP 端口（可选）
   }) async {
-    if (isStarting) {
+    if (isCoreStarting) {
       Logger.warning('Clash 正在启动中，请勿重复调用');
       return false;
     }
 
-    if (isRestarting) {
+    if (isCoreRestarting) {
       Logger.warning('Clash 正在重启中，请勿手动启动');
       return false;
     }
@@ -468,10 +470,10 @@ class LifecycleManager {
       // 等待 IPC 就绪（通过重试获取版本号）
       final version = await _waitForIpcReady();
       if (version != null) {
-        _version = version;
+        _coreVersion = version;
       } else {
         Logger.warning('未能通过 IPC 获取版本号');
-        _version = 'Unknown';
+        _coreVersion = 'Unknown';
       }
 
       try {
@@ -586,7 +588,7 @@ class LifecycleManager {
 
   // 停止 Clash 核心（不触碰系统代理）
   Future<bool> stopCore() async {
-    if (isStopping) {
+    if (isCoreStopping) {
       Logger.warning('Clash 正在停止中，请勿重复调用');
       return false;
     }
@@ -626,7 +628,7 @@ class LifecycleManager {
       // 清理状态
       _coreStateManager.setStopped(reason: '核心已停止');
       _actualPortsUsed = null;
-      _version = 'Unknown';
+      _coreVersion = 'Unknown';
       _currentStartMode = null;
 
       _notifyListeners();

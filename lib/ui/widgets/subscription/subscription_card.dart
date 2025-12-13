@@ -68,7 +68,7 @@ class SubscriptionCard extends StatelessWidget {
     return Consumer<SubscriptionProvider>(
       builder: (context, provider, child) {
         final isUpdating = provider.isSubscriptionUpdating(subscription.id);
-        final isBatchUpdating = provider.isBatchUpdating;
+        final isBatchUpdating = provider.isBatchUpdatingSubscriptions;
         final colorScheme = Theme.of(context).colorScheme;
         final isDark = Theme.of(context).brightness == Brightness.dark;
 

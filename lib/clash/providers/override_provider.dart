@@ -38,7 +38,7 @@ class OverrideProvider extends ChangeNotifier {
 
   // 状态委托给状态管理器
   bool get isLoading => _stateManager.isLoading;
-  bool get isBatchUpdating => _stateManager.isBatchUpdating;
+  bool get isBatchUpdatingOverrides => _stateManager.isBatchUpdating;
   String? get errorMessage => _stateManager.errorMessage;
 
   // 检查指定覆写是否正在更新

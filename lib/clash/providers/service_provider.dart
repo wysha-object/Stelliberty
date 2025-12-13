@@ -23,8 +23,8 @@ class ServiceProvider {
   // Getters - 便捷访问状态（可选，UI 也可以直接访问 stateManager）
   ServiceState get status => stateManager.currentState;
   bool get isInstalled => stateManager.isInstalled;
-  bool get isRunning => stateManager.isRunning;
-  bool get isProcessing => stateManager.isProcessing;
+  bool get isServiceRunning => stateManager.isRunning;
+  bool get isServiceOperationInProgress => stateManager.isProcessing;
   String? get lastOperationError => _lastOperationError;
   bool? get lastOperationSuccess => _lastOperationSuccess;
 

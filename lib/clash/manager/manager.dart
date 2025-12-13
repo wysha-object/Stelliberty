@@ -58,9 +58,9 @@ class ClashManager extends ChangeNotifier {
   }
 
   bool get isCoreRunning => _lifecycleManager.isCoreRunning;
-  bool get isRestarting => _lifecycleManager.isRestarting;
+  bool get isCoreRestarting => _lifecycleManager.isCoreRestarting;
   String? get currentConfigPath => _lifecycleManager.currentConfigPath;
-  String get version => _lifecycleManager.version;
+  String get coreVersion => _lifecycleManager.coreVersion;
 
   bool get allowLan => _configManager.allowLan;
   bool get ipv6 => _configManager.ipv6;

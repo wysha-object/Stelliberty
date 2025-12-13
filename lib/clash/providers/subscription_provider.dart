@@ -74,8 +74,8 @@ class SubscriptionProvider extends ChangeNotifier {
   bool get isLoading => _stateManager.isLoading;
   int get updateProgress => _stateManager.updateProgress.current;
   int get updateTotal => _stateManager.updateProgress.total;
-  bool get isUpdating => _stateManager.updateProgress.isUpdating;
-  bool get isBatchUpdating => _stateManager.isBatchUpdating;
+  bool get isUpdatingSubscription => _stateManager.updateProgress.isUpdating;
+  bool get isBatchUpdatingSubscriptions => _stateManager.isBatchUpdating;
   String? get errorMessage => _stateManager.errorMessage;
 
   // 检查指定订阅是否正在更新

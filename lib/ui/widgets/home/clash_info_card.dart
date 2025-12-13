@@ -36,17 +36,17 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
     // 使用 Selector 只监听需要的属性，避免不必要的重建
     return Selector<
       ClashManager,
-      ({bool isCoreRunning, int mixedPort, String version})
+      ({bool isCoreRunning, int mixedPort, String coreVersion})
     >(
       selector: (_, manager) => (
         isCoreRunning: manager.isCoreRunning,
         mixedPort: manager.mixedPort,
-        version: manager.version,
+        coreVersion: manager.coreVersion,
       ),
       builder: (context, state, child) {
         final isCoreRunning = state.isCoreRunning;
         final proxyAddress = '$proxyHost:${state.mixedPort}';
-        final version = state.version;
+        final coreVersion = state.coreVersion;
 
         return BaseCard(
           icon: Icons.info_outline,
@@ -127,7 +127,7 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
               // 核心版本
               InfoRow.text(
                 label: context.translate.home.coreVersion,
-                value: isCoreRunning ? version : '--',
+                value: isCoreRunning ? coreVersion : '--',
                 valueStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   fontFeatures: [const FontFeature.tabularFigures()],
