@@ -133,9 +133,9 @@ class ClashProvider extends ChangeNotifier {
   // 配置文件监听器
   ConfigWatcher? _configWatcher;
 
-  // 是否启用配置文件重载
-  bool _enableConfigReload = true;
-  bool get enableConfigReload => _enableConfigReload;
+  // 配置文件重载功能是否已启用
+  bool _isConfigReloadEnabled = true;
+  bool get isConfigReloadEnabled => _isConfigReloadEnabled;
 
   // 判断代理组类型是否支持手动选择
   static bool _isSelectableGroupType(String type) {
@@ -274,7 +274,7 @@ class ClashProvider extends ChangeNotifier {
         await loadProxies();
 
         // 如果启用了配置重载且指定了配置文件路径，启动配置文件监听
-        if (_enableConfigReload &&
+        if (_isConfigReloadEnabled &&
             configPath != null &&
             configPath.isNotEmpty) {
           await _startConfigWatcher(configPath);
@@ -859,7 +859,7 @@ class ClashProvider extends ChangeNotifier {
 
   // 启用/禁用配置文件重载
   void setConfigReload(bool enabled) {
-    _enableConfigReload = enabled;
+    _isConfigReloadEnabled = enabled;
     Logger.info('配置文件重载：${enabled ? "已启用" : "已禁用"}');
   }
 

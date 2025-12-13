@@ -67,7 +67,7 @@ class ClashDefaults {
   static const int maxTunMtu = 9000; // 最大 MTU 值（支持 Jumbo Frame）
 
   // ==================== 防抖延迟配置 ====================
-  static const int configReloadDebounceMs = 500; // 配置热重载防抖延迟（ms）
+  static const int configReloadDebounceMs = 500; // 配置重载防抖延迟（ms）
   static const int restartDebounceMs = 1000; // 核心重启防抖延迟（ms）
   static const int restartIntervalMs = 300; // 重启间隔延迟（ms）
 }

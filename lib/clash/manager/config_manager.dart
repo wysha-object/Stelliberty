@@ -7,7 +7,7 @@ import 'package:stelliberty/utils/logger.dart';
 import 'package:stelliberty/src/bindings/signals/signals.dart';
 
 // Clash 配置管理器
-// 负责配置的读取、更新、热重载
+// 负责配置的读取、更新、重载
 class ConfigManager {
   final ClashApiClient _apiClient;
   final Function() _notifyListeners;
@@ -139,19 +139,19 @@ class ConfigManager {
     return await _apiClient.updateConfig(config);
   }
 
-  // 热重载配置文件
+  // 重载配置文件
   Future<bool> reloadConfig({
     String? configPath,
     List<OverrideConfig> overrides = const [],
   }) async {
     try {
       if (!_isCoreRunning()) {
-        Logger.warning('Clash 未运行，无法热重载配置');
+        Logger.warning('Clash 未运行，无法重载配置');
         return false;
       }
 
       Logger.debug(
-        '热重载参数：configPath=$configPath, tunEnabled=$_tunEnabled, ipv6=$_ipv6, allowLan=$_allowLan',
+        '重载参数：configPath=$configPath, tunEnabled=$_tunEnabled, ipv6=$_ipv6, allowLan=$_allowLan',
       );
 
       String? actualConfigPath;
@@ -201,12 +201,12 @@ class ConfigManager {
       if (success) {
         _notifyListeners();
       } else {
-        Logger.error('配置热重载失败');
+        Logger.error('配置重载失败');
       }
 
       return success;
     } catch (e) {
-      Logger.error('热重载配置文件出错：$e');
+      Logger.error('重载配置文件出错：$e');
       return false;
     }
   }
@@ -226,7 +226,7 @@ class ConfigManager {
         _allowLan = enabled;
         await ClashPreferences.instance.setAllowLan(enabled);
         _notifyListeners();
-        Logger.info('局域网代理（支持热重载）：${enabled ? "启用" : "禁用"}');
+        Logger.info('局域网代理（支持重载）：${enabled ? "启用" : "禁用"}');
       }
       return success;
     } catch (e) {
@@ -250,7 +250,7 @@ class ConfigManager {
         _ipv6 = enabled;
         await ClashPreferences.instance.setIpv6(enabled);
         _notifyListeners();
-        Logger.info('IPv6（支持热重载）：${enabled ? "启用" : "禁用"}');
+        Logger.info('IPv6（支持重载）：${enabled ? "启用" : "禁用"}');
       }
       return success;
     } catch (e) {
@@ -322,7 +322,7 @@ class ConfigManager {
         _geodataLoader = mode;
         await ClashPreferences.instance.setGeodataLoader(mode);
         _notifyListeners();
-        Logger.info('GEO 数据加载模式（支持热重载）：$mode');
+        Logger.info('GEO 数据加载模式（支持重载）：$mode');
       }
       return success;
     } catch (e) {
@@ -346,7 +346,7 @@ class ConfigManager {
         _findProcessMode = mode;
         await ClashPreferences.instance.setFindProcessMode(mode);
         _notifyListeners();
-        Logger.info('查找进程模式（支持热重载）：$mode');
+        Logger.info('查找进程模式（支持重载）：$mode');
       }
       return success;
     } catch (e) {
@@ -370,7 +370,7 @@ class ConfigManager {
         _clashCoreLogLevel = level;
         await ClashPreferences.instance.setCoreLogLevel(level);
         _notifyListeners();
-        Logger.info('日志等级（支持热重载）：$level');
+        Logger.info('日志等级（支持重载）：$level');
       }
       return success;
     } catch (e) {
@@ -398,7 +398,7 @@ class ConfigManager {
         _externalController = address;
         await ClashPreferences.instance.setExternalControllerEnabled(enabled);
         _notifyListeners();
-        Logger.info('外部控制器（支持热重载）：${enabled ? "启用" : "禁用"} - $address');
+        Logger.info('外部控制器（支持重载）：${enabled ? "启用" : "禁用"} - $address');
       }
       return success;
     } catch (e) {
@@ -474,7 +474,7 @@ class ConfigManager {
         updateSystemProxyCallback();
 
         _notifyListeners();
-        Logger.info('混合端口（支持热重载）：$port');
+        Logger.info('混合端口（支持重载）：$port');
       }
       return success;
     } catch (e) {
@@ -504,7 +504,7 @@ class ConfigManager {
         _socksPort = port;
         await ClashPreferences.instance.setSocksPort(port);
         _notifyListeners();
-        Logger.info('SOCKS 端口（支持热重载）：${port ?? "未设置"}');
+        Logger.info('SOCKS 端口（支持重载）：${port ?? "未设置"}');
       }
       return success;
     } catch (e) {
@@ -534,7 +534,7 @@ class ConfigManager {
         _httpPort = port;
         await ClashPreferences.instance.setHttpPort(port);
         _notifyListeners();
-        Logger.info('HTTP 端口（支持热重载）：${port ?? "未设置"}');
+        Logger.info('HTTP 端口（支持重载）：${port ?? "未设置"}');
       }
       return success;
     } catch (e) {
@@ -556,7 +556,7 @@ class ConfigManager {
       _notifyListeners();
 
       Logger.info(
-        '虚拟网卡模式配置已更新：${enabled ? "启用" : "禁用"}（${_isCoreRunning() ? "将通过配置热重载生效" : "将在下次启动时生效"}）',
+        '虚拟网卡模式配置已更新：${enabled ? "启用" : "禁用"}（${_isCoreRunning() ? "将通过配置重载生效" : "将在下次启动时生效"}）',
       );
       return true;
     } catch (e) {
@@ -583,7 +583,7 @@ class ConfigManager {
         _tunStack = stack;
         await ClashPreferences.instance.setTunStack(stack);
         _notifyListeners();
-        Logger.info('虚拟网卡网络栈（支持热重载）：$stack');
+        Logger.info('虚拟网卡网络栈（支持重载）：$stack');
       }
       return success;
     } catch (e) {
@@ -607,7 +607,7 @@ class ConfigManager {
         _tunDevice = device;
         await ClashPreferences.instance.setTunDevice(device);
         _notifyListeners();
-        Logger.info('虚拟网卡设备名称（支持热重载）：$device');
+        Logger.info('虚拟网卡设备名称（支持重载）：$device');
       }
       return success;
     } catch (e) {
@@ -631,7 +631,7 @@ class ConfigManager {
         _tunAutoRoute = enabled;
         await ClashPreferences.instance.setTunAutoRoute(enabled);
         _notifyListeners();
-        Logger.info('虚拟网卡自动路由（支持热重载）：${enabled ? "启用" : "禁用"}');
+        Logger.info('虚拟网卡自动路由（支持重载）：${enabled ? "启用" : "禁用"}');
       }
       return success;
     } catch (e) {
@@ -655,7 +655,7 @@ class ConfigManager {
         _tunAutoRedirect = enabled;
         await ClashPreferences.instance.setTunAutoRedirect(enabled);
         _notifyListeners();
-        Logger.info('虚拟网卡自动 TCP 重定向（支持热重载）：${enabled ? "启用" : "禁用"}');
+        Logger.info('虚拟网卡自动 TCP 重定向（支持重载）：${enabled ? "启用" : "禁用"}');
       }
       return success;
     } catch (e) {
@@ -679,7 +679,7 @@ class ConfigManager {
         _tunAutoDetectInterface = enabled;
         await ClashPreferences.instance.setTunAutoDetectInterface(enabled);
         _notifyListeners();
-        Logger.info('虚拟网卡自动检测接口（支持热重载）：${enabled ? "启用" : "禁用"}');
+        Logger.info('虚拟网卡自动检测接口（支持重载）：${enabled ? "启用" : "禁用"}');
       }
       return success;
     } catch (e) {
@@ -703,7 +703,7 @@ class ConfigManager {
         _tunDnsHijack = dnsHijack;
         await ClashPreferences.instance.setTunDnsHijack(dnsHijack);
         _notifyListeners();
-        Logger.info('虚拟网卡 DNS 劫持列表（支持热重载）：$dnsHijack');
+        Logger.info('虚拟网卡 DNS 劫持列表（支持重载）：$dnsHijack');
       }
       return success;
     } catch (e) {
@@ -727,7 +727,7 @@ class ConfigManager {
         _tunStrictRoute = enabled;
         await ClashPreferences.instance.setTunStrictRoute(enabled);
         _notifyListeners();
-        Logger.info('虚拟网卡严格路由（支持热重载）：${enabled ? "启用" : "禁用"}');
+        Logger.info('虚拟网卡严格路由（支持重载）：${enabled ? "启用" : "禁用"}');
       }
       return success;
     } catch (e) {
@@ -751,7 +751,7 @@ class ConfigManager {
         _tunRouteExcludeAddress = addresses;
         await ClashPreferences.instance.setTunRouteExcludeAddress(addresses);
         _notifyListeners();
-        Logger.info('虚拟网卡排除网段列表（支持热重载）：$addresses');
+        Logger.info('虚拟网卡排除网段列表（支持重载）：$addresses');
       }
       return success;
     } catch (e) {
@@ -775,7 +775,7 @@ class ConfigManager {
         _tunDisableIcmpForwarding = disabled;
         await ClashPreferences.instance.setTunDisableIcmpForwarding(disabled);
         _notifyListeners();
-        Logger.info('虚拟网卡 ICMP 转发（支持热重载）：${disabled ? "禁用" : "启用"}');
+        Logger.info('虚拟网卡 ICMP 转发（支持重载）：${disabled ? "禁用" : "启用"}');
       }
       return success;
     } catch (e) {
@@ -806,7 +806,7 @@ class ConfigManager {
         _tunMtu = mtu;
         await ClashPreferences.instance.setTunMtu(mtu);
         _notifyListeners();
-        Logger.info('虚拟网卡 MTU 值（支持热重载）：$mtu');
+        Logger.info('虚拟网卡 MTU 值（支持重载）：$mtu');
       }
       return success;
     } catch (e) {

@@ -245,7 +245,7 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
       // 保存 DNS 启用状态到 Preferences
       await ClashPreferences.instance.setDnsOverrideEnabled(_enableDns);
 
-      // 如果 Clash 正在运行，热重载配置文件
+      // 如果 Clash 正在运行，重载配置文件
       if (ClashManager.instance.isCoreRunning) {
         final currentConfigPath = ClashManager.instance.currentConfigPath;
         if (currentConfigPath != null) {
@@ -254,7 +254,7 @@ class _DnsConfigCardState extends State<DnsConfigCard> {
             overrides: ClashManager.instance.getOverrides(),
           );
         } else {
-          Logger.warning('当前配置路径为空，无法热重载 DNS 配置');
+          Logger.warning('当前配置路径为空，无法重载 DNS 配置');
         }
       }
     } catch (e, stackTrace) {

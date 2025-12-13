@@ -325,16 +325,16 @@ class SubscriptionProvider extends ChangeNotifier {
           final configPath = getSubscriptionConfigPath();
           if (configPath != null) {
             try {
-              // 订阅切换，使用热重载（避免连接中断）
-              Logger.info('订阅切换，尝试热重载配置');
+              // 订阅切换，使用重载（避免连接中断）
+              Logger.info('订阅切换，尝试重载配置');
               final reloadSuccess = await clashProvider.clashManager
                   .reloadConfig(configPath: configPath);
 
               if (!reloadSuccess) {
-                Logger.warning('热重载失败，降级为重启核心');
+                Logger.warning('重载失败，降级为重启核心');
                 await clashProvider.clashManager.restartCore();
               } else {
-                // 热重载成功后，从 Clash API 重新加载代理列表
+                // 重载成功后，从 Clash API 重新加载代理列表
                 await clashProvider.loadProxies();
               }
             } catch (e) {
@@ -767,16 +767,16 @@ class SubscriptionProvider extends ChangeNotifier {
           final configPath = getSubscriptionConfigPath();
           if (configPath != null) {
             try {
-              // 订阅切换，使用热重载（避免连接中断）
-              Logger.info('订阅切换，尝试热重载配置（本地订阅）');
+              // 订阅切换，使用重载（避免连接中断）
+              Logger.info('订阅切换，尝试重载配置（本地订阅）');
               final reloadSuccess = await clashProvider.clashManager
                   .reloadConfig(configPath: configPath);
 
               if (!reloadSuccess) {
-                Logger.warning('热重载失败，降级为重启核心');
+                Logger.warning('重载失败，降级为重启核心');
                 await clashProvider.clashManager.restartCore();
               } else {
-                // 热重载成功后，从 Clash API 重新加载代理列表
+                // 重载成功后，从 Clash API 重新加载代理列表
                 await clashProvider.loadProxies();
               }
             } catch (e) {
@@ -830,10 +830,10 @@ class SubscriptionProvider extends ChangeNotifier {
           _currentSubscriptionId,
         );
 
-        // 如果核心正在运行，热重载配置（订阅或默认配置）
+        // 如果核心正在运行，重载配置（订阅或默认配置）
         if (wasRunning) {
           Logger.info(
-            '删除了当前订阅，热重载${_currentSubscriptionId != null ? "新订阅配置" : "默认配置"}',
+            '删除了当前订阅，重载${_currentSubscriptionId != null ? "新订阅配置" : "默认配置"}',
           );
           final clashProvider = _clashProvider;
           if (clashProvider != null) {
@@ -844,14 +844,14 @@ class SubscriptionProvider extends ChangeNotifier {
                   .reloadConfig(configPath: configPath);
 
               if (!reloadSuccess) {
-                Logger.warning('热重载失败，降级为重启核心');
+                Logger.warning('重载失败，降级为重启核心');
                 await ClashManager.instance.restartCore();
               } else {
-                // 热重载成功后，从 Clash API 重新加载代理列表
+                // 重载成功后，从 Clash API 重新加载代理列表
                 await clashProvider.loadProxies();
               }
             } catch (e) {
-              Logger.error('热重载配置失败，尝试重启核心：$e');
+              Logger.error('重载配置失败，尝试重启核心：$e');
               await ClashManager.instance.restartCore();
             }
           }
@@ -1241,11 +1241,11 @@ class SubscriptionProvider extends ChangeNotifier {
       Logger.info('当前订阅无覆写配置');
     }
 
-    // 如果 Clash 正在运行，尝试热重载配置
+    // 如果 Clash 正在运行，尝试重载配置
     if (clashProvider.isCoreRunning) {
-      Logger.info('Clash 正在运行，尝试热重载配置');
+      Logger.info('Clash 正在运行，尝试重载配置');
 
-      // 【性能监控】记录热重载总耗时
+      // 【性能监控】记录重载总耗时
       final reloadStopwatch = Stopwatch()..start();
 
       final reloadSuccess = await clashProvider.clashManager.reloadConfig(
@@ -1336,7 +1336,7 @@ class SubscriptionProvider extends ChangeNotifier {
           }
         }
       } else {
-        Logger.info('配置热重载成功 (耗时: ${reloadStopwatch.elapsedMilliseconds}ms)');
+        Logger.info('配置重载成功 (耗时: ${reloadStopwatch.elapsedMilliseconds}ms)');
 
         // 清除配置失败标记（如果之前失败过）
         if (currentSubscription != null &&
@@ -1354,7 +1354,7 @@ class SubscriptionProvider extends ChangeNotifier {
           }
         }
 
-        // 热重载成功后，从 Clash API 重新加载代理信息
+        // 重载成功后，从 Clash API 重新加载代理信息
         final proxyLoadStopwatch = Stopwatch()..start();
         try {
           await clashProvider.loadProxies();

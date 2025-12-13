@@ -46,7 +46,7 @@ class LifecycleManager {
   String? _originalConfigPath;
   String? get currentConfigPath => _originalConfigPath;
 
-  // 更新当前配置路径（用于热重载后同步路径）
+  // 更新当前配置路径（用于重载后同步路径）
   void updateConfigPath(String? configPath) {
     if (configPath != null && configPath.isNotEmpty) {
       _originalConfigPath = configPath;

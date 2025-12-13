@@ -33,7 +33,7 @@ class ClashManager extends ChangeNotifier {
   late final ConnectionManager _connectionManager;
   late final SystemProxyManager _systemProxyManager;
 
-  // 配置热重载防抖定时器
+  // 配置重载防抖定时器
   Timer? _configReloadDebounceTimer;
 
   // 懒惰模式：标记是否为应用启动后的首次核心启动
@@ -287,7 +287,7 @@ class ClashManager extends ChangeNotifier {
       overrides: overrides,
     );
 
-    // 热重载成功后，更新 lifecycle_manager 的配置路径缓存
+    // 重载成功后，更新 lifecycle_manager 的配置路径缓存
     if (success && configPath != null) {
       _lifecycleManager.updateConfigPath(configPath);
     }
@@ -354,8 +354,8 @@ class ClashManager extends ChangeNotifier {
     return success;
   }
 
-  // 调度配置热重载（使用防抖机制）
-  // 在指定时间内的多次配置修改只会触发一次热重载
+  // 调度配置重载（使用防抖机制）
+  // 在指定时间内的多次配置修改只会触发一次重载
   void _scheduleConfigReload(String reason) {
     if (!isCoreRunning || currentConfigPath == null) return;
 
@@ -366,12 +366,12 @@ class ClashManager extends ChangeNotifier {
     _configReloadDebounceTimer = Timer(
       Duration(milliseconds: ClashDefaults.configReloadDebounceMs),
       () async {
-        Logger.info('触发配置热重载以应用最新设置（原因：$reason）…');
+        Logger.info('触发配置重载以应用最新设置（原因：$reason）…');
         try {
           await reloadConfig(configPath: currentConfigPath);
-          Logger.info('配置热重载完成，所有设置已生效');
+          Logger.info('配置重载完成，所有设置已生效');
         } catch (e) {
-          Logger.error('配置热重载失败：$e');
+          Logger.error('配置重载失败：$e');
         }
       },
     );
@@ -440,11 +440,11 @@ class ClashManager extends ChangeNotifier {
     // 先更新本地状态和持久化
     final success = await _configManager.setTunEnabled(enabled);
 
-    // 如果核心正在运行且更新成功，重新生成配置并热重载
-    // 即使 currentConfigPath 为 null（无订阅），也支持热重载（使用默认配置）
+    // 如果核心正在运行且更新成功，重新生成配置并重载
+    // 即使 currentConfigPath 为 null（无订阅），也支持重载（使用默认配置）
     if (success && isCoreRunning) {
       Logger.debug(
-        'TUN 状态已更新，重新生成配置文件并热重载（${currentConfigPath != null ? "使用订阅配置" : "使用默认配置"}）…',
+        'TUN 状态已更新，重新生成配置文件并重载（${currentConfigPath != null ? "使用订阅配置" : "使用默认配置"}）…',
       );
       await reloadConfig(
         configPath: currentConfigPath, // 可能为 null（无订阅时使用默认配置）
