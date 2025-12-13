@@ -108,6 +108,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
 
   // 从 API 加载 Providers
   Future<void> _loadProviders() async {
+    final trans = context.translate;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -122,7 +123,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
 
       if (apiClient == null) {
         setState(() {
-          _errorMessage = context.translate.provider.clashNotRunning;
+          _errorMessage = trans.provider.clashNotRunning;
           _isLoading = false;
         });
         return;
@@ -154,7 +155,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = context.translate.provider.loadingFailed.replaceAll(
+        _errorMessage = trans.provider.loadingFailed.replaceAll(
           '{error}',
           e.toString(),
         );
@@ -165,6 +166,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
 
   // 同步所有 Providers
   Future<void> _syncAll() async {
+    final trans = context.translate;
     // 防止重复触发
     if (_isSyncingAll) {
       Logger.warning('同步全部操作正在进行中，忽略重复请求');
@@ -179,7 +181,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
 
     if (apiClient == null) {
       if (mounted) {
-        ModernToast.error(context, context.translate.provider.clashNotRunning);
+        ModernToast.error(context, trans.provider.clashNotRunning);
       }
       return;
     }
@@ -195,16 +197,13 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
         if (updatingCount > 0) {
           ModernToast.info(
             context,
-            context.translate.provider.allSyncInProgress.replaceAll(
+            trans.provider.allSyncInProgress.replaceAll(
               '{count}',
               updatingCount.toString(),
             ),
           );
         } else {
-          ModernToast.info(
-            context,
-            context.translate.provider.noProvidersToSync,
-          );
+          ModernToast.info(context, trans.provider.noProvidersToSync);
         }
       }
       return;
@@ -277,7 +276,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
       if (failedResults.isEmpty) {
         ModernToast.success(
           context,
-          context.translate.provider.allSyncComplete
+          trans.provider.allSyncComplete
               .replaceAll('{success}', successCount.toString())
               .replaceAll('{total}', httpProviders.length.toString()),
         );
@@ -285,7 +284,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
         final failedNames = failedResults.map((r) => r.$1).join('，');
         ModernToast.error(
           context,
-          context.translate.provider.partialSyncFailed
+          trans.provider.partialSyncFailed
               .replaceAll('{names}', failedNames)
               .replaceAll('{success}', successCount.toString())
               .replaceAll('{failed}', failedResults.length.toString()),
@@ -296,6 +295,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
 
   // 上传文件更新 Provider
   Future<void> _handleUpload(Provider provider) async {
+    final trans = context.translate;
     try {
       // 选择文件
       final result = await FilePicker.platform.pickFiles(
@@ -310,10 +310,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
       final platformFile = result.files.first;
       if (platformFile.path == null || provider.path == null) {
         if (mounted) {
-          ModernToast.error(
-            context,
-            context.translate.provider.pathNotAvailable,
-          );
+          ModernToast.error(context, trans.provider.pathNotAvailable);
         }
         return;
       }
@@ -336,10 +333,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
       if (mounted) {
         ModernToast.success(
           context,
-          context.translate.provider.uploadSuccess.replaceAll(
-            '{name}',
-            provider.name,
-          ),
+          trans.provider.uploadSuccess.replaceAll('{name}', provider.name),
         );
       }
 
@@ -351,10 +345,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
       if (mounted) {
         ModernToast.error(
           context,
-          context.translate.provider.uploadFailed.replaceAll(
-            '{error}',
-            e.toString(),
-          ),
+          trans.provider.uploadFailed.replaceAll('{error}', e.toString()),
         );
       }
     }
@@ -362,6 +353,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
 
   // 同步单个 Provider
   Future<void> _handleSync(Provider provider) async {
+    final trans = context.translate;
     if (provider.vehicleType != 'HTTP') {
       return;
     }
@@ -370,7 +362,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
     if (_isSyncingAll) {
       Logger.warning('同步全部操作正在进行中，忽略单个同步请求：${provider.name}');
       if (mounted) {
-        ModernToast.info(context, context.translate.provider.syncAllInProgress);
+        ModernToast.info(context, trans.provider.syncAllInProgress);
       }
       return;
     }
@@ -406,20 +398,16 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
       if (syncResult.success) {
         ModernToast.success(
           context,
-          context.translate.provider.syncSuccess.replaceAll(
-            '{name}',
-            provider.name,
-          ),
+          trans.provider.syncSuccess.replaceAll('{name}', provider.name),
         );
       } else {
         ModernToast.error(
           context,
-          context.translate.provider.syncFailed
+          trans.provider.syncFailed
               .replaceAll('{name}', provider.name)
               .replaceAll(
                 '{error}',
-                syncResult.errorMessage ??
-                    context.translate.provider.unknownError,
+                syncResult.errorMessage ?? trans.provider.unknownError,
               ),
         );
       }
@@ -428,8 +416,10 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     return ModernDialog(
-      title: context.translate.provider.title,
+      title: trans.provider.title,
       titleIcon: Icons.cloud_sync,
       maxWidth: 720,
       maxHeightRatio: 0.8,
@@ -443,7 +433,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
       content: _buildContent(),
       actionsLeftButtons: [
         DialogActionButton(
-          label: context.translate.provider.syncAll,
+          label: trans.provider.syncAll,
           icon: Icons.sync,
           onPressed: _isSyncingAll ? null : _syncAll,
           isLoading: _isSyncingAll,
@@ -451,7 +441,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
       ],
       actionsRight: [
         DialogActionButton(
-          label: context.translate.common.close,
+          label: trans.common.close,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],
@@ -460,6 +450,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
   }
 
   Widget _buildContent() {
+    final trans = context.translate;
     if (_isLoading) {
       return Center(
         child: Column(
@@ -467,7 +458,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
           children: [
             const CircularProgressIndicator(),
             const SizedBox(height: 16),
-            Text(context.translate.provider.loading),
+            Text(trans.provider.loading),
           ],
         ),
       );
@@ -489,7 +480,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
             ElevatedButton.icon(
               onPressed: _loadProviders,
               icon: const Icon(Icons.refresh),
-              label: Text(context.translate.provider.retry),
+              label: Text(trans.provider.retry),
             ),
           ],
         ),
@@ -504,7 +495,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
             const Icon(Icons.cloud_off, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
-              context.translate.provider.emptyTitle,
+              trans.provider.emptyTitle,
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
@@ -525,7 +516,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
       children: [
         if (proxyProviders.isNotEmpty) ...[
           Text(
-            context.translate.provider.proxyProviders,
+            trans.provider.proxyProviders,
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
@@ -536,7 +527,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
         ],
         if (ruleProviders.isNotEmpty) ...[
           Text(
-            context.translate.provider.ruleProviders,
+            trans.provider.ruleProviders,
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
@@ -549,6 +540,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
   }
 
   Widget _buildProviderItem(Provider provider) {
+    final trans = context.translate;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
 
@@ -626,7 +618,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
               ),
               const SizedBox(width: 4),
               Text(
-                '${provider.count} ${provider.type == ProviderType.proxy ? context.translate.provider.nodes : context.translate.provider.rules}',
+                '${provider.count} ${provider.type == ProviderType.proxy ? trans.provider.nodes : trans.provider.rules}',
                 style: TextStyle(
                   fontSize: 11,
                   color: Theme.of(
@@ -667,7 +659,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
               OutlinedButton.icon(
                 onPressed: () => _handleUpload(provider),
                 icon: const Icon(Icons.upload, size: 16),
-                label: Text(context.translate.provider.upload),
+                label: Text(trans.provider.upload),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -701,7 +693,7 @@ class _ProviderViewerDialogState extends State<ProviderViewerDialog> {
                     : OutlinedButton.icon(
                         onPressed: () => _handleSync(provider),
                         icon: const Icon(Icons.sync, size: 16),
-                        label: Text(context.translate.provider.sync),
+                        label: Text(trans.provider.sync),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,

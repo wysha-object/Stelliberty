@@ -12,6 +12,8 @@ class UwpLoopbackCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     // 仅在 Windows 平台显示
     if (!Platform.isWindows) {
       return const SizedBox.shrink();
@@ -19,10 +21,10 @@ class UwpLoopbackCard extends StatelessWidget {
 
     return ModernFeatureLayoutCard(
       icon: Icons.apps,
-      title: context.translate.uwpLoopback.cardTitle,
-      subtitle: context.translate.uwpLoopback.cardSubtitle,
+      title: trans.uwpLoopback.cardTitle,
+      subtitle: trans.uwpLoopback.cardSubtitle,
       trailing: ModernTooltip(
-        message: context.translate.uwpLoopback.openManager,
+        message: trans.uwpLoopback.openManager,
         child: IconButton(
           icon: const Icon(Icons.open_in_new),
           onPressed: () {

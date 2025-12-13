@@ -12,15 +12,17 @@ class ConnectionDetailDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     return ModernDialog(
-      title: context.translate.connection.connectionDetails,
+      title: trans.connection.connectionDetails,
       titleIcon: Icons.info_outline_rounded,
       maxWidth: 600,
       maxHeightRatio: 0.8,
       content: _buildContent(context),
       actionsRight: [
         DialogActionButton(
-          label: context.translate.connection.exitButton,
+          label: trans.connection.exitButton,
           isPrimary: false,
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -29,8 +31,10 @@ class ConnectionDetailDialog extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
+    final trans = context.translate;
+
     final metadata = connection.metadata;
-    final t = context.translate.connection;
+    final t = trans.connection;
 
     // 定义所有信息项，用于分组
     final infoItems = {

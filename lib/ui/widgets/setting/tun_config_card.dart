@@ -117,17 +117,18 @@ class _TunConfigCardState extends State<TunConfigCard> {
 
   // 验证 MTU 值
   String? _validateMtu(String value) {
+    final trans = context.translate;
     if (value.isEmpty) {
-      return context.translate.tunConfig.mtuError;
+      return trans.tunConfig.mtuError;
     }
 
     final mtu = int.tryParse(value);
     if (mtu == null) {
-      return context.translate.tunConfig.mtuInvalid;
+      return trans.tunConfig.mtuInvalid;
     }
 
     if (mtu < 1280 || mtu > 9000) {
-      return context.translate.tunConfig.mtuRange;
+      return trans.tunConfig.mtuRange;
     }
 
     return null;
@@ -135,6 +136,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
 
   // 统一保存文本输入配置
   Future<void> _saveConfig() async {
+    final trans = context.translate;
     if (_isSaving) return;
 
     // 验证 MTU 值
@@ -175,17 +177,14 @@ class _TunConfigCardState extends State<TunConfigCard> {
       ClashManager.instance.setTunRouteExcludeAddress(addressList);
 
       if (mounted) {
-        ModernToast.success(context, context.translate.tunConfig.saveSuccess);
+        ModernToast.success(context, trans.tunConfig.saveSuccess);
       }
     } catch (e) {
       Logger.error('保存 TUN 配置失败: $e');
       if (mounted) {
         ModernToast.error(
           context,
-          context.translate.tunConfig.saveFailed.replaceAll(
-            '{error}',
-            e.toString(),
-          ),
+          trans.tunConfig.saveFailed.replaceAll('{error}', e.toString()),
         );
       }
     } finally {
@@ -246,6 +245,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final trans = context.translate;
 
     if (Platform.isAndroid) {
       return const SizedBox.shrink();
@@ -270,11 +270,11 @@ class _TunConfigCardState extends State<TunConfigCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.translate.clashFeatures.tunMode.title,
+                    trans.clashFeatures.tunMode.title,
                     style: theme.textTheme.titleMedium,
                   ),
                   Text(
-                    context.translate.clashFeatures.tunMode.subtitle,
+                    trans.clashFeatures.tunMode.subtitle,
                     style: theme.textTheme.bodySmall,
                   ),
                 ],
@@ -298,6 +298,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
 
   // 真实内容
   List<Widget> _buildRealContent(BuildContext context, ThemeData theme) {
+    final trans = context.translate;
     return [
       // ========== 服务模式安装（第一行） ==========
       Consumer<ServiceStateManager>(
@@ -314,14 +315,14 @@ class _TunConfigCardState extends State<TunConfigCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      context.translate.tunConfig.serviceMode,
+                      trans.tunConfig.serviceMode,
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       isServiceModeInstalled
-                          ? context.translate.tunConfig.serviceInstalled
-                          : context.translate.tunConfig.serviceNotInstalled,
+                          ? trans.tunConfig.serviceInstalled
+                          : trans.tunConfig.serviceNotInstalled,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: isServiceModeInstalled
                             ? Colors.green.shade700
@@ -403,7 +404,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            context.translate.clashFeatures.tunMode.networkStack,
+            trans.clashFeatures.tunMode.networkStack,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           MouseRegion(
@@ -432,7 +433,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
       Row(
         children: [
           Text(
-            context.translate.clashFeatures.tunMode.deviceName,
+            trans.clashFeatures.tunMode.deviceName,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const Spacer(),
@@ -453,7 +454,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
       Row(
         children: [
           Text(
-            context.translate.clashFeatures.tunMode.mtu,
+            trans.clashFeatures.tunMode.mtu,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const Spacer(),
@@ -477,7 +478,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            context.translate.clashFeatures.tunMode.autoRoute,
+            trans.clashFeatures.tunMode.autoRoute,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           ModernSwitch(
@@ -497,7 +498,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            context.translate.clashFeatures.tunMode.autoDetectInterface,
+            trans.clashFeatures.tunMode.autoDetectInterface,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           ModernSwitch(
@@ -517,7 +518,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            context.translate.clashFeatures.tunMode.strictRoute,
+            trans.clashFeatures.tunMode.strictRoute,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           ModernSwitch(
@@ -536,7 +537,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
       Row(
         children: [
           Text(
-            context.translate.clashFeatures.tunMode.dnsHijack,
+            trans.clashFeatures.tunMode.dnsHijack,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const Spacer(),
@@ -563,12 +564,12 @@ class _TunConfigCardState extends State<TunConfigCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.translate.clashFeatures.tunMode.autoRedirect,
+                    trans.clashFeatures.tunMode.autoRedirect,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    context.translate.clashFeatures.tunMode.autoRedirectDesc,
+                    trans.clashFeatures.tunMode.autoRedirectDesc,
                     style: Theme.of(
                       context,
                     ).textTheme.bodySmall?.copyWith(color: Colors.grey),
@@ -597,7 +598,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  context.translate.clashFeatures.tunMode.routeExcludeAddress,
+                  trans.clashFeatures.tunMode.routeExcludeAddress,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 4),
@@ -637,12 +638,12 @@ class _TunConfigCardState extends State<TunConfigCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  context.translate.clashFeatures.tunMode.icmpForwarding,
+                  trans.clashFeatures.tunMode.icmpForwarding,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  context.translate.clashFeatures.tunMode.icmpForwardingDesc,
+                  trans.clashFeatures.tunMode.icmpForwardingDesc,
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: Colors.grey),
@@ -678,11 +679,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.save, size: 18),
-            label: Text(
-              _isSaving
-                  ? context.translate.tunConfig.saving
-                  : context.translate.common.save,
-            ),
+            label: Text(_isSaving ? trans.tunConfig.saving : trans.common.save),
           ),
         ],
       ),

@@ -42,6 +42,7 @@ class OverrideCard extends StatelessWidget {
 
     final mixColor = isDark ? Colors.black : Colors.white;
     final mixOpacity = 0.1;
+    final trans = context.translate;
 
     return Container(
       decoration: BoxDecoration(
@@ -145,7 +146,7 @@ class OverrideCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              context.translate.subscription.localTypeLabel,
+                              trans.subscription.localTypeLabel,
                               style: TextStyle(
                                 fontSize: 10,
                                 color: Colors.blue[700],
@@ -207,17 +208,17 @@ class OverrideCard extends StatelessWidget {
                   items: [
                     PopupMenuItemData(
                       icon: Icons.settings,
-                      label: context.translate.kOverride.editConfig,
+                      label: trans.kOverride.editConfig,
                       onPressed: onEditConfig,
                     ),
                     PopupMenuItemData(
                       icon: Icons.edit,
-                      label: context.translate.kOverride.editFile,
+                      label: trans.kOverride.editFile,
                       onPressed: onEditFile,
                     ),
                     PopupMenuItemData(
                       icon: Icons.delete,
-                      label: context.translate.kOverride.deleteItem,
+                      label: trans.kOverride.deleteItem,
                       onPressed: onDelete,
                       danger: true,
                     ),

@@ -33,6 +33,7 @@ class _LogsDebugPageState extends State<LogsDebugPage> {
   Widget build(BuildContext context) {
     final provider = Provider.of<ContentProvider>(context, listen: false);
     final theme = Theme.of(context);
+    final trans = context.translate;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,7 +50,7 @@ class _LogsDebugPageState extends State<LogsDebugPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                context.translate.clashFeatures.logsDebug.pageTitle,
+                trans.clashFeatures.logsDebug.pageTitle,
                 style: theme.textTheme.titleLarge,
               ),
             ],

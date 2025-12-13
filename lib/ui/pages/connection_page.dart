@@ -89,6 +89,7 @@ class _ConnectionPageContentState extends State<ConnectionPageContent> {
 
   // 构建过滤器和控制栏（扁平化 MD3 风格）
   Widget _buildFilterBar(BuildContext context, ConnectionProvider provider) {
+    final trans = context.translate;
     final colorScheme = Theme.of(context).colorScheme;
     final totalCount = provider.connections.length;
 
@@ -113,7 +114,7 @@ class _ConnectionPageContentState extends State<ConnectionPageContent> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  context.translate.connection.totalConnections.replaceAll(
+                  trans.connection.totalConnections.replaceAll(
                     '{count}',
                     totalCount.toString(),
                   ),
@@ -141,7 +142,7 @@ class _ConnectionPageContentState extends State<ConnectionPageContent> {
               children: [
                 _buildFilterChip(
                   context,
-                  label: context.translate.connection.allConnections,
+                  label: trans.connection.allConnections,
                   isSelected: provider.filterLevel == ConnectionFilterLevel.all,
                   onTap: () =>
                       provider.setFilterLevel(ConnectionFilterLevel.all),
@@ -149,7 +150,7 @@ class _ConnectionPageContentState extends State<ConnectionPageContent> {
                 const SizedBox(width: 4),
                 _buildFilterChip(
                   context,
-                  label: context.translate.connection.directConnections,
+                  label: trans.connection.directConnections,
                   isSelected:
                       provider.filterLevel == ConnectionFilterLevel.direct,
                   onTap: () =>
@@ -158,7 +159,7 @@ class _ConnectionPageContentState extends State<ConnectionPageContent> {
                 const SizedBox(width: 4),
                 _buildFilterChip(
                   context,
-                  label: context.translate.connection.proxiedConnections,
+                  label: trans.connection.proxiedConnections,
                   isSelected:
                       provider.filterLevel == ConnectionFilterLevel.proxy,
                   onTap: () =>
@@ -177,7 +178,7 @@ class _ConnectionPageContentState extends State<ConnectionPageContent> {
               child: TextField(
                 onChanged: (value) => provider.setSearchKeyword(value),
                 decoration: InputDecoration(
-                  hintText: context.translate.connection.searchPlaceholder,
+                  hintText: trans.connection.searchPlaceholder,
                   hintStyle: TextStyle(
                     fontSize: 13,
                     color: colorScheme.onSurfaceVariant,
@@ -212,8 +213,8 @@ class _ConnectionPageContentState extends State<ConnectionPageContent> {
               // 暂停/恢复按钮
               ModernIconTooltip(
                 message: provider.isMonitoringPaused
-                    ? context.translate.connection.resumeBtn
-                    : context.translate.connection.pauseBtn,
+                    ? trans.connection.resumeBtn
+                    : trans.connection.pauseBtn,
                 icon: provider.isMonitoringPaused
                     ? Icons.play_arrow_rounded
                     : Icons.pause_rounded,
@@ -223,7 +224,7 @@ class _ConnectionPageContentState extends State<ConnectionPageContent> {
               const SizedBox(width: 6),
               // 手动刷新按钮
               ModernIconTooltip(
-                message: context.translate.connection.refreshBtn,
+                message: trans.connection.refreshBtn,
                 icon: Icons.refresh_rounded,
                 onPressed: () => provider.refreshConnections(),
                 iconSize: 20,
@@ -231,7 +232,7 @@ class _ConnectionPageContentState extends State<ConnectionPageContent> {
               const SizedBox(width: 6),
               // 关闭所有连接按钮
               ModernIconTooltip(
-                message: context.translate.connection.closeAllConnections,
+                message: trans.connection.closeAllConnections,
                 icon: Icons.clear_all_rounded,
                 onPressed: totalCount > 0
                     ? () => _closeAllConnections(context, provider)
@@ -285,6 +286,8 @@ class _ConnectionPageContentState extends State<ConnectionPageContent> {
     List<ConnectionInfo> connections,
     bool isLoading,
   ) {
+    final trans = context.translate;
+
     if (isLoading && connections.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -303,7 +306,7 @@ class _ConnectionPageContentState extends State<ConnectionPageContent> {
             ),
             const SizedBox(height: 16),
             Text(
-              context.translate.connection.noActiveConnections,
+              trans.connection.noActiveConnections,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(
                   context,
@@ -345,23 +348,26 @@ class _ConnectionPageContentState extends State<ConnectionPageContent> {
   ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.translate.common.confirm),
-        content: Text(context.translate.connection.closeConnectionConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.translate.common.cancel),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await provider.closeConnection(connection.id);
-            },
-            child: Text(context.translate.common.ok),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final trans = context.translate;
+        return AlertDialog(
+          title: Text(trans.common.confirm),
+          content: Text(trans.connection.closeConnectionConfirm),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(trans.common.cancel),
+            ),
+            FilledButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await provider.closeConnection(connection.id);
+              },
+              child: Text(trans.common.ok),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -369,23 +375,26 @@ class _ConnectionPageContentState extends State<ConnectionPageContent> {
   void _closeAllConnections(BuildContext context, ConnectionProvider provider) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.translate.common.confirm),
-        content: Text(context.translate.connection.closeAllConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.translate.common.cancel),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await provider.closeAllConnections();
-            },
-            child: Text(context.translate.common.ok),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final trans = context.translate;
+        return AlertDialog(
+          title: Text(trans.common.confirm),
+          content: Text(trans.connection.closeAllConfirm),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(trans.common.cancel),
+            ),
+            FilledButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await provider.closeAllConnections();
+              },
+              child: Text(trans.common.ok),
+            ),
+          ],
+        );
+      },
     );
   }
 

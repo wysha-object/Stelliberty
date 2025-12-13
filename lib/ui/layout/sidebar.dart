@@ -13,6 +13,7 @@ class HomeSidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<ContentProvider>(context);
     final currentView = provider.currentView;
+    final trans = context.translate;
 
     return Consumer<WindowEffectProvider>(
       builder: (context, windowEffectProvider, child) {
@@ -25,7 +26,7 @@ class HomeSidebar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 24.0),
                 child: Center(
                   child: Text(
-                    context.translate.common.appName,
+                    trans.common.appName,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -43,31 +44,31 @@ class HomeSidebar extends StatelessWidget {
                   children: [
                     HomeSidebarItem(
                       icon: Icons.home_rounded,
-                      title: context.translate.sidebar.home,
+                      title: trans.sidebar.home,
                       isSelected: currentView == ContentView.home,
                       onTap: () => provider.switchView(ContentView.home),
                     ),
                     HomeSidebarItem(
                       icon: Icons.wifi,
-                      title: context.translate.sidebar.proxy,
+                      title: trans.sidebar.proxy,
                       isSelected: currentView == ContentView.proxy,
                       onTap: () => provider.switchView(ContentView.proxy),
                     ),
                     HomeSidebarItem(
                       icon: Icons.swap_horiz_rounded,
-                      title: context.translate.sidebar.connections,
+                      title: trans.sidebar.connections,
                       isSelected: currentView == ContentView.connections,
                       onTap: () => provider.switchView(ContentView.connections),
                     ),
                     HomeSidebarItem(
                       icon: Icons.description_rounded,
-                      title: context.translate.sidebar.logs,
+                      title: trans.sidebar.logs,
                       isSelected: currentView == ContentView.logs,
                       onTap: () => provider.switchView(ContentView.logs),
                     ),
                     HomeSidebarItem(
                       icon: Icons.storage,
-                      title: context.translate.sidebar.subscriptions,
+                      title: trans.sidebar.subscriptions,
                       isSelected:
                           currentView == ContentView.subscriptions ||
                           currentView == ContentView.overrides,
@@ -85,7 +86,7 @@ class HomeSidebar extends StatelessWidget {
                 ),
                 child: HomeSidebarItem(
                   icon: Icons.settings_rounded,
-                  title: context.translate.common.settings,
+                  title: trans.common.settings,
                   isSelected: currentView.name.startsWith('settings'),
                   onTap: () =>
                       provider.switchView(ContentView.settingsOverview),

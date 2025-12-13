@@ -476,7 +476,7 @@ class SubscriptionProvider extends ChangeNotifier {
       final errorType = _classifyError(rawError);
       Logger.info('错误类型：$errorType');
 
-      // 保存错误类型的字符串表示，供 UI 层转换为翻译文本
+      // 保存错误类型的字符串表示
       _subscriptions[index] = subscription.copyWith(
         isUpdating: false,
         lastError: errorType.name, // 保存枚举名称
@@ -1288,9 +1288,10 @@ class SubscriptionProvider extends ChangeNotifier {
 
         // 显示配置异常提示
         _showToast((context) {
+          final trans = context.translate;
           ModernToast.error(
             context,
-            context.translate.subscription.configAbnormal.replaceAll(
+            trans.subscription.configAbnormal.replaceAll(
               '{name}',
               subscriptionName,
             ),
@@ -1305,9 +1306,10 @@ class SubscriptionProvider extends ChangeNotifier {
         if (emptyReloadSuccess) {
           Logger.info('默认配置重载成功');
           _showToast((context) {
+            final trans = context.translate;
             ModernToast.success(
               context,
-              context.translate.subscription.fallbackToDefaultConfig,
+              trans.subscription.fallbackToDefaultConfig,
             );
           });
         } else {
@@ -1320,18 +1322,17 @@ class SubscriptionProvider extends ChangeNotifier {
           if (emptyRestartSuccess) {
             Logger.info('默认配置重启成功');
             _showToast((context) {
+              final trans = context.translate;
               ModernToast.success(
                 context,
-                context.translate.subscription.coreRestartedWithDefaultConfig,
+                trans.subscription.coreRestartedWithDefaultConfig,
               );
             });
           } else {
             Logger.error('默认配置重启失败');
             _showToast((context) {
-              ModernToast.error(
-                context,
-                context.translate.subscription.coreRestartFailed,
-              );
+              final trans = context.translate;
+              ModernToast.error(context, trans.subscription.coreRestartFailed);
             });
           }
         }

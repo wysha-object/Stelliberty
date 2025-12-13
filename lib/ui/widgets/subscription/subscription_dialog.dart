@@ -64,12 +64,14 @@ class SubscriptionDialog extends StatefulWidget {
     BuildContext context, {
     required Future<bool> Function(SubscriptionDialogResult) onConfirm,
   }) {
+    final trans = context.translate;
+
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => SubscriptionDialog(
-        title: context.translate.subscriptionDialog.addTitle,
-        confirmText: context.translate.subscriptionDialog.addButton,
+        title: trans.subscriptionDialog.addTitle,
+        confirmText: trans.subscriptionDialog.addButton,
         titleIcon: Icons.add_circle_outline,
         isAddMode: true, // 标记为添加模式
         onConfirm: onConfirm,
@@ -82,11 +84,13 @@ class SubscriptionDialog extends StatefulWidget {
     BuildContext context,
     Subscription subscription,
   ) {
+    final trans = context.translate;
+
     return showDialog<SubscriptionDialogResult>(
       context: context,
       barrierDismissible: false,
       builder: (context) => SubscriptionDialog(
-        title: context.translate.subscriptionDialog.editTitle,
+        title: trans.subscriptionDialog.editTitle,
         initialName: subscription.name,
         initialUrl: subscription.url,
         initialAutoUpdateMode: subscription.autoUpdateMode,
@@ -94,7 +98,7 @@ class SubscriptionDialog extends StatefulWidget {
         initialUpdateOnStartup: subscription.updateOnStartup,
         initialProxyMode: subscription.proxyMode,
         initialUserAgent: subscription.userAgent,
-        confirmText: context.translate.subscriptionDialog.saveButton,
+        confirmText: trans.subscriptionDialog.saveButton,
         titleIcon: Icons.edit_outlined,
         isLocalFile: subscription.isLocalFile,
       ),
@@ -230,6 +234,8 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     return ModernDialog(
       title: widget.title,
       titleIcon: widget.titleIcon,
@@ -239,7 +245,7 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
       content: _buildContent(),
       actionsLeft: widget.isAddMode
           ? Text(
-              context.translate.subscriptionDialog.addModeHint,
+              trans.subscriptionDialog.addModeHint,
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(
@@ -248,7 +254,7 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
               ),
             )
           : Text(
-              context.translate.subscriptionDialog.editModeHint,
+              trans.subscriptionDialog.editModeHint,
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(
@@ -258,7 +264,7 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
             ),
       actionsRight: [
         DialogActionButton(
-          label: context.translate.subscriptionDialog.cancelButton,
+          label: trans.subscriptionDialog.cancelButton,
           isPrimary: false,
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
         ),
@@ -274,6 +280,8 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
   }
 
   Widget _buildContent() {
+    final trans = context.translate;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(_dialogContentPadding),
       child: Form(
@@ -290,12 +298,12 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
 
             TextInputField(
               controller: _nameController,
-              label: context.translate.subscriptionDialog.configNameLabel,
-              hint: context.translate.subscriptionDialog.configNameHint,
+              label: trans.subscriptionDialog.configNameLabel,
+              hint: trans.subscriptionDialog.configNameHint,
               icon: Icons.label_outline,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return context.translate.subscriptionDialog.configNameError;
+                  return trans.subscriptionDialog.configNameError;
                 }
                 return null;
               },
@@ -310,20 +318,19 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
               const SizedBox(height: _dialogItemSpacing),
               TextInputField(
                 controller: _urlController,
-                label:
-                    context.translate.subscriptionDialog.subscriptionLinkLabel,
-                hint: context.translate.subscriptionDialog.subscriptionLinkHint,
+                label: trans.subscriptionDialog.subscriptionLinkLabel,
+                hint: trans.subscriptionDialog.subscriptionLinkHint,
                 icon: Icons.link,
                 minLines: 1,
                 maxLines: null,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return context.translate.subscriptionDialog.linkError;
+                    return trans.subscriptionDialog.linkError;
                   }
 
                   final uri = Uri.tryParse(value.trim());
                   if (uri == null) {
-                    return context.translate.subscriptionDialog.linkFormatError;
+                    return trans.subscriptionDialog.linkFormatError;
                   }
 
                   if (uri.scheme != 'http' && uri.scheme != 'https') {
@@ -334,7 +341,7 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
                   }
 
                   if (uri.host.isEmpty) {
-                    return context.translate.subscriptionDialog.linkMissingHost;
+                    return trans.subscriptionDialog.linkMissingHost;
                   }
 
                   // 验证域名格式：必须包含点，或者是 localhost/IP
@@ -384,7 +391,7 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
   }
 
   Widget _buildAutoUpdateSection() {
-    final trans = context.translate.subscriptionDialog;
+    final dialogTrans = context.translate.subscriptionDialog;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
@@ -413,7 +420,7 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  trans.autoUpdateTitle,
+                  dialogTrans.autoUpdateTitle,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -438,14 +445,14 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
               const SizedBox(height: 16),
               TextInputField(
                 controller: _intervalController,
-                label: trans.updateIntervalLabel,
-                hint: trans.updateIntervalHint,
+                label: dialogTrans.updateIntervalLabel,
+                hint: dialogTrans.updateIntervalHint,
                 icon: Icons.schedule,
                 validator: (value) {
                   if (_autoUpdateMode == AutoUpdateMode.interval) {
                     final minutes = int.tryParse(value?.trim() ?? '');
                     if (minutes == null || minutes < 1) {
-                      return trans.updateIntervalError;
+                      return dialogTrans.updateIntervalError;
                     }
                   }
                   return null;
@@ -460,19 +467,19 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
 
   // 构建更新模式选项（横向排列）
   Widget _buildUpdateModeOptions() {
-    final trans = context.translate.subscriptionDialog;
+    final dialogTrans = context.translate.subscriptionDialog;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final options = [
       (
         AutoUpdateMode.disabled,
-        trans.autoUpdateDisabled,
-        trans.autoUpdateDisabledDesc,
+        dialogTrans.autoUpdateDisabled,
+        dialogTrans.autoUpdateDisabledDesc,
       ),
       (
         AutoUpdateMode.interval,
-        trans.autoUpdateInterval,
-        trans.autoUpdateIntervalDesc,
+        dialogTrans.autoUpdateInterval,
+        dialogTrans.autoUpdateIntervalDesc,
       ),
     ];
 
@@ -550,7 +557,7 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
 
   // 构建"启动时更新"开关卡片
   Widget _buildUpdateOnStartupCheckbox() {
-    final trans = context.translate.subscriptionDialog;
+    final dialogTrans = context.translate.subscriptionDialog;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
@@ -580,7 +587,7 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      trans.updateOnStartup,
+                      dialogTrans.updateOnStartup,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -589,7 +596,7 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      trans.updateOnStartupDesc,
+                      dialogTrans.updateOnStartupDesc,
                       style: TextStyle(
                         fontSize: 11,
                         color: Theme.of(
@@ -628,33 +635,34 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
 
   // 构建 User-Agent 输入字段
   Widget _buildUserAgentField() {
-    final trans = context.translate.subscriptionDialog;
+    final dialogTrans = context.translate.subscriptionDialog;
     return TextInputField(
       controller: _userAgentController,
       label: 'User-Agent',
-      hint: '${trans.userAgentDefault}: ${ClashDefaults.defaultUserAgent}',
+      hint:
+          '${dialogTrans.userAgentDefault}: ${ClashDefaults.defaultUserAgent}',
       icon: Icons.badge,
     );
   }
 
   // 构建导入方式选择器
   Widget _buildImportModeSelector() {
-    final trans = context.translate.subscriptionDialog;
+    final dialogTrans = context.translate.subscriptionDialog;
 
     return OptionSelectorWidget<SubscriptionImportMethod>(
-      title: trans.importMethodTitle,
+      title: dialogTrans.importMethodTitle,
       titleIcon: Icons.import_export,
       isHorizontal: true,
       options: [
         OptionItem(
           value: SubscriptionImportMethod.link,
-          title: trans.importLink,
-          subtitle: trans.importLinkSupport,
+          title: dialogTrans.importLink,
+          subtitle: dialogTrans.importLinkSupport,
         ),
         OptionItem(
           value: SubscriptionImportMethod.localFile,
-          title: trans.importLocal,
-          subtitle: trans.importLocalNoSupport,
+          title: dialogTrans.importLocal,
+          subtitle: dialogTrans.importLocalNoSupport,
         ),
       ],
       selectedValue: _importMethod,
@@ -675,7 +683,7 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
 
   // 构建文件选择器
   Widget _buildFileSelector() {
-    final trans = context.translate.subscriptionDialog;
+    final dialogTrans = context.translate.subscriptionDialog;
 
     return FileSelectorWidget(
       onFileSelected: (result) {
@@ -684,14 +692,16 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
         });
       },
       initialFile: _selectedFile,
-      hintText: trans.selectFileLabel,
-      selectedText: trans.fileSelectedLabel,
-      draggingText: trans.dropToImport,
-      dragHintText: trans.clickOrDrag,
+      hintText: dialogTrans.selectFileLabel,
+      selectedText: dialogTrans.fileSelectedLabel,
+      draggingText: dialogTrans.dropToImport,
+      dragHintText: dialogTrans.clickOrDrag,
     );
   }
 
   void _handleConfirm() async {
+    final trans = context.translate;
+
     // 验证表单
     if (!_formKey.currentState!.validate()) {
       return;
@@ -750,8 +760,8 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
           if (mounted) {
             final defaultErrorMessage =
                 _importMethod == SubscriptionImportMethod.localFile
-                ? context.translate.subscriptionDialog.localImportFailed
-                : context.translate.subscriptionDialog.remoteImportFailed;
+                ? trans.subscriptionDialog.localImportFailed
+                : trans.subscriptionDialog.remoteImportFailed;
 
             ModernToast.error(context, errorMessage ?? defaultErrorMessage);
           }
@@ -760,10 +770,7 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
         // 没有回调，直接返回结果（编辑模式）
         await Future.delayed(const Duration(milliseconds: 300));
         if (mounted) {
-          ModernToast.success(
-            context,
-            context.translate.subscriptionDialog.saveSuccess,
-          );
+          ModernToast.success(context, trans.subscriptionDialog.saveSuccess);
           Navigator.of(context).pop(result);
         }
       }
@@ -773,7 +780,7 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
         setState(() => _isLoading = false);
         ModernToast.error(
           context,
-          context.translate.subscriptionDialog.operationError.replaceAll(
+          trans.subscriptionDialog.operationError.replaceAll(
             '{error}',
             error.toString(),
           ),

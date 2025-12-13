@@ -43,6 +43,7 @@ class _TunModeCardState extends State<TunModeCard> {
   Widget build(BuildContext context) {
     final serviceStateManager = context.watch<ServiceStateManager>();
     final isServiceModeInstalled = serviceStateManager.isServiceModeInstalled;
+    final trans = context.translate;
 
     // TUN 模式可用条件：服务模式已安装 或 以管理员/root 权限运行
     final canEnableTun = isServiceModeInstalled || _isElevated;
@@ -51,7 +52,7 @@ class _TunModeCardState extends State<TunModeCard> {
     if (Platform.isAndroid) {
       return BaseCard(
         icon: Icons.router_outlined,
-        title: context.translate.proxy.tunMode,
+        title: trans.proxy.tunMode,
         // Android 平台禁用开关
         trailing: ModernSwitch(value: false, onChanged: null),
         child: _buildUnsupportedContent(context),
@@ -64,7 +65,7 @@ class _TunModeCardState extends State<TunModeCard> {
       builder: (context, tunEnabled, child) {
         return BaseCard(
           icon: Icons.router_outlined,
-          title: context.translate.proxy.tunMode,
+          title: trans.proxy.tunMode,
           // 右边只有开关
           trailing: ModernSwitch(
             value: tunEnabled,
@@ -85,18 +86,22 @@ class _TunModeCardState extends State<TunModeCard> {
 
   // 根据平台返回不同的权限要求提示
   String _getPlatformRequirementHint(BuildContext context) {
+    final trans = context.translate;
+
     if (Platform.isWindows) {
-      return context.translate.home.tunRequiresWindows;
+      return trans.home.tunRequiresWindows;
     } else if (Platform.isLinux) {
-      return context.translate.home.tunRequiresLinux;
+      return trans.home.tunRequiresLinux;
     } else if (Platform.isMacOS) {
-      return context.translate.home.tunRequiresMacOS;
+      return trans.home.tunRequiresMacOS;
     }
-    return context.translate.proxy.tunRequiresService;
+    return trans.proxy.tunRequiresService;
   }
 
   // 构建状态指示器
   Widget _buildStatusIndicator(BuildContext context, bool canEnableTun) {
+    final trans = context.translate;
+
     final theme = Theme.of(context);
     final isAvailable = canEnableTun;
 
@@ -117,8 +122,8 @@ class _TunModeCardState extends State<TunModeCard> {
           const SizedBox(width: 6),
           Text(
             isAvailable
-                ? context.translate.home.tunStatusAvailable
-                : context.translate.home.tunStatusUnavailable,
+                ? trans.home.tunStatusAvailable
+                : trans.home.tunStatusUnavailable,
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: 13,
               color: isAvailable
@@ -133,6 +138,8 @@ class _TunModeCardState extends State<TunModeCard> {
 
   // 构建不支持平台的内容
   Widget _buildUnsupportedContent(BuildContext context) {
+    final trans = context.translate;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -153,7 +160,7 @@ class _TunModeCardState extends State<TunModeCard> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              context.translate.home.tunNotSupported,
+              trans.home.tunNotSupported,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(
                   context,

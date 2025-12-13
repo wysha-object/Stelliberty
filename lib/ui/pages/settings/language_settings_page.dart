@@ -31,6 +31,7 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ContentProvider>(context, listen: false);
+    final trans = context.translate;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +48,7 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                context.translate.language.settings,
+                trans.language.settings,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ],

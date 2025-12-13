@@ -55,6 +55,7 @@ class _BehaviorSettingsPageState extends State<BehaviorSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ContentProvider>(context, listen: false);
+    final trans = context.translate;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,7 +72,7 @@ class _BehaviorSettingsPageState extends State<BehaviorSettingsPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                context.translate.behavior.title,
+                trans.behavior.title,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ],
@@ -96,8 +97,8 @@ class _BehaviorSettingsPageState extends State<BehaviorSettingsPage> {
                   // 开机自启动卡片
                   _buildSwitchCard(
                     icon: Icons.power_settings_new_outlined,
-                    title: context.translate.behavior.autoStartTitle,
-                    subtitle: context.translate.behavior.autoStartDescription,
+                    title: trans.behavior.autoStartTitle,
+                    subtitle: trans.behavior.autoStartDescription,
                     value: _autoStartEnabled,
                     onChanged: _updateAutoStartSetting,
                   ),
@@ -107,8 +108,8 @@ class _BehaviorSettingsPageState extends State<BehaviorSettingsPage> {
                   // 静默启动卡片
                   _buildSwitchCard(
                     icon: Icons.visibility_off_outlined,
-                    title: context.translate.behavior.silentStartTitle,
-                    subtitle: context.translate.behavior.silentStartDescription,
+                    title: trans.behavior.silentStartTitle,
+                    subtitle: trans.behavior.silentStartDescription,
                     value: _silentStartEnabled,
                     onChanged: _updateSilentStartSetting,
                   ),
@@ -118,9 +119,8 @@ class _BehaviorSettingsPageState extends State<BehaviorSettingsPage> {
                   // 最小化到托盘卡片
                   _buildSwitchCard(
                     icon: Icons.remove_circle_outline,
-                    title: context.translate.behavior.minimizeToTrayTitle,
-                    subtitle:
-                        context.translate.behavior.minimizeToTrayDescription,
+                    title: trans.behavior.minimizeToTrayTitle,
+                    subtitle: trans.behavior.minimizeToTrayDescription,
                     value: _minimizeToTray,
                     onChanged: _updateMinimizeToTraySetting,
                   ),
@@ -130,8 +130,8 @@ class _BehaviorSettingsPageState extends State<BehaviorSettingsPage> {
                   // 应用日志卡片
                   _buildSwitchCard(
                     icon: Icons.description_outlined,
-                    title: context.translate.behavior.appLogTitle,
-                    subtitle: context.translate.behavior.appLogDescription,
+                    title: trans.behavior.appLogTitle,
+                    subtitle: trans.behavior.appLogDescription,
                     value: _appLogEnabled,
                     onChanged: _updateAppLogSetting,
                   ),

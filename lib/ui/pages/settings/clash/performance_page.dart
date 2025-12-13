@@ -66,13 +66,15 @@ class _PerformancePageState extends State<PerformancePage> {
   }
 
   String _getFindProcessModeDisplayName(BuildContext context, String value) {
+    final trans = context.translate;
+
     switch (value) {
       case 'off':
-        return context.translate.clashFeatures.performance.findProcess.off;
+        return trans.clashFeatures.performance.findProcess.off;
       case 'strict':
-        return context.translate.clashFeatures.performance.findProcess.strict;
+        return trans.clashFeatures.performance.findProcess.strict;
       case 'always':
-        return context.translate.clashFeatures.performance.findProcess.always;
+        return trans.clashFeatures.performance.findProcess.always;
       default:
         return value;
     }
@@ -83,6 +85,7 @@ class _PerformancePageState extends State<PerformancePage> {
     final provider = Provider.of<ContentProvider>(context, listen: false);
     final clashProvider = Provider.of<ClashProvider>(context, listen: false);
     final theme = Theme.of(context);
+    final trans = context.translate;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,7 +102,7 @@ class _PerformancePageState extends State<PerformancePage> {
               ),
               const SizedBox(width: 8),
               Text(
-                context.translate.clashFeatures.performance.pageTitle,
+                trans.clashFeatures.performance.pageTitle,
                 style: theme.textTheme.titleLarge,
               ),
             ],

@@ -93,6 +93,8 @@ class _ProxyActionBarState extends State<ProxyActionBar> {
     _ActionBarState state,
     ClashProvider clashProvider,
   ) {
+    final trans = context.translate;
+
     return Row(
       children: [
         // 测速按钮
@@ -121,7 +123,7 @@ class _ProxyActionBarState extends State<ProxyActionBar> {
         // 定位按钮
         _ActionButton(
           icon: Icons.gps_fixed,
-          tooltip: context.translate.proxy.locate,
+          tooltip: trans.proxy.locate,
           onPressed: state.canLocate && widget.onLocate != null
               ? widget.onLocate
               : null,
@@ -130,7 +132,7 @@ class _ProxyActionBarState extends State<ProxyActionBar> {
         // 回到顶部按钮
         _ActionButton(
           icon: Icons.vertical_align_top,
-          tooltip: context.translate.proxy.scrollToTop,
+          tooltip: trans.proxy.scrollToTop,
           onPressed: widget.onScrollToTop,
         ),
         const SizedBox(width: 8),
@@ -155,7 +157,7 @@ class _ProxyActionBarState extends State<ProxyActionBar> {
               alignment: Alignment.centerLeft,
               child: _ActionButton(
                 icon: Icons.search,
-                tooltip: context.translate.proxy.search,
+                tooltip: trans.proxy.search,
                 onPressed: () {
                   widget.viewModel.toggleSearch();
                   Future.delayed(
@@ -172,7 +174,7 @@ class _ProxyActionBarState extends State<ProxyActionBar> {
         // 布局切换按钮
         _ActionButton(
           icon: Icons.view_agenda,
-          tooltip: context.translate.proxy.switchToVerticalLayout,
+          tooltip: trans.proxy.switchToVerticalLayout,
           onPressed: widget.onLayoutModeChanged,
         ),
       ],
@@ -181,6 +183,8 @@ class _ProxyActionBarState extends State<ProxyActionBar> {
 
   // 构建竖向模式按钮
   Widget _buildVerticalButtons(BuildContext context) {
+    final trans = context.translate;
+
     return Selector<ClashProvider, _ActionBarState>(
       selector: (_, provider) => _ActionBarState(
         isLoadingProxies: provider.isLoadingProxies,
@@ -205,7 +209,7 @@ class _ProxyActionBarState extends State<ProxyActionBar> {
             // 回到顶部按钮
             _ActionButton(
               icon: Icons.vertical_align_top,
-              tooltip: context.translate.proxy.scrollToTop,
+              tooltip: trans.proxy.scrollToTop,
               onPressed: widget.onScrollToTop,
             ),
             const SizedBox(width: 8),
@@ -219,7 +223,7 @@ class _ProxyActionBarState extends State<ProxyActionBar> {
             // 布局切换按钮
             _ActionButton(
               icon: Icons.view_list,
-              tooltip: context.translate.proxy.switchToHorizontalLayout,
+              tooltip: trans.proxy.switchToHorizontalLayout,
               onPressed: widget.onLayoutModeChanged,
             ),
           ],
@@ -229,6 +233,8 @@ class _ProxyActionBarState extends State<ProxyActionBar> {
   }
 
   Widget _buildSearchField(BuildContext context) {
+    final trans = context.translate;
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -260,7 +266,7 @@ class _ProxyActionBarState extends State<ProxyActionBar> {
               onChanged: widget.viewModel.updateSearchQuery,
               style: TextStyle(fontSize: 13, color: colorScheme.onSurface),
               decoration: InputDecoration(
-                hintText: context.translate.proxy.searchHint,
+                hintText: trans.proxy.searchHint,
                 hintStyle: TextStyle(
                   fontSize: 13,
                   color: colorScheme.onSurface.withValues(alpha: 0.4),
@@ -327,15 +333,17 @@ class _ProxyActionBarState extends State<ProxyActionBar> {
   }
 
   String _getSortTooltip(BuildContext context, int mode) {
+    final trans = context.translate;
+
     switch (mode) {
       case 0:
-        return context.translate.proxy.defaultSort;
+        return trans.proxy.defaultSort;
       case 1:
-        return context.translate.proxy.nameSort;
+        return trans.proxy.nameSort;
       case 2:
-        return context.translate.proxy.delaySort;
+        return trans.proxy.delaySort;
       default:
-        return context.translate.proxy.defaultSort;
+        return trans.proxy.defaultSort;
     }
   }
 }

@@ -49,6 +49,7 @@ class _NetworkSettingsPageState extends State<NetworkSettingsPage> {
     final provider = Provider.of<ContentProvider>(context, listen: false);
     final clashProvider = Provider.of<ClashProvider>(context, listen: false);
     final theme = Theme.of(context);
+    final trans = context.translate;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,7 +66,7 @@ class _NetworkSettingsPageState extends State<NetworkSettingsPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                context.translate.clashFeatures.networkSettings.pageTitle,
+                trans.clashFeatures.networkSettings.pageTitle,
                 style: theme.textTheme.titleLarge,
               ),
             ],

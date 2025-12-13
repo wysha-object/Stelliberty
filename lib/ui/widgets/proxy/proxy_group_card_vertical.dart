@@ -67,7 +67,9 @@ class ProxyGroupCardVertical extends StatelessWidget {
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
-    final currentNode = group.now ?? context.translate.proxy.notSelected;
+    final trans = context.translate;
+
+    final currentNode = group.now ?? trans.proxy.notSelected;
     final nodeCount = group.all.length;
     final hasSelectedNode = group.now != null && group.now!.isNotEmpty;
 
@@ -145,7 +147,7 @@ class ProxyGroupCardVertical extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '($nodeCount ${context.translate.proxy.nodes})',
+                      '($nodeCount ${trans.proxy.nodes})',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -233,6 +235,8 @@ class ProxyGroupCardVertical extends StatelessWidget {
   // 构建卡片内容（节点列表）
   Widget _buildContent(BuildContext context) {
     // 应用排序（只排序节点，不排序代理组）
+    final trans = context.translate;
+
     final nodeNames = viewModel.getSortedProxyNames(group.all);
 
     if (nodeNames.isEmpty) {
@@ -240,7 +244,7 @@ class ProxyGroupCardVertical extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Center(
           child: Text(
-            context.translate.proxy.noNodes,
+            trans.proxy.noNodes,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),

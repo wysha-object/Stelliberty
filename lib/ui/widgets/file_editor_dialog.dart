@@ -317,8 +317,10 @@ class _FileEditorDialogState extends State<FileEditorDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     return ModernDialog(
-      title: widget.customTitle ?? context.translate.fileEditor.title,
+      title: widget.customTitle ?? trans.fileEditor.title,
       subtitle: widget.fileName,
       hideSubtitle: widget.hideSubtitle,
       titleIcon: Icons.code,
@@ -328,7 +330,7 @@ class _FileEditorDialogState extends State<FileEditorDialog> {
       headerWidget: _buildEnhancedSearchBox(),
       content: _buildEditor(),
       actionsLeft: Text(
-        context.translate.fileEditor.stats
+        trans.fileEditor.stats
             .replaceAll('{chars}', _charCount.toString())
             .replaceAll('{lines}', _lineCount.toString()),
         style: TextStyle(
@@ -339,21 +341,21 @@ class _FileEditorDialogState extends State<FileEditorDialog> {
       actionsRight: [
         if (!widget.readOnly) ...[
           DialogActionButton(
-            label: context.translate.fileEditor.cancelButton,
+            label: trans.fileEditor.cancelButton,
             isPrimary: false,
             onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
           ),
           DialogActionButton(
             label: _isSaving
-                ? context.translate.fileEditor.savingButton
-                : context.translate.fileEditor.saveButton,
+                ? trans.fileEditor.savingButton
+                : trans.fileEditor.saveButton,
             isPrimary: true,
             isLoading: _isSaving,
             onPressed: (_isSaving || !_isModified) ? null : _handleSave,
           ),
         ] else
           DialogActionButton(
-            label: context.translate.common.close,
+            label: trans.common.close,
             isPrimary: true,
             onPressed: () => Navigator.of(context).pop(),
           ),
@@ -478,6 +480,7 @@ class _FileEditorDialogState extends State<FileEditorDialog> {
 
   // 构建代码编辑器
   Widget _buildEditor() {
+    final trans = context.translate;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -577,7 +580,7 @@ class _FileEditorDialogState extends State<FileEditorDialog> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        context.translate.fileEditor.loading,
+                        trans.fileEditor.loading,
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(
@@ -609,6 +612,7 @@ class _FileEditorDialogState extends State<FileEditorDialog> {
 
   // 处理保存操作
   Future<void> _handleSave() async {
+    final trans = context.translate;
     // 只读模式或无保存回调时不执行保存
     if (widget.onSave == null) return;
 
@@ -622,13 +626,13 @@ class _FileEditorDialogState extends State<FileEditorDialog> {
       if (!mounted) return;
 
       if (success) {
-        ModernToast.success(context, context.translate.fileEditor.saveSuccess);
+        ModernToast.success(context, trans.fileEditor.saveSuccess);
         Navigator.of(context).pop();
       } else {
         setState(() {
           _isSaving = false;
         });
-        ModernToast.error(context, context.translate.fileEditor.saveFailed);
+        ModernToast.error(context, trans.fileEditor.saveFailed);
       }
     } catch (e) {
       if (!mounted) return;
@@ -640,10 +644,7 @@ class _FileEditorDialogState extends State<FileEditorDialog> {
       Logger.error('保存文件失败: $e');
       ModernToast.error(
         context,
-        context.translate.fileEditor.saveError.replaceAll(
-          '{error}',
-          e.toString(),
-        ),
+        trans.fileEditor.saveError.replaceAll('{error}', e.toString()),
       );
     }
   }

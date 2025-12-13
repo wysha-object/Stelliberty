@@ -21,8 +21,10 @@ class SubscriptionInfoWidget extends StatelessWidget {
   }
 
   String _formatExpireTime(BuildContext context, int expireTimestamp) {
+    final trans = context.translate;
+
     if (expireTimestamp == 0) {
-      return context.translate.provider.permanent;
+      return trans.provider.permanent;
     }
     final expireDate = DateTime.fromMillisecondsSinceEpoch(
       expireTimestamp * 1000,

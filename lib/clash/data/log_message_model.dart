@@ -69,19 +69,20 @@ extension ClashLogLevelExtension on ClashLogLevel {
     }
   }
 
-  // 获取显示名称（国际化）
+  // 获取显示名称
   String getDisplayName(BuildContext context) {
+    final trans = context.translate;
     switch (this) {
       case ClashLogLevel.debug:
-        return context.translate.logLevel.debug;
+        return trans.logLevel.debug;
       case ClashLogLevel.info:
-        return context.translate.logLevel.info;
+        return trans.logLevel.info;
       case ClashLogLevel.warning:
-        return context.translate.logLevel.warning;
+        return trans.logLevel.warning;
       case ClashLogLevel.error:
-        return context.translate.logLevel.error;
+        return trans.logLevel.error;
       case ClashLogLevel.silent:
-        return context.translate.logLevel.silent;
+        return trans.logLevel.silent;
     }
   }
 

@@ -29,6 +29,7 @@ class _TrafficStatsCardState extends State<TrafficStatsCard> {
   @override
   Widget build(BuildContext context) {
     final manager = context.read<ClashManager>();
+    final trans = context.translate;
 
     // 使用 select 精确监听 isRunning 状态，避免不必要的重建
     final isRunning = context.select<ClashManager, bool>(
@@ -50,7 +51,7 @@ class _TrafficStatsCardState extends State<TrafficStatsCard> {
 
               return BaseCard(
                 icon: Icons.data_usage,
-                title: context.translate.home.trafficStats,
+                title: trans.home.trafficStats,
                 trailing: _buildTotalTrafficDisplay(context, traffic),
                 child: _buildTrafficContent(context, traffic, isRunning),
               );
@@ -58,7 +59,7 @@ class _TrafficStatsCardState extends State<TrafficStatsCard> {
           )
         : BaseCard(
             icon: Icons.data_usage,
-            title: context.translate.home.trafficStats,
+            title: trans.home.trafficStats,
             trailing: _buildTotalTrafficDisplay(
               context,
               manager.lastTrafficData ?? TrafficData.zero,
@@ -73,11 +74,13 @@ class _TrafficStatsCardState extends State<TrafficStatsCard> {
 
   // 构建累计流量显示
   Widget _buildTotalTrafficDisplay(BuildContext context, TrafficData traffic) {
+    final trans = context.translate;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          '${context.translate.home.upload}：',
+          '${trans.home.upload}：',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(
               context,
@@ -96,7 +99,7 @@ class _TrafficStatsCardState extends State<TrafficStatsCard> {
         ),
         const SizedBox(width: 12),
         Text(
-          '${context.translate.home.download}：',
+          '${trans.home.download}：',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(
               context,
@@ -282,6 +285,8 @@ class _ResetButtonState extends State<_ResetButton> {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -318,7 +323,7 @@ class _ResetButtonState extends State<_ResetButton> {
               ),
               const SizedBox(width: 6),
               Text(
-                context.translate.home.reset,
+                trans.home.reset,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w500,

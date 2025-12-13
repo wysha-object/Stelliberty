@@ -31,6 +31,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ContentProvider>(context, listen: false);
+    final trans = context.translate;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +48,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                context.translate.theme.title,
+                trans.theme.title,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ],

@@ -94,6 +94,8 @@ class _ProxyNodeGridWidgetState extends State<ProxyNodeGrid> {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     return Expanded(
       child: Padding(
         padding: SpacingConstants.scrollbarPadding,
@@ -175,7 +177,7 @@ class _ProxyNodeGridWidgetState extends State<ProxyNodeGrid> {
                                 style: const TextStyle(fontSize: 14),
                               ),
                               subtitle: Text(
-                                context.translate.proxy.nodeInfoUnavailable,
+                                trans.proxy.nodeInfoUnavailable,
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ),

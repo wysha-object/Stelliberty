@@ -291,11 +291,13 @@ class _ProxyGroupSelectorState extends State<ProxyGroupSelector> {
   }
 
   Widget _buildScrollButtons(BuildContext context) {
+    final trans = context.translate;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         ModernTooltip(
-          message: context.translate.proxy.scrollLeft,
+          message: trans.proxy.scrollLeft,
           child: IconButton(
             constraints: const BoxConstraints(
               minWidth: _scrollButtonConstraint,
@@ -333,7 +335,7 @@ class _ProxyGroupSelectorState extends State<ProxyGroupSelector> {
         ),
         const SizedBox(width: _scrollButtonGap),
         ModernTooltip(
-          message: context.translate.proxy.scrollRight,
+          message: trans.proxy.scrollRight,
           child: IconButton(
             constraints: const BoxConstraints(
               minWidth: _scrollButtonConstraint,

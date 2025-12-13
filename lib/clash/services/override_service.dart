@@ -80,9 +80,7 @@ class OverrideService {
         : SubscriptionProxyMode.direct;
 
     if (!isClashRunning && config.proxyMode != SubscriptionProxyMode.direct) {
-      Logger.warning(
-        'Clash 未运行，强制使用直连模式（用户配置：${config.proxyMode.value}）',
-      );
+      Logger.warning('Clash 未运行，强制使用直连模式（用户配置：${config.proxyMode.value}）');
     }
 
     try {

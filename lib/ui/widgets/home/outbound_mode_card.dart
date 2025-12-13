@@ -68,13 +68,15 @@ class _OutboundModeCardState extends State<OutboundModeCard> {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     // 使用 Selector 只监听 isRunning，避免 isLoadingProxies 变化导致的重建
     return Selector<ClashProvider, bool>(
       selector: (_, provider) => provider.isCoreRunning,
       builder: (context, isRunning, child) {
         return BaseCard(
           icon: Icons.alt_route_rounded,
-          title: context.translate.proxy.outboundMode,
+          title: trans.proxy.outboundMode,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,7 +84,7 @@ class _OutboundModeCardState extends State<OutboundModeCard> {
               _buildModeOption(
                 context,
                 icon: Icons.rule_rounded,
-                title: context.translate.proxy.ruleMode,
+                title: trans.proxy.ruleMode,
                 outboundMode: 'rule',
                 isRunning: isRunning,
               ),
@@ -92,7 +94,7 @@ class _OutboundModeCardState extends State<OutboundModeCard> {
               _buildModeOption(
                 context,
                 icon: Icons.public_rounded,
-                title: context.translate.proxy.globalMode,
+                title: trans.proxy.globalMode,
                 outboundMode: 'global',
                 isRunning: isRunning,
               ),
@@ -102,7 +104,7 @@ class _OutboundModeCardState extends State<OutboundModeCard> {
               _buildModeOption(
                 context,
                 icon: Icons.phonelink_rounded,
-                title: context.translate.proxy.directMode,
+                title: trans.proxy.directMode,
                 outboundMode: 'direct',
                 isRunning: isRunning,
               ),

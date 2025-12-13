@@ -174,6 +174,8 @@ class SubscriptionCard extends StatelessWidget {
     bool isUpdating,
     bool isBatchUpdating,
   ) {
+    final trans = context.translate;
+
     final isDisabled = isUpdating || isBatchUpdating;
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -199,7 +201,7 @@ class SubscriptionCard extends StatelessWidget {
         // 独立更新按钮（更新时显示转圈指示器）
         if (!subscription.isLocalFile)
           ModernTooltip(
-            message: context.translate.subscription.updateCard,
+            message: trans.subscription.updateCard,
             child: IconButton(
               onPressed: isDisabled ? null : onUpdate,
               icon: isUpdating
@@ -250,6 +252,8 @@ class SubscriptionCard extends StatelessWidget {
 
   // 构建状态文本
   Widget _buildStatusText(BuildContext context) {
+    final trans = context.translate;
+
     final List<InlineSpan> children = [];
 
     // 自动更新状态
@@ -258,10 +262,10 @@ class SubscriptionCard extends StatelessWidget {
     children.add(
       TextSpan(
         text: subscription.isLocalFile
-            ? context.translate.subscription.localTypeLabel
+            ? trans.subscription.localTypeLabel
             : (isAutoUpdateEnabled
-                  ? context.translate.subscription.autoUpdateLabel
-                  : context.translate.subscription.manualUpdateLabel),
+                  ? trans.subscription.autoUpdateLabel
+                  : trans.subscription.manualUpdateLabel),
         style: TextStyle(
           color: subscription.isLocalFile
               ? Colors.grey
@@ -300,6 +304,8 @@ class SubscriptionCard extends StatelessWidget {
   // 使用 ModernPopupMenu 替代标准 PopupMenuButton，
   // 提供 Windows 11 风格的交互体验
   Widget _buildModernPopupMenu(BuildContext context, bool isDisabled) {
+    final trans = context.translate;
+
     return ModernPopupBox(
       targetBuilder: (open) => IconButton(
         icon: const Icon(Icons.more_vert),
@@ -314,41 +320,41 @@ class SubscriptionCard extends StatelessWidget {
         items: [
           PopupMenuItemData(
             icon: Icons.edit,
-            label: context.translate.subscription.menu.configEdit,
+            label: trans.subscription.menu.configEdit,
             onPressed: onEdit,
           ),
           PopupMenuItemData(
             icon: Icons.code,
-            label: context.translate.subscription.menu.fileEdit,
+            label: trans.subscription.menu.fileEdit,
             onPressed: onEditFile,
           ),
           // 只有当前选中的订阅才显示运行配置查看
           if (isSelected)
             PopupMenuItemData(
               icon: Icons.visibility,
-              label: context.translate.subscription.menu.configView,
+              label: trans.subscription.menu.configView,
               onPressed: onViewConfig,
             ),
           PopupMenuItemData(
             icon: Icons.rule,
-            label: context.translate.subscription.menu.overrideManage,
+            label: trans.subscription.menu.overrideManage,
             onPressed: onManageOverride,
           ),
           PopupMenuItemData(
             icon: Icons.extension,
-            label: context.translate.subscription.menu.providerView,
+            label: trans.subscription.menu.providerView,
             onPressed: onViewProvider,
           ),
           // 本地文件订阅不显示复制链接选项
           if (!subscription.isLocalFile)
             PopupMenuItemData(
               icon: Icons.copy,
-              label: context.translate.subscription.menu.copyLink,
+              label: trans.subscription.menu.copyLink,
               onPressed: () => _copyUrl(context),
             ),
           PopupMenuItemData(
             icon: Icons.delete,
-            label: context.translate.subscription.menu.delete,
+            label: trans.subscription.menu.delete,
             onPressed: onDelete,
             danger: true,
           ),
@@ -359,6 +365,8 @@ class SubscriptionCard extends StatelessWidget {
 
   // 构建状态与流量并排显示
   Widget _buildStatusWithTraffic(BuildContext context) {
+    final trans = context.translate;
+
     final info = subscription.info!;
     final usagePercentage = info.usagePercentage;
 
@@ -400,7 +408,7 @@ class SubscriptionCard extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             info.isExpired
-                ? context.translate.subscription.expired
+                ? trans.subscription.expired
                 : _formatExpireDate(info.expire, context),
             style: TextStyle(
               fontSize: 11,
@@ -438,11 +446,13 @@ class SubscriptionCard extends StatelessWidget {
 
   // 格式化距下次更新时间
   String _formatNextUpdate(BuildContext context) {
+    final trans = context.translate;
+
     if (subscription.lastUpdateTime == null) {
-      return context.translate.subscription.pendingUpdate;
+      return trans.subscription.pendingUpdate;
     }
 
-    final trans = context.translate.subscription;
+    final subTrans = trans.subscription;
     final now = DateTime.now();
 
     // 根据更新模式计算下次更新时间
@@ -452,43 +462,48 @@ class SubscriptionCard extends StatelessWidget {
         Duration(minutes: subscription.intervalMinutes),
       );
     } else {
-      return trans.pendingUpdate;
+      return subTrans.pendingUpdate;
     }
 
     // 如果已经过了更新时间
     if (now.isAfter(nextUpdateTime)) {
-      return trans.pendingUpdate;
+      return subTrans.pendingUpdate;
     }
 
     final diff = nextUpdateTime.difference(now);
 
-    if (diff.inMinutes < 1) return trans.willUpdate;
+    if (diff.inMinutes < 1) return subTrans.willUpdate;
     if (diff.inMinutes < 60) {
-      return trans.updateAfterMinutes.replaceAll(
+      return subTrans.updateAfterMinutes.replaceAll(
         '{n}',
         diff.inMinutes.toString(),
       );
     }
     if (diff.inHours < 24) {
-      return trans.updateAfterHours.replaceAll('{n}', diff.inHours.toString());
+      return subTrans.updateAfterHours.replaceAll(
+        '{n}',
+        diff.inHours.toString(),
+      );
     }
-    return trans.updateAfterDays.replaceAll('{n}', diff.inDays.toString());
+    return subTrans.updateAfterDays.replaceAll('{n}', diff.inDays.toString());
   }
 
   // 格式化过期日期
   String _formatExpireDate(int timestamp, BuildContext context) {
+    final trans = context.translate;
+
     final date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
     final now = DateTime.now();
     final diff = date.difference(now);
 
-    final trans = context.translate.subscription;
+    final subTrans = trans.subscription;
 
     if (diff.inDays > 30) {
-      return trans.remainingMonths.replaceAll(
+      return subTrans.remainingMonths.replaceAll(
         '{n}',
         (diff.inDays / 30).floor().toString(),
       );
     }
-    return trans.remainingDays.replaceAll('{n}', diff.inDays.toString());
+    return subTrans.remainingDays.replaceAll('{n}', diff.inDays.toString());
   }
 }

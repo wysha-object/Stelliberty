@@ -193,15 +193,16 @@ class _UwpLoopbackDialogState extends State<UwpLoopbackDialog> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+    final trans = context.translate;
 
     return ModernDialog(
-      title: context.translate.uwpLoopback.dialogTitle,
+      title: trans.uwpLoopback.dialogTitle,
       titleIcon: Icons.apps,
       maxWidth: screenSize.width - 400, // 特殊尺寸：左右各200px间距
       maxHeightRatio:
           (screenSize.height - 100) / screenSize.height, // 上下各50px间距
       searchController: _searchController,
-      searchHint: context.translate.uwpLoopback.searchPlaceholder,
+      searchHint: trans.uwpLoopback.searchPlaceholder,
       onSearchChanged: (value) {
         setState(() {
           // 搜索状态由 ModernDialog 管理，这里只需要触发重建
@@ -210,24 +211,24 @@ class _UwpLoopbackDialogState extends State<UwpLoopbackDialog> {
       content: _buildContent(),
       actionsLeftButtons: [
         DialogActionButton(
-          label: context.translate.uwpLoopback.enableAll,
+          label: trans.uwpLoopback.enableAll,
           icon: Icons.check_box,
           onPressed: () => context.read<UwpLoopbackState>().selectAll(),
         ),
         DialogActionButton(
-          label: context.translate.uwpLoopback.invertSelection,
+          label: trans.uwpLoopback.invertSelection,
           icon: Icons.swap_horiz,
           onPressed: () => context.read<UwpLoopbackState>().invertSelection(),
         ),
       ],
       actionsRight: [
         DialogActionButton(
-          label: context.translate.common.cancel,
+          label: trans.common.cancel,
           isPrimary: false,
           onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
         ),
         DialogActionButton(
-          label: context.translate.common.save,
+          label: trans.common.save,
           isPrimary: true,
           isLoading: _isSaving,
           onPressed: _handleSave,
@@ -238,6 +239,7 @@ class _UwpLoopbackDialogState extends State<UwpLoopbackDialog> {
   }
 
   Widget _buildContent() {
+    final trans = context.translate;
     return Consumer<UwpLoopbackState>(
       builder: (context, state, _) {
         if (state.isLoading) {
@@ -271,7 +273,7 @@ class _UwpLoopbackDialogState extends State<UwpLoopbackDialog> {
                   ElevatedButton.icon(
                     onPressed: state.loadApps,
                     icon: const Icon(Icons.refresh),
-                    label: Text(context.translate.common.refresh),
+                    label: Text(trans.common.refresh),
                   ),
                 ],
               ),
@@ -296,7 +298,7 @@ class _UwpLoopbackDialogState extends State<UwpLoopbackDialog> {
                 Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
                 const SizedBox(height: 16),
                 Text(
-                  context.translate.uwpLoopback.noApps,
+                  trans.uwpLoopback.noApps,
                   style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 ),
               ],
@@ -439,6 +441,7 @@ class _UwpLoopbackDialogState extends State<UwpLoopbackDialog> {
   }
 
   Future<void> _handleSave() async {
+    final trans = context.translate;
     final state = context.read<UwpLoopbackState>();
 
     setState(() {
@@ -461,10 +464,7 @@ class _UwpLoopbackDialogState extends State<UwpLoopbackDialog> {
       if (result.message.success) {
         // 成功，显示提示并关闭对话框
         if (mounted) {
-          ModernToast.success(
-            context,
-            context.translate.uwpLoopback.saveSuccess,
-          );
+          ModernToast.success(context, trans.uwpLoopback.saveSuccess);
           Navigator.of(context).pop();
         }
       } else {
@@ -475,7 +475,7 @@ class _UwpLoopbackDialogState extends State<UwpLoopbackDialog> {
           });
 
           final errorMsg = result.message.errorMessage ?? '';
-          final t = context.translate.uwpLoopback;
+          final t = trans.uwpLoopback;
           String userFriendlyMsg;
 
           if (errorMsg.contains('权限不足') ||
@@ -500,10 +500,7 @@ class _UwpLoopbackDialogState extends State<UwpLoopbackDialog> {
         });
         ModernToast.error(
           context,
-          context.translate.uwpLoopback.applyFailed.replaceAll(
-            '{error}',
-            e.toString(),
-          ),
+          trans.uwpLoopback.applyFailed.replaceAll('{error}', e.toString()),
         );
       }
     }

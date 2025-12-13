@@ -33,6 +33,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ContentProvider>(context, listen: false);
+    final trans = context.translate;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,7 +50,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                context.translate.backup.title,
+                trans.backup.title,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ],
@@ -74,8 +75,8 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                   // 创建备份卡片
                   ModernFeatureLayoutCard(
                     icon: Icons.backup_outlined,
-                    title: context.translate.backup.createBackup,
-                    subtitle: context.translate.backup.description,
+                    title: trans.backup.createBackup,
+                    subtitle: trans.backup.description,
                     enableHover: !_isCreating,
                     enableTap: !_isCreating,
                     onTap: _isCreating ? null : _createBackup,
@@ -84,8 +85,8 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                   // 还原备份卡片
                   ModernFeatureLayoutCard(
                     icon: Icons.restore_outlined,
-                    title: context.translate.backup.restoreBackup,
-                    subtitle: context.translate.backup.description,
+                    title: trans.backup.restoreBackup,
+                    subtitle: trans.backup.description,
                     enableHover: !_isRestoring,
                     enableTap: !_isRestoring,
                     onTap: _isRestoring ? null : _restoreBackup,
@@ -101,12 +102,13 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
 
   // 创建备份
   Future<void> _createBackup() async {
+    final trans = context.translate;
     setState(() => _isCreating = true);
 
     try {
       // 选择保存位置
       final result = await FilePicker.platform.saveFile(
-        dialogTitle: context.translate.backup.createBackup,
+        dialogTitle: trans.backup.createBackup,
         fileName: BackupService.instance.generateBackupFileName(),
         type: FileType.custom,
         allowedExtensions: ['stelliberty'],
@@ -125,7 +127,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
 
       ModernToast.show(
         context,
-        context.translate.backup.backupSuccess,
+        trans.backup.backupSuccess,
         type: ToastType.success,
       );
 
@@ -134,12 +136,12 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
       await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text(context.translate.backup.securityWarning),
-          content: Text(context.translate.backup.securityWarningMessage),
+          title: Text(trans.backup.securityWarning),
+          content: Text(trans.backup.securityWarningMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(context.translate.common.ok),
+              child: Text(trans.common.ok),
             ),
           ],
         ),
@@ -155,9 +157,11 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
 
   // 还原备份
   Future<void> _restoreBackup() async {
+    final trans = context.translate;
+
     // 选择备份文件
     final result = await FilePicker.platform.pickFiles(
-      dialogTitle: context.translate.backup.selectBackupFile,
+      dialogTitle: trans.backup.selectBackupFile,
       type: FileType.custom,
       allowedExtensions: ['stelliberty'],
     );
@@ -169,8 +173,8 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => ConfirmDialog(
-        title: context.translate.backup.restoreConfirm,
-        message: context.translate.backup.restoreConfirmMessage,
+        title: trans.backup.restoreConfirm,
+        message: trans.backup.restoreConfirmMessage,
       ),
     );
 
@@ -195,7 +199,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
 
       ModernToast.show(
         context,
-        context.translate.backup.restoreSuccess,
+        trans.backup.restoreSuccess,
         type: ToastType.success,
       );
     } catch (e) {
@@ -209,8 +213,9 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
 
   // 获取友好的错误消息
   String _getErrorMessage(Object error) {
+    final trans = context.translate;
     final errorStr = error.toString();
-    final t = context.translate.backup;
+    final t = trans.backup;
 
     if (errorStr.contains('不存在') || errorStr.contains('not found')) {
       return t.errorFileNotFound;

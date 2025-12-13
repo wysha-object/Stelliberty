@@ -38,6 +38,7 @@ class _TestUrlCardState extends State<TestUrlCard> {
 
   // 保存配置
   Future<void> _saveConfig() async {
+    final trans = context.translate;
     if (_isSaving) return;
 
     setState(() => _isSaving = true);
@@ -47,17 +48,14 @@ class _TestUrlCardState extends State<TestUrlCard> {
       clashProvider.configService.setTestUrl(_testUrlController.text);
 
       if (mounted) {
-        ModernToast.success(
-          context,
-          context.translate.clashFeatures.testUrl.saveSuccess,
-        );
+        ModernToast.success(context, trans.clashFeatures.testUrl.saveSuccess);
       }
     } catch (e) {
       Logger.error('保存延迟测试网址失败: $e');
       if (mounted) {
         ModernToast.error(
           context,
-          context.translate.clashFeatures.testUrl.saveFailed.replaceAll(
+          trans.clashFeatures.testUrl.saveFailed.replaceAll(
             '{error}',
             e.toString(),
           ),
@@ -72,6 +70,8 @@ class _TestUrlCardState extends State<TestUrlCard> {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     return ModernFeatureCard(
       isSelected: false,
       onTap: () {},
@@ -91,11 +91,11 @@ class _TestUrlCardState extends State<TestUrlCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.translate.clashFeatures.testUrl.title,
+                    trans.clashFeatures.testUrl.title,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Text(
-                    context.translate.clashFeatures.testUrl.subtitle,
+                    trans.clashFeatures.testUrl.subtitle,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -107,12 +107,12 @@ class _TestUrlCardState extends State<TestUrlCard> {
           ModernTextField(
             controller: _testUrlController,
             keyboardType: TextInputType.url,
-            labelText: context.translate.clashFeatures.testUrl.label,
+            labelText: trans.clashFeatures.testUrl.label,
             hintText: ClashDefaults.defaultTestUrl,
             suffixIcon: Padding(
               padding: const EdgeInsets.only(right: 4),
               child: ModernTooltip(
-                message: context.translate.clashFeatures.testUrl.restoreDefault,
+                message: trans.clashFeatures.testUrl.restoreDefault,
                 child: IconButton(
                   icon: const Icon(Icons.restore),
                   onPressed: () {
@@ -140,8 +140,8 @@ class _TestUrlCardState extends State<TestUrlCard> {
                     : const Icon(Icons.save, size: 18),
                 label: Text(
                   _isSaving
-                      ? context.translate.clashFeatures.testUrl.saving
-                      : context.translate.common.save,
+                      ? trans.clashFeatures.testUrl.saving
+                      : trans.common.save,
                 ),
               ),
             ],

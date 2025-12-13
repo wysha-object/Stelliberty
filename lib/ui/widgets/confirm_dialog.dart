@@ -11,10 +11,10 @@ class ConfirmDialog extends StatelessWidget {
   // 提示内容
   final String message;
 
-  // 确认按钮文本（可选，默认使用国际化"确认"）
+  // 确认按钮文本
   final String? confirmText;
 
-  // 取消按钮文本（可选，默认使用国际化"取消"）
+  // 取消按钮文本
   final String? cancelText;
 
   // 确认按钮是否为危险操作（红色）
@@ -32,6 +32,7 @@ class ConfirmDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final trans = context.translate;
 
     return ModernDialog(
       title: title,
@@ -61,11 +62,11 @@ class ConfirmDialog extends StatelessWidget {
       // 右侧按钮：取消和确认
       actionsRight: [
         DialogActionButton(
-          label: cancelText ?? context.translate.common.cancel,
+          label: cancelText ?? trans.common.cancel,
           onPressed: () => Navigator.of(context).pop(false),
         ),
         DialogActionButton(
-          label: confirmText ?? context.translate.common.confirm,
+          label: confirmText ?? trans.common.confirm,
           onPressed: () => Navigator.of(context).pop(true),
           isPrimary: true,
           isDanger: isDanger,

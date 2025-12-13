@@ -33,6 +33,7 @@ class _PortControlPageState extends State<PortControlPage> {
   Widget build(BuildContext context) {
     final provider = Provider.of<ContentProvider>(context, listen: false);
     final theme = Theme.of(context);
+    final trans = context.translate;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,7 +50,7 @@ class _PortControlPageState extends State<PortControlPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                context.translate.clashFeatures.portControl.pageTitle,
+                trans.clashFeatures.portControl.pageTitle,
                 style: theme.textTheme.titleLarge,
               ),
             ],

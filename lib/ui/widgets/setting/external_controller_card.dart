@@ -54,6 +54,7 @@ class _ExternalControllerCardState extends State<ExternalControllerCard> {
   }
 
   Future<void> _saveConfig() async {
+    final trans = context.translate;
     if (_isSaving) return;
 
     setState(() {
@@ -65,16 +66,13 @@ class _ExternalControllerCardState extends State<ExternalControllerCard> {
     final secret = _secretController.text.trim();
 
     if (address.isEmpty) {
-      setState(
-        () => _addressError = context.translate.externalController.addressError,
-      );
+      setState(() => _addressError = trans.externalController.addressError);
       return;
     }
 
     if (!_validateAddress(address)) {
       setState(
-        () => _addressError =
-            context.translate.externalController.addressFormatError,
+        () => _addressError = trans.externalController.addressFormatError,
       );
       return;
     }
@@ -87,17 +85,14 @@ class _ExternalControllerCardState extends State<ExternalControllerCard> {
       await prefs.setExternalControllerSecret(secret);
 
       if (mounted) {
-        ModernToast.success(
-          context,
-          context.translate.externalController.saveSuccess,
-        );
+        ModernToast.success(context, trans.externalController.saveSuccess);
       }
     } catch (e) {
       Logger.error('保存外部控制器配置失败: $e');
       if (mounted) {
         ModernToast.error(
           context,
-          context.translate.externalController.saveFailed.replaceAll(
+          trans.externalController.saveFailed.replaceAll(
             '{error}',
             e.toString(),
           ),
@@ -111,21 +106,21 @@ class _ExternalControllerCardState extends State<ExternalControllerCard> {
   }
 
   Future<void> _copyToClipboard(String text, String label) async {
+    final trans = context.translate;
     if (text.isEmpty) return;
     await Clipboard.setData(ClipboardData(text: text));
     if (mounted) {
       ModernToast.success(
         context,
-        context.translate.externalController.copied.replaceAll(
-          '{label}',
-          label,
-        ),
+        trans.externalController.copied.replaceAll('{label}', label),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     return ModernFeatureCard(
       isSelected: false,
       onTap: () {},
@@ -147,11 +142,11 @@ class _ExternalControllerCardState extends State<ExternalControllerCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        context.translate.externalController.title,
+                        trans.externalController.title,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       Text(
-                        context.translate.externalController.description,
+                        trans.externalController.description,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -185,14 +180,13 @@ class _ExternalControllerCardState extends State<ExternalControllerCard> {
                   controller: _addressController,
                   enabled: !_isSaving,
                   decoration: InputDecoration(
-                    labelText:
-                        context.translate.externalController.addressLabel,
-                    hintText: context.translate.externalController.addressHint,
+                    labelText: trans.externalController.addressLabel,
+                    hintText: trans.externalController.addressHint,
                     errorText: _addressError,
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.link_rounded, size: 20),
                     suffixIcon: ModernTooltip(
-                      message: context.translate.externalController.copyAddress,
+                      message: trans.externalController.copyAddress,
                       child: IconButton(
                         icon: const Icon(Icons.content_copy_rounded, size: 20),
                         onPressed: _isSaving
@@ -220,20 +214,20 @@ class _ExternalControllerCardState extends State<ExternalControllerCard> {
                   enabled: !_isSaving,
                   obscureText: true,
                   decoration: InputDecoration(
-                    labelText: context.translate.externalController.secretLabel,
-                    hintText: context.translate.externalController.secretHint,
+                    labelText: trans.externalController.secretLabel,
+                    hintText: trans.externalController.secretHint,
                     errorText: _secretError,
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.vpn_key_rounded, size: 20),
                     suffixIcon: ModernTooltip(
-                      message: context.translate.externalController.copySecret,
+                      message: trans.externalController.copySecret,
                       child: IconButton(
                         icon: const Icon(Icons.content_copy_rounded, size: 20),
                         onPressed: _isSaving
                             ? null
                             : () => _copyToClipboard(
                                 _secretController.text,
-                                context.translate.externalController.copySecret,
+                                trans.externalController.copySecret,
                               ),
                       ),
                     ),
@@ -257,8 +251,8 @@ class _ExternalControllerCardState extends State<ExternalControllerCard> {
                     : const Icon(Icons.save, size: 18),
                 label: Text(
                   _isSaving
-                      ? context.translate.externalController.saving
-                      : context.translate.common.save,
+                      ? trans.externalController.saving
+                      : trans.common.save,
                 ),
               ),
             ],

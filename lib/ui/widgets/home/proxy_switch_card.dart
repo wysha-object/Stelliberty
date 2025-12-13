@@ -29,6 +29,8 @@ class ProxySwitchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     // 使用 Selector 只在相关状态变化时重建，避免 isLoadingProxies 变化导致的闪烁
     return Selector<ClashProvider, ({bool isCoreRunning, bool isProxyEnabled})>(
       selector: (_, provider) => (
@@ -41,7 +43,7 @@ class ProxySwitchCard extends StatelessWidget {
 
         return BaseCard(
           icon: Icons.shield_outlined,
-          title: context.translate.proxy.proxyControl,
+          title: trans.proxy.proxyControl,
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -55,9 +57,7 @@ class ProxySwitchCard extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                isProxyEnabled
-                    ? context.translate.proxy.running
-                    : context.translate.proxy.stopped,
+                isProxyEnabled ? trans.proxy.running : trans.proxy.stopped,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: isProxyEnabled ? Colors.green : Colors.grey,
                   fontSize: 13,
@@ -95,8 +95,8 @@ class ProxySwitchCard extends StatelessWidget {
                 ),
                 child: Text(
                   isProxyEnabled
-                      ? context.translate.proxy.stopProxy
-                      : context.translate.proxy.startProxy,
+                      ? trans.proxy.stopProxy
+                      : trans.proxy.startProxy,
                   style: const TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 15,

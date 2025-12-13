@@ -41,15 +41,13 @@ class _KeepAliveCardState extends State<KeepAliveCard> {
 
   // 保存配置
   Future<void> _saveConfig() async {
+    final trans = context.translate;
     if (_isSaving) return;
 
     final interval = int.tryParse(_keepAliveIntervalController.text);
     if (interval == null || interval <= 0) {
       if (mounted) {
-        ModernToast.error(
-          context,
-          context.translate.clashFeatures.keepAlive.intervalError,
-        );
+        ModernToast.error(context, trans.clashFeatures.keepAlive.intervalError);
       }
       return;
     }
@@ -62,17 +60,14 @@ class _KeepAliveCardState extends State<KeepAliveCard> {
       clashProvider.configService.setKeepAlive(_keepAliveEnabled);
 
       if (mounted) {
-        ModernToast.success(
-          context,
-          context.translate.clashFeatures.keepAlive.saveSuccess,
-        );
+        ModernToast.success(context, trans.clashFeatures.keepAlive.saveSuccess);
       }
     } catch (e) {
       Logger.error('保存 TCP 保持活动配置失败: $e');
       if (mounted) {
         ModernToast.error(
           context,
-          context.translate.clashFeatures.keepAlive.saveFailed.replaceAll(
+          trans.clashFeatures.keepAlive.saveFailed.replaceAll(
             '{error}',
             e.toString(),
           ),
@@ -88,6 +83,7 @@ class _KeepAliveCardState extends State<KeepAliveCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final trans = context.translate;
     return ModernFeatureCard(
       isSelected: false,
       onTap: () {},
@@ -111,11 +107,11 @@ class _KeepAliveCardState extends State<KeepAliveCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        context.translate.clashFeatures.keepAlive.title,
+                        trans.clashFeatures.keepAlive.title,
                         style: theme.textTheme.titleMedium,
                       ),
                       Text(
-                        context.translate.clashFeatures.keepAlive.subtitle,
+                        trans.clashFeatures.keepAlive.subtitle,
                         style: theme.textTheme.bodySmall,
                       ),
                     ],
@@ -147,7 +143,7 @@ class _KeepAliveCardState extends State<KeepAliveCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                context.translate.clashFeatures.keepAlive.intervalLabel,
+                trans.clashFeatures.keepAlive.intervalLabel,
                 style: theme.textTheme.titleSmall,
               ),
               Row(
@@ -163,7 +159,7 @@ class _KeepAliveCardState extends State<KeepAliveCard> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    context.translate.clashFeatures.keepAlive.intervalUnit,
+                    trans.clashFeatures.keepAlive.intervalUnit,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface.withAlpha(150),
                     ),
@@ -188,8 +184,8 @@ class _KeepAliveCardState extends State<KeepAliveCard> {
                     : const Icon(Icons.save, size: 18),
                 label: Text(
                   _isSaving
-                      ? context.translate.clashFeatures.keepAlive.saving
-                      : context.translate.common.save,
+                      ? trans.clashFeatures.keepAlive.saving
+                      : trans.common.save,
                 ),
               ),
             ],

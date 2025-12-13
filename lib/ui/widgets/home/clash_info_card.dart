@@ -32,6 +32,7 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
     final serviceStateManager = context.watch<ServiceStateManager>();
     final runMode = _determineRunMode(context, serviceStateManager);
     final proxyHost = ClashPreferences.instance.getProxyHost();
+    final trans = context.translate;
 
     // 使用 Selector 只监听需要的属性，避免不必要的重建
     return Selector<
@@ -50,13 +51,13 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
 
         return BaseCard(
           icon: Icons.info_outline,
-          title: context.translate.home.clashInfo,
+          title: trans.home.clashInfo,
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               // 更新核心按钮
               ModernTooltip(
-                message: context.translate.home.updateCore,
+                message: trans.home.updateCore,
                 child: IconButton(
                   icon: _isUpdating
                       ? SizedBox(
@@ -80,7 +81,7 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
               const SizedBox(width: 4),
               // 重启核心按钮
               ModernTooltip(
-                message: context.translate.proxy.restartCore,
+                message: trans.proxy.restartCore,
                 child: IconButton(
                   icon: _isRestarting
                       ? SizedBox(
@@ -106,13 +107,10 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
           child: InfoContainer(
             rows: [
               // 运行模式
-              InfoRow.text(
-                label: context.translate.home.coreRunMode,
-                value: runMode,
-              ),
+              InfoRow.text(label: trans.home.coreRunMode, value: runMode),
               // 代理地址
               InfoRow.text(
-                label: context.translate.home.proxyAddress,
+                label: trans.home.proxyAddress,
                 value: proxyAddress,
                 valueStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
@@ -126,7 +124,7 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
               ),
               // 核心版本
               InfoRow.text(
-                label: context.translate.home.coreVersion,
+                label: trans.home.coreVersion,
                 value: isCoreRunning ? coreVersion : '--',
                 valueStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
@@ -147,6 +145,8 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
 
   // 更新核心
   Future<void> _updateCore(BuildContext context) async {
+    final trans = context.translate;
+
     if (_isUpdating) return;
 
     final clashProvider = context.read<ClashProvider>();
@@ -160,7 +160,7 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
 
     // 显示开始更新提示
     if (context.mounted) {
-      ModernToast.info(context, context.translate.home.updatingCore);
+      ModernToast.info(context, trans.home.updatingCore);
     }
 
     // 记录核心状态（用于更新后恢复）
@@ -191,7 +191,7 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
           // 当前版本已是最新或更新
           Logger.info('核心已是最新版本: $currentVersion');
           if (context.mounted) {
-            ModernToast.info(context, context.translate.home.coreAlreadyLatest);
+            ModernToast.info(context, trans.home.coreAlreadyLatest);
           }
           return;
         }
@@ -233,7 +233,7 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
       if (context.mounted) {
         ModernToast.success(
           context,
-          context.translate.home.coreUpdatedTo.replaceAll('{version}', version),
+          trans.home.coreUpdatedTo.replaceAll('{version}', version),
         );
       }
     } catch (e) {
@@ -256,10 +256,7 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
       if (context.mounted) {
         ModernToast.error(
           context,
-          context.translate.home.coreUpdateError.replaceAll(
-            '{error}',
-            e.toString(),
-          ),
+          trans.home.coreUpdateError.replaceAll('{error}', e.toString()),
         );
       }
     } finally {
@@ -272,6 +269,8 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
   }
 
   Future<void> _restartCore(BuildContext context) async {
+    final trans = context.translate;
+
     if (_isRestarting) return;
 
     setState(() {
@@ -289,7 +288,7 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
 
       // 显示成功提示
       if (context.mounted) {
-        ModernToast.success(context, context.translate.proxy.coreRestarted);
+        ModernToast.success(context, trans.proxy.coreRestarted);
       }
     } catch (e) {
       Logger.error('重启核心失败: $e');
@@ -298,7 +297,7 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
       if (context.mounted) {
         ModernToast.error(
           context,
-          context.translate.proxy.restartFailedWithError.replaceAll(
+          trans.proxy.restartFailedWithError.replaceAll(
             '{error}',
             e.toString(),
           ),
@@ -317,14 +316,16 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
     BuildContext context,
     ServiceStateManager serviceStateManager,
   ) {
+    final trans = context.translate;
+
     final isServiceModeInstalled = serviceStateManager.isServiceModeInstalled;
 
     // 只要服务模式已安装，就显示服务模式（无论核心是否运行）
     if (isServiceModeInstalled) {
-      return context.translate.home.serviceMode;
+      return trans.home.serviceMode;
     }
 
     // 服务模式未安装，使用普通模式
-    return context.translate.home.normalMode;
+    return trans.home.normalMode;
   }
 }

@@ -31,18 +31,19 @@ class ProxyEmptyState extends StatelessWidget {
   }
 
   List<Widget> _buildContent(BuildContext context) {
+    final trans = context.translate;
     switch (type) {
       case ProxyEmptyStateType.noSubscription:
         return [
           const Icon(Icons.warning_amber, size: 64, color: Colors.orange),
           const SizedBox(height: 16),
           Text(
-            message ?? context.translate.proxy.emptyNoSubscription,
+            message ?? trans.proxy.emptyNoSubscription,
             style: const TextStyle(fontSize: 18, color: Colors.grey),
           ),
           const SizedBox(height: 8),
           Text(
-            subtitle ?? context.translate.proxy.emptyPleaseAddFirst,
+            subtitle ?? trans.proxy.emptyPleaseAddFirst,
             style: const TextStyle(color: Colors.grey),
           ),
         ];
@@ -52,7 +53,7 @@ class ProxyEmptyState extends StatelessWidget {
           const Icon(Icons.error_outline, size: 64, color: Colors.red),
           const SizedBox(height: 16),
           Text(
-            message ?? context.translate.proxy.emptyError,
+            message ?? trans.proxy.emptyError,
             style: const TextStyle(color: Colors.red),
             textAlign: TextAlign.center,
           ),
@@ -63,12 +64,12 @@ class ProxyEmptyState extends StatelessWidget {
           const Icon(Icons.settings_ethernet, size: 64, color: Colors.blue),
           const SizedBox(height: 16),
           Text(
-            message ?? context.translate.proxy.emptyDirectMode,
+            message ?? trans.proxy.emptyDirectMode,
             style: const TextStyle(fontSize: 18, color: Colors.blue),
           ),
           const SizedBox(height: 8),
           Text(
-            subtitle ?? context.translate.proxy.emptyDirectModeDesc,
+            subtitle ?? trans.proxy.emptyDirectModeDesc,
             style: const TextStyle(color: Colors.grey),
             textAlign: TextAlign.center,
           ),
@@ -79,7 +80,7 @@ class ProxyEmptyState extends StatelessWidget {
           const Icon(Icons.inbox, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
           Text(
-            message ?? context.translate.proxy.emptyNoProxyGroups,
+            message ?? trans.proxy.emptyNoProxyGroups,
             style: const TextStyle(fontSize: 18, color: Colors.grey),
           ),
           if (subtitle != null) ...[

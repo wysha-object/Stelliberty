@@ -143,11 +143,12 @@ class _OverrideDialogState extends State<OverrideDialog> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.editingOverride != null;
+    final trans = context.translate;
 
     return ModernDialog(
       title: isEditing
-          ? context.translate.overrideDialog.editOverrideTitle
-          : context.translate.overrideDialog.addOverrideTitle,
+          ? trans.overrideDialog.editOverrideTitle
+          : trans.overrideDialog.addOverrideTitle,
       titleIcon: isEditing ? Icons.edit : Icons.add_circle_outline,
       isModified: isEditing && _hasChanges,
       maxWidth: 720,
@@ -155,14 +156,12 @@ class _OverrideDialogState extends State<OverrideDialog> {
       content: _buildContent(isEditing),
       actionsRight: [
         DialogActionButton(
-          label: context.translate.common.cancel,
+          label: trans.common.cancel,
           isPrimary: false,
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
         ),
         DialogActionButton(
-          label: isEditing
-              ? context.translate.common.save
-              : context.translate.common.add,
+          label: isEditing ? trans.common.save : trans.common.add,
           isPrimary: true,
           isLoading: _isLoading,
           onPressed: (_isLoading || !_hasChanges) ? null : _handleConfirm,
@@ -173,6 +172,7 @@ class _OverrideDialogState extends State<OverrideDialog> {
   }
 
   Widget _buildContent(bool isEditing) {
+    final trans = context.translate;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(_dialogContentPadding),
       child: Form(
@@ -188,12 +188,12 @@ class _OverrideDialogState extends State<OverrideDialog> {
 
             TextInputField(
               controller: _nameController,
-              label: context.translate.kOverride.nameLabel,
-              hint: context.translate.kOverride.nameHint,
+              label: trans.kOverride.nameLabel,
+              hint: trans.kOverride.nameHint,
               icon: Icons.label_outline,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return context.translate.kOverride.nameError;
+                  return trans.kOverride.nameError;
                 }
                 return null;
               },
@@ -204,18 +204,18 @@ class _OverrideDialogState extends State<OverrideDialog> {
               const SizedBox(height: _dialogItemSpacing),
               TextInputField(
                 controller: _urlController,
-                label: context.translate.kOverride.urlLabel,
+                label: trans.kOverride.urlLabel,
                 hint: 'https://example.com/override.yaml',
                 icon: Icons.link,
                 minLines: 1,
                 maxLines: null,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return context.translate.kOverride.urlError;
+                    return trans.kOverride.urlError;
                   }
                   final uri = Uri.tryParse(value.trim());
                   if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
-                    return context.translate.kOverride.urlFormatError;
+                    return trans.kOverride.urlFormatError;
                   }
                   return null;
                 },
@@ -245,25 +245,26 @@ class _OverrideDialogState extends State<OverrideDialog> {
 
   // 构建添加方式选择器
   Widget _buildAddModeSelector() {
+    final trans = context.translate;
     return OptionSelectorWidget<OverrideAddMethod>(
-      title: context.translate.kOverride.addMethodTitle,
+      title: trans.kOverride.addMethodTitle,
       titleIcon: Icons.folder,
       isHorizontal: true,
       options: [
         OptionItem(
           value: OverrideAddMethod.remote,
-          title: context.translate.kOverride.addMethodRemote,
-          subtitle: context.translate.kOverride.addMethodRemoteDesc,
+          title: trans.kOverride.addMethodRemote,
+          subtitle: trans.kOverride.addMethodRemoteDesc,
         ),
         OptionItem(
           value: OverrideAddMethod.create,
-          title: context.translate.kOverride.addMethodCreate,
-          subtitle: context.translate.kOverride.addMethodCreateDesc,
+          title: trans.kOverride.addMethodCreate,
+          subtitle: trans.kOverride.addMethodCreateDesc,
         ),
         OptionItem(
           value: OverrideAddMethod.import,
-          title: context.translate.kOverride.addMethodImport,
-          subtitle: context.translate.kOverride.addMethodImportDesc,
+          title: trans.kOverride.addMethodImport,
+          subtitle: trans.kOverride.addMethodImportDesc,
         ),
       ],
       selectedValue: _addMethod,
@@ -275,8 +276,9 @@ class _OverrideDialogState extends State<OverrideDialog> {
 
   // 构建格式选择器
   Widget _buildFormatSelector() {
+    final trans = context.translate;
     return OptionSelectorWidget<OverrideFormat>(
-      title: context.translate.kOverride.formatTitle,
+      title: trans.kOverride.formatTitle,
       titleIcon: Icons.code,
       isHorizontal: true,
       options: [
@@ -308,6 +310,7 @@ class _OverrideDialogState extends State<OverrideDialog> {
 
   // 构建文件选择器
   Widget _buildFileSelector() {
+    final trans = context.translate;
     return FileSelectorWidget(
       onFileSelected: (result) {
         setState(() {
@@ -315,14 +318,15 @@ class _OverrideDialogState extends State<OverrideDialog> {
         });
       },
       initialFile: _selectedFile,
-      hintText: context.translate.kOverride.selectLocalFile,
-      selectedText: context.translate.kOverride.fileSelected,
-      draggingText: context.translate.kOverride.fileSelectPrompt,
-      dragHintText: context.translate.kOverride.clickOrDrag,
+      hintText: trans.kOverride.selectLocalFile,
+      selectedText: trans.kOverride.fileSelected,
+      draggingText: trans.kOverride.fileSelectPrompt,
+      dragHintText: trans.kOverride.clickOrDrag,
     );
   }
 
   Future<void> _handleConfirm() async {
+    final trans = context.translate;
     Logger.info('_handleConfirm 被调用');
     Logger.info('编辑模式: ${widget.editingOverride != null}');
     Logger.info('名称: ${_nameController.text}');
@@ -379,10 +383,7 @@ class _OverrideDialogState extends State<OverrideDialog> {
         if (success) {
           Logger.info('添加成功，关闭对话框');
           if (mounted) {
-            ModernToast.success(
-              context,
-              context.translate.overrideDialog.addSuccess,
-            );
+            ModernToast.success(context, trans.overrideDialog.addSuccess);
             Navigator.of(context).pop(override);
           }
         } else {
@@ -391,10 +392,7 @@ class _OverrideDialogState extends State<OverrideDialog> {
           if (mounted) {
             ModernToast.error(
               context,
-              context.translate.kOverride.addFailed.replaceAll(
-                '{error}',
-                override.name,
-              ),
+              trans.kOverride.addFailed.replaceAll('{error}', override.name),
             );
           }
         }
@@ -404,10 +402,7 @@ class _OverrideDialogState extends State<OverrideDialog> {
         setState(() => _isLoading = false);
         ModernToast.error(
           context,
-          context.translate.kOverride.addFailed.replaceAll(
-            '{error}',
-            error.toString(),
-          ),
+          trans.kOverride.addFailed.replaceAll('{error}', error.toString()),
         );
       }
     } else {

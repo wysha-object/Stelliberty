@@ -25,6 +25,7 @@ class ConnectionCard extends StatelessWidget {
     final mixOpacity = 0.1;
 
     final protocolColor = _getProtocolColor(metadata.network);
+    final trans = context.translate;
 
     return Container(
       decoration: BoxDecoration(
@@ -92,7 +93,7 @@ class ConnectionCard extends StatelessWidget {
                       ),
                     ),
                     ModernTooltip(
-                      message: context.translate.connection.closeConnection,
+                      message: trans.connection.closeConnection,
                       child: IconButton(
                         icon: const Icon(Icons.close_rounded, size: 16),
                         onPressed: onClose,

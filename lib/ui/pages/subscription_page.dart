@@ -109,6 +109,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     SubscriptionProvider provider,
     _SubscriptionControlBarState data,
   ) {
+    final trans = context.translate;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
@@ -132,7 +133,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  context.translate.subscription.configCount.replaceAll(
+                  trans.subscription.configCount.replaceAll(
                     '{count}',
                     data.subscriptionCount.toString(),
                   ),
@@ -152,7 +153,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           OutlinedButton.icon(
             onPressed: () => _navigateToOverrideManagement(context),
             icon: const Icon(Icons.rule, size: 18),
-            label: Text(context.translate.subscription.overrideManagement),
+            label: Text(trans.subscription.overrideManagement),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               textStyle: const TextStyle(
@@ -168,7 +169,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           FilledButton.icon(
             onPressed: () => _showAddSubscriptionDialog(context, provider),
             icon: const Icon(Icons.add_rounded, size: 18),
-            label: Text(context.translate.subscription.addConfig),
+            label: Text(trans.subscription.addConfig),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               textStyle: const TextStyle(
@@ -200,8 +201,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   : const Icon(Icons.sync_rounded, size: 18),
               label: Text(
                 data.isLoading
-                    ? context.translate.subscription.updating
-                    : context.translate.subscription.updateAll,
+                    ? trans.subscription.updating
+                    : trans.subscription.updateAll,
               ),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
@@ -225,6 +226,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     SubscriptionProvider provider,
     _SubscriptionListState data,
   ) {
+    final trans = context.translate;
+
     // 如果正在加载
     if (data.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -257,12 +260,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             const Icon(Icons.rss_feed, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
-              context.translate.subscription.empty,
+              trans.subscription.empty,
               style: const TextStyle(fontSize: 18, color: Colors.grey),
             ),
             const SizedBox(height: 8),
             Text(
-              context.translate.subscription.emptyHint,
+              trans.subscription.emptyHint,
               style: const TextStyle(color: Colors.grey),
             ),
           ],
@@ -430,6 +433,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     SubscriptionProvider provider,
     Subscription subscription,
   ) async {
+    final trans = context.translate;
     final success = await provider.updateSubscription(subscription.id);
 
     if (!context.mounted) return;
@@ -437,7 +441,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     if (success) {
       ModernToast.success(
         context,
-        context.translate.subscription.updateSuccess.replaceAll(
+        trans.subscription.updateSuccess.replaceAll(
           '{name}',
           subscription.name,
         ),
@@ -454,29 +458,31 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
   }
 
-  // 将错误类型转换为翻译文本
+  // 获取错误消息
   String _getErrorMessage(BuildContext context, String? errorTypeName) {
+    final trans = context.translate;
+
     if (errorTypeName == null) {
-      return context.translate.subscription.updateFailed;
+      return trans.subscription.updateFailed;
     }
 
     switch (errorTypeName) {
       case 'network':
-        return context.translate.subscription.updateFailedNetwork;
+        return trans.subscription.updateFailedNetwork;
       case 'timeout':
-        return context.translate.subscription.updateFailedTimeout;
+        return trans.subscription.updateFailedTimeout;
       case 'notFound':
-        return context.translate.subscription.updateFailedNotFound;
+        return trans.subscription.updateFailedNotFound;
       case 'forbidden':
-        return context.translate.subscription.updateFailedForbidden;
+        return trans.subscription.updateFailedForbidden;
       case 'serverError':
-        return context.translate.subscription.updateFailedServer;
+        return trans.subscription.updateFailedServer;
       case 'formatError':
-        return context.translate.subscription.updateFailedFormat;
+        return trans.subscription.updateFailedFormat;
       case 'certificate':
-        return context.translate.subscription.updateFailedCertificate;
+        return trans.subscription.updateFailedCertificate;
       default:
-        return context.translate.subscription.updateFailedUnknown;
+        return trans.subscription.updateFailedUnknown;
     }
   }
 
@@ -485,30 +491,25 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     BuildContext context,
     SubscriptionProvider provider,
   ) async {
+    final trans = context.translate;
     final errors = await provider.updateAllSubscriptions();
 
     if (!context.mounted) return;
 
     if (errors.isEmpty) {
-      ModernToast.success(
-        context,
-        context.translate.subscription.updateAllSuccess,
-      );
+      ModernToast.success(context, trans.subscription.updateAllSuccess);
     } else {
       // 只显示成功/失败统计，不显示具体错误
       final successCount = provider.subscriptions.length - errors.length;
       if (successCount > 0) {
         ModernToast.warning(
           context,
-          context.translate.subscription.updatePartialSuccess
+          trans.subscription.updatePartialSuccess
               .replaceAll('{success}', successCount.toString())
               .replaceAll('{failed}', errors.length.toString()),
         );
       } else {
-        ModernToast.error(
-          context,
-          context.translate.subscription.updateAllFailed,
-        );
+        ModernToast.error(context, trans.subscription.updateAllFailed);
       }
     }
   }
@@ -519,14 +520,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     SubscriptionProvider provider,
     Subscription subscription,
   ) async {
+    final trans = context.translate;
     final confirmed = await showConfirmDialog(
       context: context,
-      title: context.translate.subscription.deleteConfirm,
-      message: context.translate.subscription.deleteConfirmMessage.replaceAll(
+      title: trans.subscription.deleteConfirm,
+      message: trans.subscription.deleteConfirmMessage.replaceAll(
         '{name}',
         subscription.name,
       ),
-      confirmText: context.translate.common.delete,
+      confirmText: trans.common.delete,
       isDanger: true,
     );
 
@@ -591,6 +593,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     SubscriptionProvider provider,
     Subscription subscription,
   ) async {
+    final trans = context.translate;
+
     try {
       await WidgetsBinding.instance.endOfFrame;
       if (!context.mounted) return;
@@ -627,10 +631,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
       ModernToast.error(
         context,
-        context.translate.fileEditor.readError.replaceAll(
-          '{error}',
-          error.toString(),
-        ),
+        trans.fileEditor.readError.replaceAll('{error}', error.toString()),
       );
     }
   }
@@ -641,6 +642,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     SubscriptionProvider provider,
     Subscription subscription,
   ) async {
+    final trans = context.translate;
+
     try {
       await WidgetsBinding.instance.endOfFrame;
       if (!context.mounted) return;
@@ -674,10 +677,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
       ModernToast.error(
         context,
-        context.translate.fileEditor.readError.replaceAll(
-          '{error}',
-          error.toString(),
-        ),
+        trans.fileEditor.readError.replaceAll('{error}', error.toString()),
       );
     }
   }
@@ -697,10 +697,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
     try {
       final file = File(result.localFilePath!);
-      final trans = context.translate.subscriptionDialog;
+      final dialogTrans = context.translate.subscriptionDialog;
 
       if (!await file.exists()) {
-        throw Exception(trans.fileNotExist);
+        throw Exception(dialogTrans.fileNotExist);
       }
 
       // 读取文件内容

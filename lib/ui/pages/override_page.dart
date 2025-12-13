@@ -42,6 +42,7 @@ class _OverridePageState extends State<OverridePage> {
   }
 
   Widget _buildHeader() {
+    final trans = context.translate;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Consumer<OverrideProvider>(
@@ -51,7 +52,7 @@ class _OverridePageState extends State<OverridePage> {
           child: Row(
             children: [
               ModernIconTooltip(
-                message: context.translate.common.cancel,
+                message: trans.common.cancel,
                 icon: Icons.arrow_back,
                 filled: false,
                 onPressed: () {
@@ -269,6 +270,7 @@ class _OverridePageState extends State<OverridePage> {
   }
 
   Future<void> _deleteOverride(OverrideConfig override) async {
+    final trans = context.translate;
     final confirmed = await showConfirmDialog(
       context: context,
       title: translate.kOverride.confirmDelete,
@@ -276,7 +278,7 @@ class _OverridePageState extends State<OverridePage> {
         '{name}',
         override.name,
       ),
-      confirmText: context.translate.common.delete,
+      confirmText: trans.common.delete,
       isDanger: true,
     );
 

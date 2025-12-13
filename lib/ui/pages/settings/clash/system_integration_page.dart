@@ -34,6 +34,7 @@ class _SystemIntegrationPageState extends State<SystemIntegrationPage> {
   Widget build(BuildContext context) {
     final provider = Provider.of<ContentProvider>(context, listen: false);
     final theme = Theme.of(context);
+    final trans = context.translate;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,7 +51,7 @@ class _SystemIntegrationPageState extends State<SystemIntegrationPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                context.translate.clashFeatures.systemIntegration.pageTitle,
+                trans.clashFeatures.systemIntegration.pageTitle,
                 style: theme.textTheme.titleLarge,
               ),
             ],

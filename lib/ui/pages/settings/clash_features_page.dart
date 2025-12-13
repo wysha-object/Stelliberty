@@ -25,6 +25,7 @@ class _ClashFeaturesPageState extends State<ClashFeaturesPage> {
   Widget build(BuildContext context) {
     final provider = Provider.of<ContentProvider>(context, listen: false);
     final theme = Theme.of(context);
+    final trans = context.translate;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -37,7 +38,7 @@ class _ClashFeaturesPageState extends State<ClashFeaturesPage> {
             child: Row(
               children: [
                 ModernIconTooltip(
-                  message: context.translate.clashFeatures.backToSettings,
+                  message: trans.clashFeatures.backToSettings,
                   icon: Icons.arrow_back,
                   filled: false,
                   onPressed: () =>
@@ -45,7 +46,7 @@ class _ClashFeaturesPageState extends State<ClashFeaturesPage> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  context.translate.clashFeatures.title,
+                  trans.clashFeatures.title,
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

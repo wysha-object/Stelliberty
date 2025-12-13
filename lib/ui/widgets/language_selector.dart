@@ -18,13 +18,15 @@ enum AppLanguageMode {
 
   // 获取本地化显示名称
   String displayName(BuildContext context) {
+    final trans = context.translate;
+
     switch (this) {
       case AppLanguageMode.system:
-        return context.translate.language.modeSystem;
+        return trans.language.modeSystem;
       case AppLanguageMode.zh:
-        return context.translate.language.modeZh;
+        return trans.language.modeZh;
       case AppLanguageMode.en:
-        return context.translate.language.modeEn;
+        return trans.language.modeEn;
     }
   }
 
@@ -88,6 +90,8 @@ class _LanguageSelectorState extends State<LanguageSelector> {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
       child: ModernFeatureCard(
@@ -106,7 +110,7 @@ class _LanguageSelectorState extends State<LanguageSelector> {
                   width: ModernFeatureCardSpacing.featureIconToTextSpacing,
                 ),
                 Text(
-                  context.translate.language.settings,
+                  trans.language.settings,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],

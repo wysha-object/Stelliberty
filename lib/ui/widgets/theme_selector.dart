@@ -55,6 +55,8 @@ class _ThemeSelectorState extends State<ThemeSelector> {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     return Consumer2<ThemeProvider, WindowEffectProvider>(
       builder: (context, themeProvider, windowEffectProvider, _) {
         return Column(
@@ -80,7 +82,7 @@ class _ThemeSelectorState extends State<ThemeSelector> {
                               ModernFeatureCardSpacing.featureIconToTextSpacing,
                         ),
                         Text(
-                          context.translate.theme.title,
+                          trans.theme.title,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ],
@@ -134,7 +136,7 @@ class _ThemeSelectorState extends State<ThemeSelector> {
                                     .featureIconToTextSpacing,
                               ),
                               Text(
-                                context.translate.theme.effect,
+                                trans.theme.effect,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                             ],
@@ -153,14 +155,14 @@ class _ThemeSelectorState extends State<ThemeSelector> {
                               itemToString: (effect) {
                                 switch (effect) {
                                   case AppWindowEffect.mica:
-                                    return context.translate.theme.effectMica;
+                                    return trans.theme.effectMica;
                                   case AppWindowEffect.acrylic:
                                     return context
                                         .translate
                                         .theme
                                         .effectAcrylic;
                                   case AppWindowEffect.tabbed:
-                                    return context.translate.theme.effectTabbed;
+                                    return trans.theme.effectTabbed;
                                   default:
                                     return context
                                         .translate
@@ -172,7 +174,7 @@ class _ThemeSelectorState extends State<ThemeSelector> {
                                 text: (effect) {
                                   switch (effect) {
                                     case AppWindowEffect.mica:
-                                      return context.translate.theme.effectMica;
+                                      return trans.theme.effectMica;
                                     case AppWindowEffect.acrylic:
                                       return context
                                           .translate
@@ -210,7 +212,7 @@ class _ThemeSelectorState extends State<ThemeSelector> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.translate.theme.color,
+                    trans.theme.color,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),

@@ -27,10 +27,11 @@ class _SettingsOverviewPageState extends State<SettingsOverviewPage> {
   }
 
   Future<void> _loadVersion() async {
+    final trans = context.translate;
     final packageInfo = await PackageInfo.fromPlatform();
     if (!mounted) return;
     setState(() {
-      _version = '${context.translate.about.version} v${packageInfo.version}';
+      _version = '${trans.about.version} v${packageInfo.version}';
     });
   }
 
@@ -38,6 +39,7 @@ class _SettingsOverviewPageState extends State<SettingsOverviewPage> {
   Widget build(BuildContext context) {
     final provider = Provider.of<ContentProvider>(context, listen: false);
     final theme = Theme.of(context);
+    final trans = context.translate;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -47,7 +49,7 @@ class _SettingsOverviewPageState extends State<SettingsOverviewPage> {
           padding: const EdgeInsets.all(20),
           children: [
             Text(
-              context.translate.common.settings,
+              trans.common.settings,
               style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -58,8 +60,8 @@ class _SettingsOverviewPageState extends State<SettingsOverviewPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               leading: const Icon(Icons.palette_outlined),
-              title: Text(context.translate.theme.title),
-              subtitle: Text(context.translate.theme.description),
+              title: Text(trans.theme.title),
+              subtitle: Text(trans.theme.description),
               onTap: () => provider.switchView(ContentView.settingsAppearance),
               // 只移除点击时的水波纹扩散效果，保留悬停效果
               splashColor: Colors.transparent,
@@ -69,8 +71,8 @@ class _SettingsOverviewPageState extends State<SettingsOverviewPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               leading: const Icon(Icons.language_outlined),
-              title: Text(context.translate.language.title),
-              subtitle: Text(context.translate.language.description),
+              title: Text(trans.language.title),
+              subtitle: Text(trans.language.description),
               onTap: () => provider.switchView(ContentView.settingsLanguage),
               // 只移除点击时的水波纹扩散效果，保留悬停效果
               splashColor: Colors.transparent,
@@ -80,8 +82,8 @@ class _SettingsOverviewPageState extends State<SettingsOverviewPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               leading: const Icon(Icons.settings_suggest_outlined),
-              title: Text(context.translate.clashFeatures.title),
-              subtitle: Text(context.translate.clashFeatures.description),
+              title: Text(trans.clashFeatures.title),
+              subtitle: Text(trans.clashFeatures.description),
               onTap: () =>
                   provider.switchView(ContentView.settingsClashFeatures),
               // 只移除点击时的水波纹扩散效果，保留悬停效果
@@ -92,8 +94,8 @@ class _SettingsOverviewPageState extends State<SettingsOverviewPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               leading: const Icon(Icons.apps_outlined),
-              title: Text(context.translate.behavior.title),
-              subtitle: Text(context.translate.behavior.description),
+              title: Text(trans.behavior.title),
+              subtitle: Text(trans.behavior.description),
               onTap: () => provider.switchView(ContentView.settingsBehavior),
               // 只移除点击时的水波纹扩散效果，保留悬停效果
               splashColor: Colors.transparent,
@@ -103,8 +105,8 @@ class _SettingsOverviewPageState extends State<SettingsOverviewPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               leading: const Icon(Icons.backup_outlined),
-              title: Text(context.translate.backup.title),
-              subtitle: Text(context.translate.backup.description),
+              title: Text(trans.backup.title),
+              subtitle: Text(trans.backup.description),
               onTap: () => provider.switchView(ContentView.settingsBackup),
               splashColor: Colors.transparent,
             ),
@@ -115,8 +117,8 @@ class _SettingsOverviewPageState extends State<SettingsOverviewPage> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 leading: const Icon(Icons.new_releases_outlined),
-                title: Text(context.translate.appUpdate.title),
-                subtitle: Text(context.translate.appUpdate.description),
+                title: Text(trans.appUpdate.title),
+                subtitle: Text(trans.appUpdate.description),
                 onTap: () => provider.switchView(ContentView.settingsAppUpdate),
                 // 只移除点击时的水波纹扩散效果，保留悬停效果
                 splashColor: Colors.transparent,
@@ -126,7 +128,7 @@ class _SettingsOverviewPageState extends State<SettingsOverviewPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               leading: const Icon(Icons.info_outline),
-              title: Text(context.translate.about.title),
+              title: Text(trans.about.title),
               subtitle: Text(_version.isEmpty ? '…' : _version),
               onTap: null,
               splashColor: Colors.transparent,

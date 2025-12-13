@@ -158,6 +158,7 @@ class _LogPageState extends State<LogPage> {
 
   // 构建过滤器和控制栏（扁平化 MD3 风格）
   Widget _buildFilterBar(BuildContext context) {
+    final trans = context.translate;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Consumer<LogProvider>(
@@ -178,7 +179,7 @@ class _LogPageState extends State<LogPage> {
                   children: [
                     _buildFilterChip(
                       context,
-                      label: context.translate.logs.allLevels,
+                      label: trans.logs.allLevels,
                       isSelected: provider.filterLevel == null,
                       onTap: () => provider.setFilterLevel(null),
                     ),
@@ -224,7 +225,7 @@ class _LogPageState extends State<LogPage> {
                   child: TextField(
                     onChanged: (value) => provider.setSearchKeyword(value),
                     decoration: InputDecoration(
-                      hintText: context.translate.logs.searchPlaceholder,
+                      hintText: trans.logs.searchPlaceholder,
                       hintStyle: TextStyle(
                         fontSize: 13,
                         color: colorScheme.onSurfaceVariant,
@@ -259,8 +260,8 @@ class _LogPageState extends State<LogPage> {
                   // 暂停/恢复按钮
                   ModernIconTooltip(
                     message: provider.isMonitoringPaused
-                        ? context.translate.connection.resumeBtn
-                        : context.translate.connection.pauseBtn,
+                        ? trans.connection.resumeBtn
+                        : trans.connection.pauseBtn,
                     icon: provider.isMonitoringPaused
                         ? Icons.play_arrow_rounded
                         : Icons.pause_rounded,
@@ -270,7 +271,7 @@ class _LogPageState extends State<LogPage> {
                   const SizedBox(width: 6),
                   // 清空日志按钮
                   ModernIconTooltip(
-                    message: context.translate.logs.clearLogs,
+                    message: trans.logs.clearLogs,
                     icon: Icons.delete_outline_rounded,
                     onPressed: provider.logs.isEmpty
                         ? null
@@ -323,6 +324,7 @@ class _LogPageState extends State<LogPage> {
   Widget _buildLogList(BuildContext context) {
     return Consumer<LogProvider>(
       builder: (context, provider, child) {
+        final trans = context.translate;
         final filteredLogs = provider.filteredLogs;
 
         if (filteredLogs.isEmpty) {
@@ -340,8 +342,8 @@ class _LogPageState extends State<LogPage> {
                 const SizedBox(height: 16),
                 Text(
                   provider.logs.isEmpty
-                      ? context.translate.logs.emptyLogs
-                      : context.translate.logs.emptyFiltered,
+                      ? trans.logs.emptyLogs
+                      : trans.logs.emptyFiltered,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Theme.of(
                       context,
@@ -376,6 +378,8 @@ class _LogPageState extends State<LogPage> {
 
   // 构建加载状态（首次进入页面时）
   Widget _buildLoadingState(BuildContext context) {
+    final trans = context.translate;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -390,7 +394,7 @@ class _LogPageState extends State<LogPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            context.translate.logs.loadingLogs,
+            trans.logs.loadingLogs,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(
                 context,
@@ -404,6 +408,8 @@ class _LogPageState extends State<LogPage> {
 
   // 构建空状态（Clash 未运行）
   Widget _buildEmptyState(BuildContext context) {
+    final trans = context.translate;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -415,7 +421,7 @@ class _LogPageState extends State<LogPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            context.translate.logs.clashNotRunning,
+            trans.logs.clashNotRunning,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Theme.of(
                 context,
@@ -424,7 +430,7 @@ class _LogPageState extends State<LogPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            context.translate.logs.startClashToViewLogs,
+            trans.logs.startClashToViewLogs,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(
                 context,

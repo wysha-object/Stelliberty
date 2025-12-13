@@ -35,19 +35,21 @@ class _SystemProxyCardState extends State<SystemProxyCard> {
   }
 
   String _getBypassHelperText() {
+    final trans = context.translate;
     if (Platform.isWindows) {
-      return context.translate.systemProxy.bypassHelper;
+      return trans.systemProxy.bypassHelper;
     } else if (Platform.isLinux) {
-      return context.translate.systemProxy.bypassHelperLinux;
+      return trans.systemProxy.bypassHelperLinux;
     } else if (Platform.isMacOS) {
-      return context.translate.systemProxy.bypassHelperMac;
+      return trans.systemProxy.bypassHelperMac;
     } else {
-      return context.translate.systemProxy.bypassHelper;
+      return trans.systemProxy.bypassHelper;
     }
   }
 
   // 保存配置
   Future<void> _saveConfig() async {
+    final trans = context.translate;
     if (_isSaving) return;
 
     setState(() => _isSaving = true);
@@ -56,17 +58,14 @@ class _SystemProxyCardState extends State<SystemProxyCard> {
       await _viewModel.saveConfig();
 
       if (mounted) {
-        ModernToast.success(context, context.translate.systemProxy.saveSuccess);
+        ModernToast.success(context, trans.systemProxy.saveSuccess);
       }
     } catch (e) {
       Logger.error('保存系统代理配置失败: $e');
       if (mounted) {
         ModernToast.error(
           context,
-          context.translate.systemProxy.saveFailed.replaceAll(
-            '{error}',
-            e.toString(),
-          ),
+          trans.systemProxy.saveFailed.replaceAll('{error}', e.toString()),
         );
       }
     } finally {
@@ -79,6 +78,7 @@ class _SystemProxyCardState extends State<SystemProxyCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final trans = context.translate;
 
     return ListenableBuilder(
       listenable: _viewModel,
@@ -102,7 +102,7 @@ class _SystemProxyCardState extends State<SystemProxyCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        context.translate.systemProxy.configTitle,
+                        trans.systemProxy.configTitle,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ],
@@ -181,6 +181,7 @@ class _SystemProxyCardState extends State<SystemProxyCard> {
 
   // 构建真实内容
   List<Widget> _buildRealContent(ThemeData theme) {
+    final trans = context.translate;
     return [
       // 代理主机（输入框内嵌下拉按钮）
       ModernDropdownMenu<String>(
@@ -190,9 +191,9 @@ class _SystemProxyCardState extends State<SystemProxyCard> {
         itemToString: (host) => host,
         child: ModernTextField(
           controller: _viewModel.proxyHostController,
-          labelText: context.translate.systemProxy.proxyHost,
-          hintText: context.translate.systemProxy.proxyHostHint,
-          helperText: context.translate.systemProxy.proxyHostHelper,
+          labelText: trans.systemProxy.proxyHost,
+          hintText: trans.systemProxy.proxyHostHint,
+          helperText: trans.systemProxy.proxyHostHelper,
           showDropdownIcon: true,
         ),
       ),
@@ -206,12 +207,12 @@ class _SystemProxyCardState extends State<SystemProxyCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  context.translate.systemProxy.pacMode,
+                  trans.systemProxy.pacMode,
                   style: theme.textTheme.titleSmall,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  context.translate.systemProxy.pacModeDesc,
+                  trans.systemProxy.pacModeDesc,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -238,12 +239,12 @@ class _SystemProxyCardState extends State<SystemProxyCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.translate.systemProxy.useDefaultBypass,
+                    trans.systemProxy.useDefaultBypass,
                     style: theme.textTheme.titleSmall,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    context.translate.systemProxy.useDefaultBypassDesc,
+                    trans.systemProxy.useDefaultBypassDesc,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -263,7 +264,7 @@ class _SystemProxyCardState extends State<SystemProxyCard> {
         // 绕过地址编辑器
         ModernMultilineTextField(
           controller: _viewModel.bypassController,
-          labelText: context.translate.systemProxy.bypassLabel,
+          labelText: trans.systemProxy.bypassLabel,
           helperText: _getBypassHelperText(),
           height: 120,
           enabled: !_viewModel.useDefaultBypass,
@@ -278,14 +279,14 @@ class _SystemProxyCardState extends State<SystemProxyCard> {
       ] else ...[
         // PAC 脚本标签
         Text(
-          context.translate.systemProxy.pacScriptLabel,
+          trans.systemProxy.pacScriptLabel,
           style: theme.textTheme.titleSmall,
         ),
         const SizedBox(height: 8),
         // PAC 脚本编辑器
         ModernMultilineTextField(
           controller: _viewModel.pacScriptController,
-          helperText: context.translate.systemProxy.pacScriptHelper,
+          helperText: trans.systemProxy.pacScriptHelper,
           height: 250,
           contentPadding: const EdgeInsets.only(
             left: 10,
@@ -300,7 +301,7 @@ class _SystemProxyCardState extends State<SystemProxyCard> {
         TextButton.icon(
           onPressed: _viewModel.restoreDefaultPacScript,
           icon: const Icon(Icons.restart_alt, size: 18),
-          label: Text(context.translate.clashFeatures.testUrl.restoreDefault),
+          label: Text(trans.clashFeatures.testUrl.restoreDefault),
         ),
       ],
 
@@ -320,9 +321,7 @@ class _SystemProxyCardState extends State<SystemProxyCard> {
                   )
                 : const Icon(Icons.save, size: 18),
             label: Text(
-              _isSaving
-                  ? context.translate.systemProxy.saving
-                  : context.translate.common.save,
+              _isSaving ? trans.systemProxy.saving : trans.common.save,
             ),
           ),
         ],

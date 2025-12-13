@@ -37,9 +37,11 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     return ModernDialog(
-      title: context.translate.appUpdate.dialog.title,
-      subtitle: context.translate.appUpdate.dialog.subtitle,
+      title: trans.appUpdate.dialog.title,
+      subtitle: trans.appUpdate.dialog.subtitle,
       titleIcon: Icons.system_update_outlined,
       maxWidth: 560,
       maxHeightRatio: 0.75,
@@ -47,12 +49,12 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
       actionsLeft: _buildIgnoreButton(),
       actionsRight: [
         DialogActionButton(
-          label: context.translate.appUpdate.dialog.cancelButton,
+          label: trans.appUpdate.dialog.cancelButton,
           isPrimary: false,
           onPressed: () => Navigator.of(context).pop(),
         ),
         DialogActionButton(
-          label: context.translate.appUpdate.dialog.downloadButton,
+          label: trans.appUpdate.dialog.downloadButton,
           isPrimary: true,
           onPressed: _handleDownload,
         ),
@@ -84,6 +86,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
 
   // 构建版本信息卡片
   Widget _buildVersionCard() {
+    final trans = context.translate;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -101,7 +104,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         children: [
           _buildVersionRow(
             icon: Icons.phonelink_setup_outlined,
-            label: context.translate.appUpdate.dialog.currentVersionLabel,
+            label: trans.appUpdate.dialog.currentVersionLabel,
             version: widget.updateInfo.currentVersion,
             color: Theme.of(
               context,
@@ -110,7 +113,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
           const SizedBox(height: 12),
           _buildVersionRow(
             icon: Icons.new_releases_outlined,
-            label: context.translate.appUpdate.dialog.latestVersionLabel,
+            label: trans.appUpdate.dialog.latestVersionLabel,
             version: widget.updateInfo.latestVersion,
             color: Theme.of(context).colorScheme.primary,
             highlight: true,
@@ -162,6 +165,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
 
   // 构建更新说明
   Widget _buildReleaseNotes() {
+    final trans = context.translate;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -188,7 +192,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  context.translate.appUpdate.dialog.releaseNotesLabel,
+                  trans.appUpdate.dialog.releaseNotesLabel,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -230,6 +234,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
 
   // 构建忽略按钮
   Widget _buildIgnoreButton() {
+    final trans = context.translate;
     return TextButton.icon(
       onPressed: _handleIgnore,
       style: TextButton.styleFrom(
@@ -242,7 +247,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
       ),
       label: Text(
-        context.translate.appUpdate.dialog.ignoreButton,
+        trans.appUpdate.dialog.ignoreButton,
         style: TextStyle(
           fontSize: 13,
           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),

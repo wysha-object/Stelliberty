@@ -73,21 +73,24 @@ class _AppUpdateSettingsPageState extends State<AppUpdateSettingsPage> {
   }
 
   String _getIntervalDisplayText(String interval) {
+    final trans = context.translate;
+
     switch (interval) {
       case 'startup':
-        return context.translate.appUpdate.intervalOnStartup;
+        return trans.appUpdate.intervalOnStartup;
       case '1day':
-        return context.translate.appUpdate.interval1Day;
+        return trans.appUpdate.interval1Day;
       case '7days':
-        return context.translate.appUpdate.interval7Days;
+        return trans.appUpdate.interval7Days;
       case '14days':
-        return context.translate.appUpdate.interval14Days;
+        return trans.appUpdate.interval14Days;
       default:
         return interval;
     }
   }
 
   Future<void> _checkForUpdate() async {
+    final trans = context.translate;
     final updateProvider = context.read<AppUpdateProvider>();
 
     // 手动检查更新（不会触发全局监听器）
@@ -101,17 +104,18 @@ class _AppUpdateSettingsPageState extends State<AppUpdateSettingsPage> {
         await AppUpdateDialog.show(context, updateInfo);
       } else {
         // 已是最新版本
-        ModernToast.success(context, context.translate.appUpdate.upToDate);
+        ModernToast.success(context, trans.appUpdate.upToDate);
       }
     } else {
       // 检查失败
-      ModernToast.error(context, context.translate.appUpdate.networkError);
+      ModernToast.error(context, trans.appUpdate.networkError);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ContentProvider>(context, listen: false);
+    final trans = context.translate;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,7 +132,7 @@ class _AppUpdateSettingsPageState extends State<AppUpdateSettingsPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                context.translate.appUpdate.settings,
+                trans.appUpdate.settings,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ],
@@ -169,12 +173,13 @@ class _AppUpdateSettingsPageState extends State<AppUpdateSettingsPage> {
   Widget _buildAutoUpdateCard() {
     return Consumer<AppUpdateProvider>(
       builder: (context, updateProvider, child) {
+        final trans = context.translate;
         final isChecking = updateProvider.isChecking;
 
         return ModernFeatureLayoutCard(
           icon: Icons.new_releases_outlined,
-          title: context.translate.appUpdate.autoUpdateTitle,
-          subtitle: context.translate.appUpdate.autoUpdateDescription,
+          title: trans.appUpdate.autoUpdateTitle,
+          subtitle: trans.appUpdate.autoUpdateDescription,
           trailingLeadingButton: IconButton(
             icon: isChecking
                 ? SizedBox(
@@ -186,7 +191,7 @@ class _AppUpdateSettingsPageState extends State<AppUpdateSettingsPage> {
                     ),
                   )
                 : const Icon(Icons.refresh, size: 20),
-            tooltip: context.translate.appUpdate.checkNow,
+            tooltip: trans.appUpdate.checkNow,
             onPressed: isChecking ? null : _checkForUpdate,
           ),
           trailing: ModernSwitch(
@@ -202,10 +207,12 @@ class _AppUpdateSettingsPageState extends State<AppUpdateSettingsPage> {
 
   // 构建更新间隔选择卡片（使用自定义下拉菜单）
   Widget _buildIntervalCard() {
+    final trans = context.translate;
+
     return ModernFeatureLayoutCard(
       icon: Icons.schedule_outlined,
-      title: context.translate.appUpdate.checkIntervalTitle,
-      subtitle: context.translate.appUpdate.checkIntervalDescription,
+      title: trans.appUpdate.checkIntervalTitle,
+      subtitle: trans.appUpdate.checkIntervalDescription,
       trailing: _buildIntervalDropdown(),
       enableHover: true,
       enableTap: false,

@@ -65,7 +65,7 @@ class ModernDialog extends StatefulWidget {
   // 是否显示"已修改"标签
   final bool? isModified;
 
-  // "已修改"标签文本（可选，默认使用 context.translate.common.modified）
+  // "已修改"标签文本
   final String? modifiedLabel;
 
   // 内容区域（插槽）
@@ -631,6 +631,8 @@ class _ModernDialogState extends State<ModernDialog>
 
   // 构建"已修改"标签
   Widget _buildModifiedBadge() {
+    final trans = context.translate;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
@@ -638,7 +640,7 @@ class _ModernDialogState extends State<ModernDialog>
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        widget.modifiedLabel ?? context.translate.common.modified,
+        widget.modifiedLabel ?? trans.common.modified,
         style: TextStyle(
           fontSize: 10,
           color: Theme.of(context).colorScheme.primary,

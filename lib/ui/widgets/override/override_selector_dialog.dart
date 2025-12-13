@@ -82,8 +82,10 @@ class _OverrideSelectorDialogState extends State<OverrideSelectorDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
+
     return ModernDialog(
-      title: context.translate.overrideDialog.selectOverrides,
+      title: trans.overrideDialog.selectOverrides,
       titleIcon: Icons.checklist,
       maxWidth: 640,
       maxHeightRatio: 0.8,
@@ -97,11 +99,11 @@ class _OverrideSelectorDialogState extends State<OverrideSelectorDialog> {
       ),
       actionsRight: [
         DialogActionButton(
-          label: context.translate.common.cancel,
+          label: trans.common.cancel,
           onPressed: () => Navigator.of(context).pop(),
         ),
         DialogActionButton(
-          label: context.translate.common.save,
+          label: trans.common.save,
           isPrimary: true,
           onPressed: _handleConfirm,
         ),
@@ -167,6 +169,8 @@ class _OverrideSelectorDialogState extends State<OverrideSelectorDialog> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final trans = context.translate;
+
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -174,12 +178,12 @@ class _OverrideSelectorDialogState extends State<OverrideSelectorDialog> {
           Icon(Icons.rule, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
-            context.translate.overrideDialog.noOverridesTitle,
+            trans.overrideDialog.noOverridesTitle,
             style: TextStyle(fontSize: 16, color: Colors.grey[600]),
           ),
           const SizedBox(height: 8),
           Text(
-            context.translate.overrideDialog.noOverridesHint,
+            trans.overrideDialog.noOverridesHint,
             style: TextStyle(fontSize: 12, color: Colors.grey[500]),
           ),
         ],

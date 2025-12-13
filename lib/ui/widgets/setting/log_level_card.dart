@@ -28,17 +28,18 @@ enum LogLevel {
   }
 
   String getDisplayName(BuildContext context) {
+    final trans = context.translate;
     switch (this) {
       case LogLevel.silent:
-        return context.translate.logLevel.silent;
+        return trans.logLevel.silent;
       case LogLevel.error:
-        return context.translate.logLevel.error;
+        return trans.logLevel.error;
       case LogLevel.warning:
-        return context.translate.logLevel.warning;
+        return trans.logLevel.warning;
       case LogLevel.info:
-        return context.translate.logLevel.info;
+        return trans.logLevel.info;
       case LogLevel.debug:
-        return context.translate.logLevel.debug;
+        return trans.logLevel.debug;
     }
   }
 }
@@ -63,6 +64,7 @@ class _LogLevelCardState extends State<LogLevelCard> {
 
   @override
   Widget build(BuildContext context) {
+    final trans = context.translate;
     return ModernFeatureCard(
       isSelected: false,
       onTap: () {},
@@ -81,11 +83,11 @@ class _LogLevelCardState extends State<LogLevelCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.translate.clashFeatures.logLevel.title,
+                    trans.clashFeatures.logLevel.title,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Text(
-                    context.translate.clashFeatures.logLevel.subtitle,
+                    trans.clashFeatures.logLevel.subtitle,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],

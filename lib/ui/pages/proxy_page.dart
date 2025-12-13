@@ -291,11 +291,13 @@ class _ProxyPageWidgetState extends State<ProxyPage>
     ClashProvider clashProvider,
     SubscriptionProvider subscriptionProvider,
   ) {
+    final trans = context.translate;
+
     if (subscriptionProvider.getSubscriptionConfigPath() == null) {
       return ProxyEmptyState(
         type: ProxyEmptyStateType.noSubscription,
-        message: context.translate.proxy.noSubscription,
-        subtitle: context.translate.proxy.pleaseAddSubscription,
+        message: trans.proxy.noSubscription,
+        subtitle: trans.proxy.pleaseAddSubscription,
       );
     }
 
@@ -311,16 +313,16 @@ class _ProxyPageWidgetState extends State<ProxyPage>
           clashProvider.outboundMode == 'direct') {
         return ProxyEmptyState(
           type: ProxyEmptyStateType.directMode,
-          message: context.translate.proxy.directModeEnabled,
-          subtitle: context.translate.proxy.directModeDescription,
+          message: trans.proxy.directModeEnabled,
+          subtitle: trans.proxy.directModeDescription,
         );
       }
 
       return ProxyEmptyState(
         type: ProxyEmptyStateType.noProxyGroups,
-        message: context.translate.proxy.noProxyGroups,
+        message: trans.proxy.noProxyGroups,
         subtitle: !clashProvider.isCoreRunning
-            ? context.translate.proxy.loadAfterStart
+            ? trans.proxy.loadAfterStart
             : null,
       );
     }
@@ -332,8 +334,10 @@ class _ProxyPageWidgetState extends State<ProxyPage>
     BuildContext context,
     ClashProvider clashProvider,
   ) {
+    final trans = context.translate;
+
     if (clashProvider.proxyGroups.isEmpty) {
-      return Center(child: Text(context.translate.proxy.noProxyGroups));
+      return Center(child: Text(trans.proxy.noProxyGroups));
     }
 
     // 检测订阅是否切换
@@ -394,15 +398,13 @@ class _ProxyPageWidgetState extends State<ProxyPage>
     String groupName,
     String proxyName,
   ) async {
+    final trans = context.translate;
     final clashProvider = context.read<ClashProvider>();
     final success = await clashProvider.changeProxy(groupName, proxyName);
 
     // 如果切换失败（如代理组类型不支持手动切换），给用户提示
     if (!success && context.mounted) {
-      ModernToast.warning(
-        context,
-        context.translate.proxy.unsupportedGroupType,
-      );
+      ModernToast.warning(context, trans.proxy.unsupportedGroupType);
     }
 
     // 移除 setState(),让 ClashProvider.notifyListeners() 触发 Selector 更新
