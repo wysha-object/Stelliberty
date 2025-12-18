@@ -579,6 +579,19 @@ class SubscriptionProvider extends ChangeNotifier {
     Logger.info(
       '批量更新完成: 成功=${_subscriptions.length - errors.length}, 失败=${errors.length}',
     );
+
+    // 如果更新的订阅中包含当前选中的订阅，重新加载配置
+    if (_currentSubscriptionId != null &&
+        _subscriptions.any((s) => s.id == _currentSubscriptionId)) {
+      Logger.info('批量更新包含当前订阅，重新加载配置...');
+      _clashProvider?.pauseConfigWatcher();
+      try {
+        await _reloadCurrentSubscriptionConfig(reason: '批量更新包含当前订阅');
+      } finally {
+        await _clashProvider?.resumeConfigWatcher();
+      }
+    }
+
     return errors;
   }
 
