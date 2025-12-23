@@ -162,21 +162,14 @@ class _TunConfigCardState extends State<TunConfigCard> {
         await ClashManager.instance.stopCore();
       }
 
-      // 2. 卸载服务
-      Logger.info('卸载旧版本服务');
-      final uninstallSuccess = await serviceProvider.uninstallService();
-      if (!uninstallSuccess) {
-        throw Exception(serviceProvider.lastOperationError ?? '卸载服务失败');
-      }
-
-      // 3. 安装服务（新版本）
-      Logger.info('安装新版本服务');
+      // 2. 调用 install 命令（Rust 端会自动检测并原地更新，只需 1 次 UAC）
+      Logger.info('开始更新服务（原地更新）');
       final installSuccess = await serviceProvider.installService();
       if (!installSuccess) {
-        throw Exception(serviceProvider.lastOperationError ?? '安装服务失败');
+        throw Exception(serviceProvider.lastOperationError ?? '更新服务失败');
       }
 
-      // 4. 恢复核心运行状态
+      // 3. 恢复核心运行状态
       if (wasRunning && currentConfig != null) {
         Logger.info('恢复核心运行状态');
         await ClashManager.instance.startCore(
@@ -185,7 +178,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
         );
       }
 
-      // 5. 刷新版本号
+      // 4. 刷新版本号
       _checkServiceVersion();
 
       if (mounted) {
@@ -445,7 +438,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
                 children: [
                   if (isServiceModeInstalled) ...[
                     IconButton(
-                      icon: const Icon(Icons.system_update, size: 20),
+                      icon: const Icon(Icons.refresh, size: 20),
                       tooltip: hasUpdate
                           ? trans.tunConfig.updateAvailable
                           : trans.tunConfig.upToDate,
@@ -465,7 +458,8 @@ class _TunConfigCardState extends State<TunConfigCard> {
                         : (value) async {
                             if (value) {
                               // 安装服务
-                              final success = await serviceProvider.installService();
+                              final success = await serviceProvider
+                                  .installService();
                               if (mounted) {
                                 if (success) {
                                   ModernToast.success(

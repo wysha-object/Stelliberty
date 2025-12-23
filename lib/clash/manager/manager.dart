@@ -236,6 +236,16 @@ class ClashManager extends ChangeNotifier {
     return await _lifecycleManager.stopCore();
   }
 
+  // 启动服务心跳定时器（仅服务模式使用，代理方法）
+  void startServiceHeartbeat() {
+    _lifecycleManager.startServiceHeartbeat();
+  }
+
+  // 停止服务心跳定时器（仅服务模式使用，代理方法）
+  void stopServiceHeartbeat() {
+    _lifecycleManager.stopServiceHeartbeat();
+  }
+
   // 重启核心（停止后重新启动）
   // 用于应用配置更改（如端口、外部控制器等需要重启才能生效的配置）
   Future<bool> restartCore({String? configPath}) async {

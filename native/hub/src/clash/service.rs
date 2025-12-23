@@ -32,34 +32,33 @@ pub enum ServiceStatus {
 // 服务管理器
 pub struct ServiceManager {
     ipc_client: IpcClient,
-    service_exe_path: PathBuf,
+    service_binary_path: PathBuf,
 }
 
 impl ServiceManager {
     // 创建服务管理器
     pub fn new() -> Result<Self> {
-        let service_exe_path = crate::services::path_service::service_private_exe();
+        // 使用 assets 中的服务二进制（而非私有目录）以便 install 命令比对版本
+        // 首次安装时私有目录不存在，更新时比较 assets 版本和私有目录版本
+        let service_binary_path = crate::services::path_service::assets_service_binary();
         Ok(Self {
             ipc_client: IpcClient::default(),
-            service_exe_path,
+            service_binary_path,
         })
     }
 
     // 获取已安装服务的版本号（从私有目录中的服务程序）
     pub fn get_installed_service_version() -> Option<String> {
-        let service_exe_path = crate::services::path_service::service_private_exe();
+        let service_binary_path = crate::services::path_service::service_private_binary();
 
         // 检查私有目录中的服务程序是否存在
-        if !service_exe_path.exists() {
-            log::debug!("私有目录中不存在服务程序：{}", service_exe_path.display());
+        if !service_binary_path.exists() {
+            log::debug!("私有目录中不存在服务程序：{}", service_binary_path.display());
             return None;
         }
 
         // 执行 stelliberty-service version 命令
-        let output = match Command::new(&service_exe_path)
-            .arg("version")
-            .output()
-        {
+        let output = match Command::new(&service_binary_path).arg("version").output() {
             Ok(output) => output,
             Err(e) => {
                 log::error!("执行私有目录服务程序 version 命令失败：{}", e);
@@ -85,19 +84,19 @@ impl ServiceManager {
 
     // 获取内置服务的版本号（从应用 assets 中的服务二进制）
     pub fn get_bundled_service_version() -> Option<String> {
-        let source_service_exe = crate::services::path_service::assets_service_exe();
+        let source_service_binary = crate::services::path_service::assets_service_binary();
 
         // 检查 assets 中的服务程序是否存在
-        if !source_service_exe.exists() {
+        if !source_service_binary.exists() {
             log::error!(
                 "服务程序不存在：{}。请检查应用打包是否正确",
-                source_service_exe.display()
+                source_service_binary.display()
             );
             return None;
         }
 
         // 执行 stelliberty-service version 命令
-        let output = match Command::new(&source_service_exe).arg("version").output() {
+        let output = match Command::new(&source_service_binary).arg("version").output() {
             Ok(output) => output,
             Err(e) => {
                 log::error!("执行服务程序 version 命令失败：{}", e);
@@ -247,8 +246,9 @@ impl ServiceManager {
             log::info!("检测到 Clash 核心正在运行，将在权限确认后停止");
         }
 
-        // 安装前始终复制最新的服务二进制到私有目录
-        self.copy_service_binary_to_private()?;
+        // 注意：不在此处复制服务二进制文件
+        // 由 stelliberty-service 的 install 命令自行处理更新检测和文件复制
+        // 这样才能正确判断是首次安装还是更新
 
         #[cfg(windows)]
         {
@@ -278,7 +278,7 @@ impl ServiceManager {
 
             if has_root {
                 // 已有 root 权限，直接执行
-                let output = Command::new(&self.service_exe_path)
+                let output = Command::new(&self.service_binary_path)
                     .arg("install")
                     .output()
                     .context("执行安装命令失败")?;
@@ -291,7 +291,7 @@ impl ServiceManager {
             } else {
                 // 尝试 pkexec 提权
                 let output = Command::new("pkexec")
-                    .arg(&self.service_exe_path)
+                    .arg(&self.service_binary_path)
                     .arg("install")
                     .output();
 
@@ -320,7 +320,7 @@ impl ServiceManager {
         #[cfg(target_os = "macos")]
         {
             // macOS 使用 osascript 进行图形化提权（已在 stelliberty_service 中实现）
-            let output = Command::new(&self.service_exe_path)
+            let output = Command::new(&self.service_binary_path)
                 .arg("install")
                 .output()
                 .context("执行安装命令失败")?;
@@ -353,7 +353,7 @@ impl ServiceManager {
 
             if has_root {
                 // 已有 root 权限，直接执行
-                let output = Command::new(&self.service_exe_path)
+                let output = Command::new(&self.service_binary_path)
                     .arg("uninstall")
                     .output()
                     .context("执行卸载命令失败")?;
@@ -366,7 +366,7 @@ impl ServiceManager {
             } else {
                 // 尝试 pkexec 提权
                 let output = Command::new("pkexec")
-                    .arg(&self.service_exe_path)
+                    .arg(&self.service_binary_path)
                     .arg("uninstall")
                     .output();
 
@@ -391,7 +391,7 @@ impl ServiceManager {
 
         #[cfg(target_os = "macos")]
         {
-            let output = Command::new(&self.service_exe_path)
+            let output = Command::new(&self.service_binary_path)
                 .arg("uninstall")
                 .output()
                 .context("执行卸载命令失败")?;
@@ -408,102 +408,14 @@ impl ServiceManager {
         Ok(())
     }
 
-    // 复制服务二进制到私有目录（安装时调用）
-    fn copy_service_binary_to_private(&self) -> Result<()> {
-        let app_data_dir = crate::services::path_service::service_private_dir();
-        let source_service_exe = crate::services::path_service::assets_service_exe();
-        let private_service_exe = crate::services::path_service::service_private_exe();
-
-        // 检查是否需要复制（通过文件大小和修改时间判断）
-        if !private_service_exe.exists() {
-            log::info!("私有目录中不存在服务程序，需要复制");
-        } else {
-            match (
-                std::fs::metadata(&source_service_exe),
-                std::fs::metadata(&private_service_exe),
-            ) {
-                (Ok(source_meta), Ok(private_meta)) => {
-                    // 比较文件大小和修改时间
-                    let size_different = source_meta.len() != private_meta.len();
-                    let time_different = source_meta
-                        .modified()
-                        .ok()
-                        .zip(private_meta.modified().ok())
-                        .map(|(s, p)| s > p)
-                        .unwrap_or(true);
-
-                    if !size_different && !time_different {
-                        log::info!("私有目录中的服务程序已是最新版本，跳过复制");
-                        return Ok(());
-                    }
-
-                    log::info!("检测到服务程序更新（大小或时间不同），将覆盖私有目录中的文件");
-                }
-                _ => {
-                    // 元数据获取失败，安全起见重新复制
-                    log::warn!("无法获取文件元数据，将重新复制");
-                }
-            }
-        }
-
-        // 确保私有目录存在
-        if !app_data_dir.exists() {
-            std::fs::create_dir_all(&app_data_dir)
-                .with_context(|| format!("无法创建私有目录：{}", app_data_dir.display()))?;
-        }
-
-        log::info!(
-            "复制服务程序到私有目录：{} -> {}",
-            source_service_exe.display(),
-            private_service_exe.display()
-        );
-
-        // 获取源文件大小用于验证
-        let source_size = std::fs::metadata(&source_service_exe)
-            .with_context(|| format!("无法获取源文件元数据：{}", source_service_exe.display()))?
-            .len();
-
-        std::fs::copy(&source_service_exe, &private_service_exe).with_context(|| {
-            format!(
-                "无法复制服务程序从 {} 到 {}",
-                source_service_exe.display(),
-                private_service_exe.display()
-            )
-        })?;
-
-        // 问题 13：验证文件复制完整性（通过文件大小）
-        let copied_size = std::fs::metadata(&private_service_exe)
-            .with_context(|| {
-                format!(
-                    "无法获取已复制文件元数据：{}",
-                    private_service_exe.display()
-                )
-            })?
-            .len();
-
-        if copied_size != source_size {
-            anyhow::bail!(
-                "文件复制完整性验证失败：期望 {} 字节，实际 {} 字节。可能原因：磁盘空间不足或杀毒软件拦截",
-                source_size,
-                copied_size
-            );
-        }
-
-        log::info!(
-            "服务程序已复制到私有目录并验证完整性（{} 字节）",
-            copied_size
-        );
-        Ok(())
-    }
-
     // 删除私有目录中的服务二进制（卸载时调用）
     async fn remove_service_binary_from_private(&self) -> Result<()> {
-        let private_service_exe = crate::services::path_service::service_private_exe();
+        let private_service_binary = crate::services::path_service::service_private_binary();
 
-        if private_service_exe.exists() {
+        if private_service_binary.exists() {
             log::info!(
                 "删除私有目录中的服务程序：{}",
-                private_service_exe.display()
+                private_service_binary.display()
             );
 
             // 问题 14：卸载后服务进程可能还在释放文件句柄，需要等待并重试
@@ -511,7 +423,7 @@ impl ServiceManager {
             const MAX_RETRIES: u32 = 15; // 最多重试 15 次（3 秒）
 
             loop {
-                match std::fs::remove_file(&private_service_exe) {
+                match std::fs::remove_file(&private_service_binary) {
                     Ok(_) => {
                         log::info!("服务程序已从私有目录删除");
                         break;
@@ -529,7 +441,7 @@ impl ServiceManager {
                     Err(_e) => {
                         anyhow::bail!(
                             "无法删除服务程序：{}。可能原因：\n1. 文件被服务进程占用（请等待服务完全退出）\n2. 文件被杀毒软件锁定\n3. 权限不足",
-                            private_service_exe.display()
+                            private_service_binary.display()
                         );
                     }
                 }
@@ -549,14 +461,14 @@ impl ServiceManager {
         use windows::core::{HSTRING, PCWSTR};
 
         let binary_path = self
-            .service_exe_path
+            .service_binary_path
             .to_str()
             .context("服务程序路径包含无效字符")?;
 
         log::info!("以管理员权限执行：{} {}", binary_path, operation);
 
         // 再次验证服务程序是否存在（防止文件被删除）
-        if !self.service_exe_path.exists() {
+        if !self.service_binary_path.exists() {
             anyhow::bail!("服务程序文件不存在：{}。可能已被删除或移动", binary_path);
         }
 
@@ -747,19 +659,19 @@ impl Default for ServiceManager {
             log::error!("创建 ServiceManager 失败：{}", e);
 
             // 使用备用路径（尝试从私有目录或便携式目录）
-            let service_exe_path = {
-                let private_exe = crate::services::path_service::service_private_exe();
-                if private_exe.exists() {
-                    private_exe
+            let service_binary_path = {
+                let private_binary = crate::services::path_service::service_private_binary();
+                if private_binary.exists() {
+                    private_binary
                 } else {
                     // 备用：尝试从 assets 目录
-                    crate::services::path_service::assets_service_exe()
+                    crate::services::path_service::assets_service_binary()
                 }
             };
 
             Self {
                 ipc_client: IpcClient::default(),
-                service_exe_path,
+                service_binary_path,
             }
         })
     }

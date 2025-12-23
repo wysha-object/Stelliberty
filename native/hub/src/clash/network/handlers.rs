@@ -380,7 +380,7 @@ macro_rules! acquire_connection_with_retry {
                     return Ok(conn);
                 }
                 Err(e) if attempt < MAX_CONNECT_RETRIES - 1 => {
-                    log::debug!(
+                    log::trace!(
                         "{} 连接失败（第 {} 次），{}ms 后重试：{}",
                         $conn_type,
                         attempt + 1,

@@ -25,11 +25,11 @@ pub struct PathService {
 
     // 服务相关路径（私有目录，需要持久化）
     service_private_dir: PathBuf,
-    service_private_exe: PathBuf,
+    service_private_binary: PathBuf,
 
     // 服务相关路径（assets 目录，随应用打包）
     assets_service_dir: PathBuf,
-    assets_service_exe: PathBuf,
+    assets_service_binary: PathBuf,
 
     // 日志文件路径
     log_file: PathBuf,
@@ -42,8 +42,8 @@ pub struct PathService {
 impl PathService {
     // 创建路径服务实例
     pub fn new() -> Result<Self, String> {
-        let current_exe = std::env::current_exe()
-            .map_err(|e| format!("无法获取当前可执行文件路径：{}", e))?;
+        let current_exe =
+            std::env::current_exe().map_err(|e| format!("无法获取当前可执行文件路径：{}", e))?;
 
         let exe_dir = current_exe
             .parent()
@@ -62,14 +62,14 @@ impl PathService {
         #[cfg(not(target_os = "windows"))]
         let service_exe_name = "stelliberty-service";
 
-        let service_private_exe = service_private_dir.join(service_exe_name);
+        let service_private_binary = service_private_dir.join(service_exe_name);
 
         // Assets 中的服务二进制路径
         let assets_service_dir = app_data_dir
             .join("flutter_assets")
             .join("assets")
             .join("service");
-        let assets_service_exe = assets_service_dir.join(service_exe_name);
+        let assets_service_binary = assets_service_dir.join(service_exe_name);
 
         // 日志文件路径
         let log_file = app_data_dir.join("running.logs");
@@ -86,9 +86,9 @@ impl PathService {
             exe_dir,
             app_data_dir,
             service_private_dir,
-            service_private_exe,
+            service_private_binary,
             assets_service_dir,
-            assets_service_exe,
+            assets_service_binary,
             log_file,
             #[cfg(target_os = "windows")]
             tasks_dir,
@@ -106,8 +106,8 @@ impl PathService {
 
         #[cfg(target_os = "linux")]
         {
-            let home = std::env::var("HOME")
-                .map_err(|e| format!("无法获取 HOME 环境变量：{}", e))?;
+            let home =
+                std::env::var("HOME").map_err(|e| format!("无法获取 HOME 环境变量：{}", e))?;
             Ok(PathBuf::from(home)
                 .join(".local")
                 .join("share")
@@ -117,8 +117,8 @@ impl PathService {
 
         #[cfg(target_os = "macos")]
         {
-            let home = std::env::var("HOME")
-                .map_err(|e| format!("无法获取 HOME 环境变量：{}", e))?;
+            let home =
+                std::env::var("HOME").map_err(|e| format!("无法获取 HOME 环境变量：{}", e))?;
             Ok(PathBuf::from(home)
                 .join("Library")
                 .join("Application Support")
@@ -140,9 +140,18 @@ impl PathService {
             exe_dir: current_dir.clone(),
             app_data_dir: current_dir.join("data"),
             service_private_dir: current_dir.join("service"),
-            service_private_exe: current_dir.join("service").join("stelliberty-service"),
-            assets_service_dir: current_dir.join("data").join("flutter_assets").join("assets").join("service"),
-            assets_service_exe: current_dir.join("data").join("flutter_assets").join("assets").join("service").join("stelliberty-service"),
+            service_private_binary: current_dir.join("service").join("stelliberty-service"),
+            assets_service_dir: current_dir
+                .join("data")
+                .join("flutter_assets")
+                .join("assets")
+                .join("service"),
+            assets_service_binary: current_dir
+                .join("data")
+                .join("flutter_assets")
+                .join("assets")
+                .join("service")
+                .join("stelliberty-service"),
             log_file: current_dir.join("data").join("running.logs"),
             #[cfg(target_os = "windows")]
             tasks_dir: current_dir.join("tasks"),
@@ -159,14 +168,9 @@ impl PathService {
         &self.app_data_dir
     }
 
-    // 获取服务私有目录
-    pub fn service_private_dir(&self) -> &PathBuf {
-        &self.service_private_dir
-    }
-
     // 获取私有目录中的服务二进制路径
-    pub fn service_private_exe(&self) -> &PathBuf {
-        &self.service_private_exe
+    pub fn service_private_binary(&self) -> &PathBuf {
+        &self.service_private_binary
     }
 
     // 获取 assets 中的服务目录
@@ -175,8 +179,8 @@ impl PathService {
     }
 
     // 获取 assets 中的服务二进制路径
-    pub fn assets_service_exe(&self) -> &PathBuf {
-        &self.assets_service_exe
+    pub fn assets_service_binary(&self) -> &PathBuf {
+        &self.assets_service_binary
     }
 
     // 获取日志文件路径
@@ -231,19 +235,11 @@ pub fn app_data_dir() -> PathBuf {
         .unwrap_or_else(|_| PathBuf::from("data"))
 }
 
-// 获取服务私有目录
-pub fn service_private_dir() -> PathBuf {
-    PATH_SERVICE
-        .read()
-        .map(|s| s.service_private_dir().clone())
-        .unwrap_or_else(|_| PathBuf::from("service"))
-}
-
 // 获取私有目录中的服务二进制路径
-pub fn service_private_exe() -> PathBuf {
+pub fn service_private_binary() -> PathBuf {
     PATH_SERVICE
         .read()
-        .map(|s| s.service_private_exe().clone())
+        .map(|s| s.service_private_binary().clone())
         .unwrap_or_else(|_| PathBuf::from("stelliberty-service"))
 }
 
@@ -257,10 +253,10 @@ pub fn assets_service_dir() -> PathBuf {
 }
 
 // 获取 assets 中的服务二进制路径
-pub fn assets_service_exe() -> PathBuf {
+pub fn assets_service_binary() -> PathBuf {
     PATH_SERVICE
         .read()
-        .map(|s| s.assets_service_exe().clone())
+        .map(|s| s.assets_service_binary().clone())
         .unwrap_or_else(|_| PathBuf::from("stelliberty-service"))
 }
 

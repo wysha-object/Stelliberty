@@ -1,6 +1,6 @@
 [package]
 name = "stelliberty-service"
-version = "1.5.0"
+version = "1.5.1"
 edition = "2024"
 authors = ["Stelliberty Contributors"]
 description = "Background service for Stelliberty to manage Clash core with elevated privileges"
@@ -55,6 +55,7 @@ windows = { version = "^0.62", features = [
     "Win32_System_Memory",
 ] }
 
-# Unix 权限检查
+# Unix 权限检查和进程管理
 [target.'cfg(not(windows))'.dependencies]
 libc = "^0.2"
+nix = { version = "^0.29", features = ["signal", "process"] }

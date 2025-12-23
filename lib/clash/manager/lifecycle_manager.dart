@@ -504,7 +504,7 @@ class LifecycleManager {
 
       // 服务模式下启动心跳定时器
       if (_currentStartMode == ClashStartMode.service) {
-        _startServiceHeartbeat();
+        startServiceHeartbeat();
       }
 
       _notifyListeners();
@@ -618,7 +618,7 @@ class LifecycleManager {
       // 再停止 Clash 核心
       if (_currentStartMode == ClashStartMode.service) {
         Logger.info('使用服务模式停止核心');
-        _stopServiceHeartbeat(); // 停止心跳定时器
+        stopServiceHeartbeat(); // 停止心跳定时器
         await _stopWithService();
       } else {
         Logger.info('使用普通模式停止核心');
@@ -687,7 +687,7 @@ class LifecycleManager {
   }
 
   // 启动服务心跳定时器（仅服务模式使用）
-  void _startServiceHeartbeat() {
+  void startServiceHeartbeat() {
     _serviceHeartbeatTimer?.cancel();
 
     // 立即发送第一次心跳，避免服务启动后等待30秒导致超时
@@ -704,7 +704,7 @@ class LifecycleManager {
   }
 
   // 停止服务心跳定时器
-  void _stopServiceHeartbeat() {
+  void stopServiceHeartbeat() {
     if (_serviceHeartbeatTimer != null) {
       _serviceHeartbeatTimer!.cancel();
       _serviceHeartbeatTimer = null;

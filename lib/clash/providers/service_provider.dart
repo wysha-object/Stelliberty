@@ -203,6 +203,9 @@ class ServiceProvider {
         Logger.info('服务卸载成功');
         _lastOperationSuccess = true;
 
+        // 停止服务心跳定时器（Rust 端已停止核心，但 Dart 端的心跳定时器还在运行）
+        ClashManager.instance.stopServiceHeartbeat();
+
         // 立即更新本地状态并通知 UI
         stateManager.setNotInstalled(reason: '服务卸载成功');
 

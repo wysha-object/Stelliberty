@@ -112,8 +112,7 @@ fn get_task_dir() -> Result<PathBuf, String> {
 
     // 确保任务目录存在
     if !task_dir.exists() {
-        std::fs::create_dir_all(&task_dir)
-            .map_err(|e| format!("创建任务目录失败：{}", e))?;
+        std::fs::create_dir_all(&task_dir).map_err(|e| format!("创建任务目录失败：{}", e))?;
     }
 
     Ok(task_dir)
