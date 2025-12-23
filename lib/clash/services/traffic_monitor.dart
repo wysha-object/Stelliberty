@@ -11,7 +11,7 @@ class TrafficMonitor {
   TrafficMonitor._();
 
   StreamController<TrafficData>? _controller;
-  StreamSubscription? _rustStreamSubscription;
+  StreamSubscription? _trafficSubscription;
   bool _isMonitoring = false;
 
   // 累计流量统计
@@ -66,7 +66,7 @@ class TrafficMonitor {
     _controller ??= StreamController<TrafficData>.broadcast();
 
     // 监听来自 Rust 的流量数据
-    _rustStreamSubscription = IpcTrafficData.rustSignalStream.listen((signal) {
+    _trafficSubscription = IpcTrafficData.rustSignalStream.listen((signal) {
       _handleTrafficData(signal.message);
     });
 
@@ -85,8 +85,8 @@ class TrafficMonitor {
     const StopTrafficStream().sendSignalToRust();
 
     // 取消 Rust 流订阅
-    await _rustStreamSubscription?.cancel();
-    _rustStreamSubscription = null;
+    await _trafficSubscription?.cancel();
+    _trafficSubscription = null;
 
     // 关闭流控制器
     await _controller?.close();

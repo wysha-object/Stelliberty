@@ -53,7 +53,10 @@ impl ServiceManager {
 
         // 检查私有目录中的服务程序是否存在
         if !service_binary_path.exists() {
-            log::debug!("私有目录中不存在服务程序：{}", service_binary_path.display());
+            log::debug!(
+                "私有目录中不存在服务程序：{}",
+                service_binary_path.display()
+            );
             return None;
         }
 

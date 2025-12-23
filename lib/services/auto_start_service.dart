@@ -28,7 +28,7 @@ class AutoStartService {
       final completer = Completer<bool>();
 
       // 订阅 Rust 信号流
-      final streamListener = AutoStartStatusResult.rustSignalStream.listen((
+      final subscription = AutoStartStatusResult.rustSignalStream.listen((
         result,
       ) {
         if (!completer.isCompleted) {
@@ -54,7 +54,7 @@ class AutoStartService {
       );
 
       // 停止监听信号流
-      await streamListener.cancel();
+      await subscription.cancel();
 
       // 更新缓存和持久化
       _cachedStatus = status;
@@ -74,7 +74,7 @@ class AutoStartService {
       final completer = Completer<bool>();
 
       // 订阅 Rust 信号流
-      final streamListener = AutoStartStatusResult.rustSignalStream.listen((
+      final subscription = AutoStartStatusResult.rustSignalStream.listen((
         result,
       ) {
         if (!completer.isCompleted) {
@@ -101,7 +101,7 @@ class AutoStartService {
       );
 
       // 停止监听信号流
-      await streamListener.cancel();
+      await subscription.cancel();
 
       // 设置成功后更新缓存和持久化
       if (success) {

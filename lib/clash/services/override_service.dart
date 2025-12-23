@@ -97,20 +97,19 @@ class OverrideService {
 
       // 创建 Completer 等待响应
       final completer = Completer<signals.DownloadOverrideResponse>();
-      StreamSubscription? listener;
+      StreamSubscription? subscription;
 
       try {
         // 订阅 Rust 响应流，只接收匹配的 request_id
-        StreamSubscription? localListener;
-        localListener = signals.DownloadOverrideResponse.rustSignalStream
-            .listen((result) {
-              if (!completer.isCompleted &&
-                  result.message.requestId == requestId) {
-                completer.complete(result.message);
-                localListener?.cancel(); // 收到响应后立即取消监听
-              }
-            });
-        listener = localListener;
+        subscription = signals.DownloadOverrideResponse.rustSignalStream.listen(
+          (result) {
+            if (!completer.isCompleted &&
+                result.message.requestId == requestId) {
+              completer.complete(result.message);
+              subscription?.cancel(); // 收到响应后立即取消监听
+            }
+          },
+        );
 
         // 发送下载请求到 Rust 层
         signals.DownloadOverrideRequest(
@@ -150,7 +149,7 @@ class OverrideService {
         return content;
       } finally {
         // 停止监听信号流
-        await listener?.cancel();
+        await subscription?.cancel();
       }
     } catch (e) {
       Logger.error('下载远程覆写失败：${config.name} - $e');

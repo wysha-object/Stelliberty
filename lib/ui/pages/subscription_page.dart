@@ -693,7 +693,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     SubscriptionProvider provider,
     SubscriptionDialogResult result,
   ) async {
-    StreamSubscription? streamListener;
+    StreamSubscription? subscription;
 
     try {
       final file = File(result.localFilePath!);
@@ -712,8 +712,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       final requestId = 'import-${DateTime.now().millisecondsSinceEpoch}';
 
       // 订阅 Rust 信号流，只接收匹配的 request_id
-      StreamSubscription? listener;
-      listener = ParseSubscriptionResponse.rustSignalStream.listen((
+      subscription = ParseSubscriptionResponse.rustSignalStream.listen((
         rustResult,
       ) {
         if (completer.isCompleted) return;
@@ -724,9 +723,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         } else {
           completer.completeError(Exception(rustResult.message.errorMessage));
         }
-        listener?.cancel(); // 收到响应后立即取消监听
+        subscription?.cancel(); // 收到响应后立即取消监听
       });
-      streamListener = listener;
 
       // 发送解析请求到 Rust
       final parseRequest = ParseSubscriptionRequest(
@@ -756,7 +754,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       return false;
     } finally {
       // 停止监听信号流，防止内存泄漏
-      await streamListener?.cancel();
+      await subscription?.cancel();
     }
   }
 }

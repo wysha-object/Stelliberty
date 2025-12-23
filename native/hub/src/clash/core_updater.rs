@@ -377,13 +377,13 @@ async fn replace_core(
 
 // 发送进度通知到 Dart
 fn send_progress(progress: f64, message: &str, downloaded: u64, total: u64) {
-    let progress_msg = DownloadCoreProgress {
+    let signal = DownloadCoreProgress {
         progress,
         message: message.to_string(),
         downloaded,
         total,
     };
-    progress_msg.send_signal_to_dart();
+    signal.send_signal_to_dart();
 }
 
 // ============================================================================

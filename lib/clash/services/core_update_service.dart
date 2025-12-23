@@ -108,8 +108,8 @@ class CoreUpdateService {
     ProgressCallback? onProgress,
   }) async {
     final completer = Completer<DownloadCoreResponse>();
-    StreamSubscription? responseListener;
-    StreamSubscription? progressListener;
+    StreamSubscription? responseSubscription;
+    StreamSubscription? progressSubscription;
 
     try {
       // 1. 获取当前平台和架构
@@ -117,13 +117,17 @@ class CoreUpdateService {
       final arch = _getCurrentArch();
 
       // 2. 订阅进度通知
-      progressListener = DownloadCoreProgress.rustSignalStream.listen((result) {
+      progressSubscription = DownloadCoreProgress.rustSignalStream.listen((
+        result,
+      ) {
         final progress = result.message;
         onProgress?.call(progress.progress, progress.message);
       });
 
       // 3. 订阅响应流
-      responseListener = DownloadCoreResponse.rustSignalStream.listen((result) {
+      responseSubscription = DownloadCoreResponse.rustSignalStream.listen((
+        result,
+      ) {
         if (!completer.isCompleted) {
           completer.complete(result.message);
         }
@@ -153,8 +157,8 @@ class CoreUpdateService {
       Logger.error('核心下载失败：$e');
       rethrow;
     } finally {
-      await responseListener?.cancel();
-      await progressListener?.cancel();
+      await responseSubscription?.cancel();
+      await progressSubscription?.cancel();
     }
   }
 
@@ -164,11 +168,11 @@ class CoreUpdateService {
     required List<int> coreBytes,
   }) async {
     final completer = Completer<ReplaceCoreResponse>();
-    StreamSubscription? listener;
+    StreamSubscription? subscription;
 
     try {
       // 订阅 Rust 响应流
-      listener = ReplaceCoreResponse.rustSignalStream.listen((result) {
+      subscription = ReplaceCoreResponse.rustSignalStream.listen((result) {
         if (!completer.isCompleted) {
           completer.complete(result.message);
         }
@@ -197,18 +201,20 @@ class CoreUpdateService {
       Logger.error('核心替换失败：$e');
       rethrow;
     } finally {
-      await listener?.cancel();
+      await subscription?.cancel();
     }
   }
 
   // 获取最新的 Release 信息
   static Future<String> getLatestRelease() async {
     final completer = Completer<GetLatestCoreVersionResponse>();
-    StreamSubscription? listener;
+    StreamSubscription? subscription;
 
     try {
       // 订阅 Rust 响应流
-      listener = GetLatestCoreVersionResponse.rustSignalStream.listen((result) {
+      subscription = GetLatestCoreVersionResponse.rustSignalStream.listen((
+        result,
+      ) {
         if (!completer.isCompleted) {
           completer.complete(result.message);
         }
@@ -232,7 +238,7 @@ class CoreUpdateService {
 
       return result.version ?? '';
     } finally {
-      await listener?.cancel();
+      await subscription?.cancel();
     }
   }
 

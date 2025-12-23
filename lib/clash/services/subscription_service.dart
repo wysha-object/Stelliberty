@@ -80,18 +80,18 @@ class SubscriptionService {
 
     // 使用 Rust 层下载订阅
     final completer = Completer<DownloadSubscriptionResponse>();
-    StreamSubscription? downloadListener;
+    StreamSubscription? downloadSubscription;
 
     try {
       // 订阅 Rust 下载响应流，只接收匹配的 request_id
-      StreamSubscription? listener;
-      listener = DownloadSubscriptionResponse.rustSignalStream.listen((result) {
-        if (!completer.isCompleted && result.message.requestId == requestId) {
-          completer.complete(result.message);
-          listener?.cancel(); // 收到响应后立即取消监听
-        }
-      });
-      downloadListener = listener;
+      downloadSubscription = DownloadSubscriptionResponse.rustSignalStream
+          .listen((result) {
+            if (!completer.isCompleted &&
+                result.message.requestId == requestId) {
+              completer.complete(result.message);
+              downloadSubscription?.cancel(); // 收到响应后立即取消监听
+            }
+          });
 
       // 转换代理模式枚举
       final rustProxyMode = _convertProxyMode(effectiveProxyMode);
@@ -130,12 +130,13 @@ class SubscriptionService {
       // 使用 ProxyParser 解析订阅内容（支持标准 YAML、Base64 编码、纯文本代理链接）
       // 创建 Completer 等待解析结果
       final parseCompleter = Completer<String>();
-      StreamSubscription? streamListener;
+      StreamSubscription? parseSubscription;
 
       try {
         // 订阅 Rust 信号流，只接收匹配的 request_id
-        StreamSubscription? listener;
-        listener = ParseSubscriptionResponse.rustSignalStream.listen((result) {
+        parseSubscription = ParseSubscriptionResponse.rustSignalStream.listen((
+          result,
+        ) {
           if (!parseCompleter.isCompleted &&
               result.message.requestId == requestId) {
             if (result.message.isSuccessful) {
@@ -145,10 +146,9 @@ class SubscriptionService {
                 Exception(result.message.errorMessage),
               );
             }
-            listener?.cancel(); // 收到响应后立即取消监听
+            parseSubscription?.cancel(); // 收到响应后立即取消监听
           }
         });
-        streamListener = listener;
 
         // 发送解析请求到 Rust
         final parseRequest = ParseSubscriptionRequest(
@@ -188,14 +188,14 @@ class SubscriptionService {
         );
       } finally {
         // 停止监听信号流（即使发生异常）
-        await streamListener?.cancel();
+        await parseSubscription?.cancel();
       }
     } catch (e) {
       Logger.error('下载订阅失败：${subscription.name} - $e');
       rethrow;
     } finally {
       // 停止监听下载响应流
-      await downloadListener?.cancel();
+      await downloadSubscription?.cancel();
     }
   }
 

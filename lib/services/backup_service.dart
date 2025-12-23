@@ -28,11 +28,11 @@ class BackupService {
     try {
       // 使用 Rust 层创建备份
       final completer = Completer<BackupOperationResult>();
-      StreamSubscription? listener;
+      StreamSubscription? subscription;
 
       try {
         // 订阅 Rust 响应流
-        listener = BackupOperationResult.rustSignalStream.listen((result) {
+        subscription = BackupOperationResult.rustSignalStream.listen((result) {
           if (!completer.isCompleted) {
             completer.complete(result.message);
           }
@@ -63,7 +63,7 @@ class BackupService {
 
         return result.message;
       } finally {
-        await listener?.cancel();
+        await subscription?.cancel();
       }
     } catch (e) {
       Logger.error('创建备份失败：$e');
@@ -85,11 +85,11 @@ class BackupService {
     try {
       // 使用 Rust 层还原备份
       final completer = Completer<BackupOperationResult>();
-      StreamSubscription? listener;
+      StreamSubscription? subscription;
 
       try {
         // 订阅 Rust 响应流
-        listener = BackupOperationResult.rustSignalStream.listen((result) {
+        subscription = BackupOperationResult.rustSignalStream.listen((result) {
           if (!completer.isCompleted) {
             completer.complete(result.message);
           }
@@ -117,7 +117,7 @@ class BackupService {
         // 刷新内存状态（使 ClashManager 重新从持久化存储加载配置）
         ClashManager.instance.reloadFromPreferences();
       } finally {
-        await listener?.cancel();
+        await subscription?.cancel();
       }
     } catch (e) {
       Logger.error('还原备份失败：$e');

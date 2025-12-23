@@ -962,10 +962,9 @@ fn check_service_needs_update(current_exe: &std::path::Path) -> Result<bool> {
     }
 
     // 比较文件大小和修改时间
-    let current_meta = std::fs::metadata(current_exe)
-        .context("无法获取当前可执行文件元数据")?;
-    let private_meta = std::fs::metadata(&private_binary)
-        .context("无法获取私有目录可执行文件元数据")?;
+    let current_meta = std::fs::metadata(current_exe).context("无法获取当前可执行文件元数据")?;
+    let private_meta =
+        std::fs::metadata(&private_binary).context("无法获取私有目录可执行文件元数据")?;
 
     // 如果大小不同或当前文件更新，则需要更新
     let size_different = current_meta.len() != private_meta.len();
@@ -1007,12 +1006,7 @@ fn update_service_binary(current_exe: &std::path::Path) -> Result<()> {
 
     // 验证文件完整性
     let copied_size = std::fs::metadata(&private_binary)
-        .with_context(|| {
-            format!(
-                "无法获取已复制文件元数据：{}",
-                private_binary.display()
-            )
-        })?
+        .with_context(|| format!("无法获取已复制文件元数据：{}", private_binary.display()))?
         .len();
 
     if copied_size != source_size {
@@ -1023,9 +1017,6 @@ fn update_service_binary(current_exe: &std::path::Path) -> Result<()> {
         );
     }
 
-    println!(
-        "服务程序已复制到私有目录（{} 字节）",
-        copied_size
-    );
+    println!("服务程序已复制到私有目录（{} 字节）", copied_size);
     Ok(())
 }

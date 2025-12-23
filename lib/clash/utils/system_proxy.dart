@@ -105,7 +105,7 @@ class SystemProxy {
       final completer = Completer<Map<String, dynamic>>();
 
       // 订阅 Rust 信号流
-      final streamListener = SystemProxyInfo.rustSignalStream.listen((result) {
+      final subscription = SystemProxyInfo.rustSignalStream.listen((result) {
         if (!completer.isCompleted) {
           completer.complete({
             'enabled': result.message.isEnabled,
@@ -128,7 +128,7 @@ class SystemProxy {
       );
 
       // 停止监听信号流
-      await streamListener.cancel();
+      await subscription.cancel();
 
       Logger.info('系统代理状态：$status');
       return status;
@@ -155,9 +155,7 @@ class SystemProxy {
       final completer = Completer<bool>();
 
       // 订阅 Rust 信号流
-      final streamListener = SystemProxyResult.rustSignalStream.listen((
-        result,
-      ) {
+      final subscription = SystemProxyResult.rustSignalStream.listen((result) {
         if (!completer.isCompleted) {
           completer.complete(result.message.isSuccessful);
           if (!result.message.isSuccessful &&
@@ -180,7 +178,7 @@ class SystemProxy {
       );
 
       // 停止监听信号流
-      await streamListener.cancel();
+      await subscription.cancel();
 
       if (success && successMessage != null) {
         Logger.info(successMessage);

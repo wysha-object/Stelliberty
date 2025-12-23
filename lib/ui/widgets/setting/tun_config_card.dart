@@ -1,4 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +16,7 @@ import 'package:stelliberty/clash/core/service_state.dart';
 import 'package:stelliberty/i18n/i18n.dart';
 import 'package:stelliberty/utils/logger.dart';
 import 'package:stelliberty/src/bindings/signals/signals.dart';
+import 'package:rinf/rinf.dart';
 
 // 虚拟网卡网络栈类型枚举
 enum TunStack {
@@ -50,6 +52,10 @@ class _TunConfigCardState extends State<TunConfigCard> {
   // 服务版本号状态
   String? _installedServiceVersion; // 已安装服务的版本号
   String? _bundledServiceVersion; // 应用内置服务的版本号
+
+  // Stream 订阅（需要在 dispose 时取消）
+  StreamSubscription<RustSignalPack<ServiceVersionResponse>>?
+  _versionResponseSubscription;
 
   // 虚拟网卡模式配置
   TunStack _tunStack = TunStack.mixed;
@@ -92,18 +98,20 @@ class _TunConfigCardState extends State<TunConfigCard> {
     });
 
     // 监听服务版本号响应
-    ServiceVersionResponse.rustSignalStream.listen((signal) {
-      if (mounted) {
-        setState(() {
-          _installedServiceVersion = signal.message.installedVersion;
-          _bundledServiceVersion = signal.message.bundledVersion;
+    _versionResponseSubscription = ServiceVersionResponse.rustSignalStream
+        .listen((signal) {
+          if (mounted) {
+            setState(() {
+              _installedServiceVersion = signal.message.installedVersion;
+              _bundledServiceVersion = signal.message.bundledVersion;
+            });
+          }
         });
-      }
-    });
   }
 
   @override
   void dispose() {
+    _versionResponseSubscription?.cancel();
     _tunDeviceController.dispose();
     _tunMtuController.dispose();
     _tunDnsHijackController.dispose();

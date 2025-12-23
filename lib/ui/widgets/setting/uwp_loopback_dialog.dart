@@ -85,26 +85,25 @@ class UwpLoopbackState extends ChangeNotifier {
 
       // **关键修复**：先建立所有订阅，再发送请求，消除竞态窗口
       // 监听应用信息流
-      final appStreamListener = AppContainerInfo.rustSignalStream.listen((
+      final appInfoSubscription = AppContainerInfo.rustSignalStream.listen((
         signal,
       ) {
         apps.add(UwpApp.fromRust(signal.message));
       });
 
       // 监听完成信号
-      final completeListener = AppContainersComplete.rustSignalStream.listen((
-        _,
-      ) {
-        // 等待一小段时间确保所有消息都已入队并处理
-        Future.delayed(const Duration(milliseconds: 50)).then((_) {
-          if (!completer.isCompleted) {
-            completer.complete();
-          }
-        });
-      });
+      final completeSubscription = AppContainersComplete.rustSignalStream
+          .listen((_) {
+            // 等待一小段时间确保所有消息都已入队并处理
+            Future.delayed(const Duration(milliseconds: 50)).then((_) {
+              if (!completer.isCompleted) {
+                completer.complete();
+              }
+            });
+          });
 
       // 等待列表初始化信号的订阅
-      final listListener = AppContainersList.rustSignalStream.listen((_) {
+      final listSubscription = AppContainersList.rustSignalStream.listen((_) {
         // 初始化信号，不需要处理
       });
 
@@ -115,9 +114,9 @@ class UwpLoopbackState extends ChangeNotifier {
         // 等待完成信号或超时
         await completer.future.timeout(const Duration(seconds: 10));
       } finally {
-        await appStreamListener.cancel();
-        await completeListener.cancel();
-        await listListener.cancel();
+        await appInfoSubscription.cancel();
+        await completeSubscription.cancel();
+        await listSubscription.cancel();
       }
 
       _apps = apps;

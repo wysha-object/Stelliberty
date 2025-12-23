@@ -13,7 +13,7 @@ class ClashLogService {
     _controller = StreamController<ClashLogMessage>.broadcast();
   }
 
-  StreamSubscription? _rustStreamSubscription;
+  StreamSubscription? _logSubscription;
   late StreamController<ClashLogMessage> _controller;
   bool _isMonitoring = false;
   ClashLogLevel _currentLogLevel = ClashLogLevel.info;
@@ -50,7 +50,7 @@ class ClashLogService {
     Logger.info('开始 Clash 日志监控 (IPC 模式，级别：${_currentLogLevel.toApiParam()})');
 
     // 监听来自 Rust 的日志数据
-    _rustStreamSubscription = IpcLogData.rustSignalStream.listen((signal) {
+    _logSubscription = IpcLogData.rustSignalStream.listen((signal) {
       _handleLogData(signal.message);
     });
 
@@ -71,8 +71,8 @@ class ClashLogService {
     const StopLogStream().sendSignalToRust();
 
     // 取消 Rust 流订阅
-    await _rustStreamSubscription?.cancel();
-    _rustStreamSubscription = null;
+    await _logSubscription?.cancel();
+    _logSubscription = null;
 
     // 不关闭 StreamController，保持流活动以便外部持续订阅
     // StreamController 在整个应用生命周期内保持活动
