@@ -105,6 +105,9 @@ class ClashManager extends ChangeNotifier {
   // 覆写失败回调（启动失败时禁用当前订阅的所有覆写）
   Future<void> Function()? _onOverridesFailedCallback;
 
+  // 默认配置启动成功回调（清除 currentSubscription，避免应用重启后再次尝试失败的配置）
+  Future<void> Function()? _onThirdLevelFallbackCallback;
+
   // 防重复调用标记
   bool _isHandlingOverridesFailed = false;
 
@@ -185,6 +188,12 @@ class ClashManager extends ChangeNotifier {
     Logger.debug('已设置覆写失败回调到 ClashManager');
   }
 
+  // 设置默认配置启动成功回调（由 SubscriptionProvider 注入）
+  void setThirdLevelFallbackCallback(Future<void> Function() callback) {
+    _onThirdLevelFallbackCallback = callback;
+    Logger.debug('已设置默认配置启动成功回调到 ClashManager');
+  }
+
   Future<bool> startCore({
     String? configPath,
     List<OverrideConfig> overrides = const [],
@@ -193,6 +202,7 @@ class ClashManager extends ChangeNotifier {
       configPath: configPath,
       overrides: overrides,
       onOverridesFailed: onOverridesFailed,
+      onThirdLevelFallback: _onThirdLevelFallbackCallback,
       mixedPort: _configManager.mixedPort, // 传递混合端口
       isIpv6Enabled: _configManager.isIpv6Enabled,
       isTunEnabled: _configManager.isTunEnabled,
@@ -261,8 +271,10 @@ class ClashManager extends ChangeNotifier {
     // 等待一小段时间确保端口完全释放
     await Future.delayed(const Duration(milliseconds: 50));
 
-    // 启动核心
-    final startSuccess = await startCore(configPath: configPath);
+    // 启动核心（使用显式传递的 configPath，或当前的配置路径）
+    final startSuccess = await startCore(
+      configPath: configPath ?? currentConfigPath,
+    );
     if (!startSuccess) {
       Logger.error('启动核心失败');
       return false;

@@ -348,6 +348,12 @@ Future<void> setupProviderDependencies(
   } else {
     Logger.debug('当前订阅无覆写，跳过设置覆写失败回调');
   }
+
+  // 设置默认配置启动成功回调（清除 currentSubscription，避免应用重启后再次失败）
+  ClashManager.instance.setThirdLevelFallbackCallback(() async {
+    Logger.warning('使用默认配置启动成功，清除失败的订阅选择');
+    await providers.subscriptionProvider.clearCurrentSubscription();
+  });
 }
 
 // ============================================================================

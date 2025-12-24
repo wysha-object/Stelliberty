@@ -1127,6 +1127,24 @@ class SubscriptionProvider extends ChangeNotifier {
     await _reloadCurrentSubscriptionConfig(reason: '订阅切换');
   }
 
+  // 清除当前选中的订阅（用于默认配置启动成功后，避免应用重启时重新加载失败的配置）
+  Future<void> clearCurrentSubscription() async {
+    if (_currentSubscriptionId == null) {
+      Logger.debug('当前没有选中的订阅，无需清除');
+      return;
+    }
+
+    final previousId = _currentSubscriptionId;
+    _currentSubscriptionId = null;
+
+    // 保存到持久化存储
+    await ClashPreferences.instance.setCurrentSubscriptionId(null);
+
+    notifyListeners();
+
+    Logger.info('已清除选中的订阅（之前为：$previousId），下次启动将使用默认配置');
+  }
+
   // 重新加载当前订阅的配置文件
   Future<void> _reloadCurrentSubscriptionConfig({
     String reason = '配置重载',

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:stelliberty/clash/network/api_client.dart';
 import 'package:stelliberty/clash/services/process_service.dart';
 import 'package:stelliberty/clash/config/config_injector.dart';
@@ -35,7 +34,7 @@ class LifecycleManager {
   // 核心状态管理器
   final CoreStateManager _coreStateManager = CoreStateManager.instance;
 
-  // 回退标记（标记是否正在进行覆写回退）
+  // 回退标记（防止无限递归）
   bool _isFallbackRetry = false;
 
   // 当前启动模式
@@ -92,13 +91,15 @@ class LifecycleManager {
   // 参数：
   // - configPath: 配置文件路径（可选，为空时使用保存的原始路径）
   // - overrides: 覆写配置列表（由 ClashManager 通过回调获取）
-  // - enableFallback: 是否启用覆写失败回退（默认 true）
+  // - enableFallback: 是否启用自动回退（默认 true）
   // - onOverridesFailed: 覆写失败时的回调（用于禁用覆写）
+  // - onThirdLevelFallback: 使用默认配置启动成功时的回调（用于清除 currentSubscription）
   Future<bool> startCore({
     String? configPath,
     List<OverrideConfig> overrides = const [],
     bool enableFallback = true,
     Future<void> Function()? onOverridesFailed,
+    Future<void> Function()? onThirdLevelFallback,
     required int mixedPort, // 混合端口
     required bool isIpv6Enabled,
     required bool isTunEnabled,
@@ -141,26 +142,6 @@ class LifecycleManager {
     _coreStateManager.setStarting(reason: '开始启动核心');
 
     try {
-      // 如果传入的 configPath 为空，尝试使用原始订阅路径（重启场景）
-      if ((configPath == null || configPath.isEmpty) &&
-          _originalConfigPath != null &&
-          _originalConfigPath!.isNotEmpty) {
-        // 检查原始配置文件是否存在
-        final originalFile = File(_originalConfigPath!);
-        if (await originalFile.exists()) {
-          Logger.info('重启时未提供配置路径，使用原始订阅路径：$_originalConfigPath');
-          configPath = _originalConfigPath;
-        } else {
-          Logger.warning('原始订阅配置文件已不存在：$_originalConfigPath，将使用默认配置或等待新配置');
-          _originalConfigPath = null; // 清空过期的路径
-        }
-      }
-
-      // ⚠️ 保存原始订阅路径（用于重启和回退）
-      if (configPath != null && configPath.isNotEmpty) {
-        _originalConfigPath = configPath;
-      }
-
       // 生成运行时配置（支持无配置路径时使用默认配置）
       final generatedConfigPath = await ConfigInjector.injectCustomConfigParams(
         configPath: configPath,
@@ -207,6 +188,7 @@ class LifecycleManager {
         isStartSuccessful = await _startWithService(
           runtimeConfigPath,
           externalController,
+          configPath,
         );
       } else {
         // 普通模式启动
@@ -217,6 +199,7 @@ class LifecycleManager {
           socksPort,
           httpPort, // 单独 HTTP 端口
           externalController,
+          configPath,
         );
       }
 
@@ -240,36 +223,84 @@ class LifecycleManager {
         shouldFallback = true;
       }
 
-      // 如果需要回退，执行回退逻辑（只调用一次回调）
+      // 如果需要回退,执行回退逻辑(只调用一次回调)
       if (shouldFallback) {
-        Logger.error('启动失败，检测到有覆写配置，执行回退');
+        Logger.error('启动失败,检测到有覆写配置,执行回退');
 
         // 标记为回退重试
         _isFallbackRetry = true;
 
-        // 确保核心已停止（可能已经停止或根本没启动成功）
-        if (isCoreRunning) {
-          await stopCore();
+        try {
+          // 确保核心已停止(可能已经停止或根本没启动成功)
+          if (isCoreRunning) {
+            await stopCore();
+          }
+
+          // 调用覆写失败回调(禁用当前订阅的覆写) - 只调用一次
+          if (onOverridesFailed != null) {
+            Logger.warning('调用覆写失败回调,禁用所有覆写');
+            await onOverridesFailed();
+          }
+
+          // 等待一段时间确保资源释放
+          await Future.delayed(const Duration(milliseconds: 500));
+
+          // 重置状态,允许递归调用
+          _coreStateManager.setStopped(reason: '回退准备重启');
+
+          // 重新启动(不带覆写,且禁用回退以避免无限循环)
+          Logger.info('使用无覆写配置重新启动核心');
+          isStartSuccessful = await startCore(
+            configPath: configPath,
+            overrides: const [], // 不使用覆写
+            mixedPort: mixedPort, // 混合端口
+            isIpv6Enabled: isIpv6Enabled,
+            isTunEnabled: isTunEnabled,
+            tunStack: tunStack,
+            tunDevice: tunDevice,
+            isTunAutoRouteEnabled: isTunAutoRouteEnabled,
+            isTunAutoRedirectEnabled: isTunAutoRedirectEnabled,
+            isTunAutoDetectInterfaceEnabled: isTunAutoDetectInterfaceEnabled,
+            tunDnsHijack: tunDnsHijack,
+            isTunStrictRouteEnabled: isTunStrictRouteEnabled,
+            tunRouteExcludeAddress: tunRouteExcludeAddress,
+            isTunIcmpForwardingDisabled: isTunIcmpForwardingDisabled,
+            tunMtu: tunMtu,
+            isAllowLanEnabled: isAllowLanEnabled,
+            isTcpConcurrentEnabled: isTcpConcurrentEnabled,
+            geodataLoader: geodataLoader,
+            findProcessMode: findProcessMode,
+            clashCoreLogLevel: clashCoreLogLevel,
+            externalController: externalController,
+            isUnifiedDelayEnabled: isUnifiedDelayEnabled,
+            outboundMode: outboundMode,
+            socksPort: socksPort,
+            httpPort: httpPort, // 单独 HTTP 端口
+            enableFallback: false, // 禁用回退以避免递归
+            onOverridesFailed: null,
+          );
+
+          if (isStartSuccessful) {
+            Logger.info('回退成功：无覆写配置启动成功');
+          } else {
+            Logger.error('回退失败：即使没有覆写也无法启动');
+          }
+        } finally {
+          // 重置回退标记(确保异常时也能重置)
+          _isFallbackRetry = false;
         }
+      }
 
-        // 调用覆写失败回调（禁用当前订阅的覆写） - 只调用一次
-        if (onOverridesFailed != null) {
-          Logger.warning('调用覆写失败回调，禁用所有覆写');
-          await onOverridesFailed();
-        }
+      // 最终回退：如果配置文件启动失败，尝试使用默认配置
+      if (!isStartSuccessful &&
+          enableFallback &&
+          !_isFallbackRetry &&
+          configPath != null &&
+          configPath.isNotEmpty) {
+        Logger.error('配置文件启动失败，尝试使用默认配置回退');
 
-        // 等待一段时间确保资源释放
-        await Future.delayed(const Duration(milliseconds: 500));
-
-        // 重置状态，允许递归调用
-        _coreStateManager.setStopped(reason: '回退准备重启');
-
-        // 重新启动（不带覆写，且禁用回退以避免无限循环）
-        Logger.info('使用无覆写配置重新启动核心');
-        isStartSuccessful = await startCore(
-          configPath: configPath,
-          overrides: const [], // 不使用覆写
-          mixedPort: mixedPort, // 混合端口
+        isStartSuccessful = await _fallbackToDefaultConfig(
+          mixedPort: mixedPort,
           isIpv6Enabled: isIpv6Enabled,
           isTunEnabled: isTunEnabled,
           tunStack: tunStack,
@@ -291,24 +322,53 @@ class LifecycleManager {
           isUnifiedDelayEnabled: isUnifiedDelayEnabled,
           outboundMode: outboundMode,
           socksPort: socksPort,
-          httpPort: httpPort, // 单独 HTTP 端口
-          enableFallback: false, // 禁用回退以避免递归
-          onOverridesFailed: null,
+          httpPort: httpPort,
+          onDefaultConfigSuccess: onThirdLevelFallback,
         );
-
-        // 重置回退标记
-        _isFallbackRetry = false;
-
-        if (isStartSuccessful) {
-          Logger.info('回退成功：无覆写配置启动成功');
-        } else {
-          Logger.error('回退失败：即使没有覆写也无法启动');
-        }
       }
 
       return isStartSuccessful;
     } catch (e) {
       Logger.error('启动 Clash 失败：$e');
+
+      // 如果配置文件导致异常,尝试使用默认配置回退
+      if (enableFallback &&
+          !_isFallbackRetry &&
+          configPath != null &&
+          configPath.isNotEmpty) {
+        Logger.error('配置文件导致启动异常，尝试使用默认配置回退');
+
+        final isStartSuccessful = await _fallbackToDefaultConfig(
+          mixedPort: mixedPort,
+          isIpv6Enabled: isIpv6Enabled,
+          isTunEnabled: isTunEnabled,
+          tunStack: tunStack,
+          tunDevice: tunDevice,
+          isTunAutoRouteEnabled: isTunAutoRouteEnabled,
+          isTunAutoRedirectEnabled: isTunAutoRedirectEnabled,
+          isTunAutoDetectInterfaceEnabled: isTunAutoDetectInterfaceEnabled,
+          tunDnsHijack: tunDnsHijack,
+          isTunStrictRouteEnabled: isTunStrictRouteEnabled,
+          tunRouteExcludeAddress: tunRouteExcludeAddress,
+          isTunIcmpForwardingDisabled: isTunIcmpForwardingDisabled,
+          tunMtu: tunMtu,
+          isAllowLanEnabled: isAllowLanEnabled,
+          isTcpConcurrentEnabled: isTcpConcurrentEnabled,
+          geodataLoader: geodataLoader,
+          findProcessMode: findProcessMode,
+          clashCoreLogLevel: clashCoreLogLevel,
+          externalController: externalController,
+          isUnifiedDelayEnabled: isUnifiedDelayEnabled,
+          outboundMode: outboundMode,
+          socksPort: socksPort,
+          httpPort: httpPort,
+          onDefaultConfigSuccess: onThirdLevelFallback,
+        );
+
+        return isStartSuccessful;
+      }
+
+      // 无法回退,直接返回失败
       _coreStateManager.setStopped(reason: '启动失败');
       _actualPortsUsed = null;
       return false;
@@ -342,8 +402,9 @@ class LifecycleManager {
 
   // 通过服务启动 Clash 核心
   Future<bool> _startWithService(
-    String configPath,
+    String runtimeConfigPath,
     String externalController,
+    String? originalConfigPath,
   ) async {
     try {
       final execPath = await ProcessService.getExecutablePath();
@@ -352,7 +413,7 @@ class LifecycleManager {
       // 发送启动命令给服务
       StartClash(
         corePath: execPath,
-        configPath: configPath,
+        configPath: runtimeConfigPath,
         dataDir: clashDataDir,
         externalController: externalController,
       ).sendSignalToRust();
@@ -384,7 +445,10 @@ class LifecycleManager {
       );
 
       // 等待 API 就绪并初始化（服务模式使用传递的 externalController 地址）
-      return await _initializeAfterStart(externalController);
+      return await _initializeAfterStart(
+        externalController,
+        originalConfigPath,
+      );
     } catch (e) {
       Logger.error('服务模式启动失败：$e');
       return false;
@@ -393,11 +457,12 @@ class LifecycleManager {
 
   // 通过普通模式启动 Clash 核心
   Future<bool> _startWithSidecar(
-    String configPath,
+    String runtimeConfigPath,
     int mixedPort,
     int? socksPort,
     int? httpPort,
     String externalController,
+    String? originalConfigPath,
   ) async {
     try {
       final execPath = await ProcessService.getExecutablePath();
@@ -419,7 +484,7 @@ class LifecycleManager {
         // 任务 1: 启动进程
         _processService.start(
           executablePath: execPath,
-          configPath: configPath,
+          configPath: runtimeConfigPath,
           apiHost: ClashDefaults.apiHost,
           apiPort: ClashDefaults.apiPort,
           portsToCheck: portsToCheck,
@@ -443,7 +508,10 @@ class LifecycleManager {
       _currentStartMode = ClashStartMode.sidecar;
 
       // 完成后续初始化（获取版本、启动监控）
-      return await _initializeAfterStart(externalController);
+      return await _initializeAfterStart(
+        externalController,
+        originalConfigPath,
+      );
     } catch (e) {
       Logger.error('普通模式启动失败：$e');
 
@@ -464,7 +532,10 @@ class LifecycleManager {
   }
 
   // 启动后初始化（获取版本、启动监控服务）
-  Future<bool> _initializeAfterStart(String externalController) async {
+  Future<bool> _initializeAfterStart(
+    String externalController,
+    String? configPath,
+  ) async {
     try {
       // API 已在并行启动时就绪，但 Named Pipe 可能还需要一点时间创建
       // 等待 IPC 就绪（通过重试获取版本号）
@@ -501,6 +572,10 @@ class LifecycleManager {
 
       // 标记为运行状态
       _coreStateManager.setRunning(reason: '核心启动成功');
+
+      // 更新当前配置路径（启动成功后才更新，失败则不更新）
+      _originalConfigPath = configPath;
+      Logger.debug('更新当前配置路径：${configPath ?? "null（使用默认配置）"}');
 
       // 服务模式下启动心跳定时器
       if (_currentStartMode == ClashStartMode.service) {
@@ -584,6 +659,104 @@ class LifecycleManager {
       }
     }
     return null;
+  }
+
+  // 使用默认配置启动（回退机制的最后手段）
+  // 返回 true 表示启动成功，false 表示失败
+  Future<bool> _fallbackToDefaultConfig({
+    required int mixedPort,
+    required bool isIpv6Enabled,
+    required bool isTunEnabled,
+    required String tunStack,
+    required String tunDevice,
+    required bool isTunAutoRouteEnabled,
+    required bool isTunAutoRedirectEnabled,
+    required bool isTunAutoDetectInterfaceEnabled,
+    required List<String> tunDnsHijack,
+    required bool isTunStrictRouteEnabled,
+    required List<String> tunRouteExcludeAddress,
+    required bool isTunIcmpForwardingDisabled,
+    required int tunMtu,
+    required bool isAllowLanEnabled,
+    required bool isTcpConcurrentEnabled,
+    required String geodataLoader,
+    required String findProcessMode,
+    required String clashCoreLogLevel,
+    required String externalController,
+    required bool isUnifiedDelayEnabled,
+    required String outboundMode,
+    int? socksPort,
+    int? httpPort,
+    Future<void> Function()? onDefaultConfigSuccess,
+  }) async {
+    _isFallbackRetry = true;
+
+    try {
+      // 确保核心已停止
+      if (isCoreRunning) {
+        Logger.debug('停止核心以准备使用默认配置启动');
+        await stopCore();
+      } else {
+        // 如果核心未运行，确保状态正确
+        _coreStateManager.setStopped(reason: '准备使用默认配置启动');
+        _actualPortsUsed = null;
+      }
+
+      // 等待资源释放
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // 使用默认配置启动
+      Logger.info('使用默认配置启动核心（无订阅节点）');
+      final success = await startCore(
+        configPath: null, // 使用默认配置
+        overrides: const [], // 不使用覆写
+        mixedPort: mixedPort,
+        isIpv6Enabled: isIpv6Enabled,
+        isTunEnabled: isTunEnabled,
+        tunStack: tunStack,
+        tunDevice: tunDevice,
+        isTunAutoRouteEnabled: isTunAutoRouteEnabled,
+        isTunAutoRedirectEnabled: isTunAutoRedirectEnabled,
+        isTunAutoDetectInterfaceEnabled: isTunAutoDetectInterfaceEnabled,
+        tunDnsHijack: tunDnsHijack,
+        isTunStrictRouteEnabled: isTunStrictRouteEnabled,
+        tunRouteExcludeAddress: tunRouteExcludeAddress,
+        isTunIcmpForwardingDisabled: isTunIcmpForwardingDisabled,
+        tunMtu: tunMtu,
+        isAllowLanEnabled: isAllowLanEnabled,
+        isTcpConcurrentEnabled: isTcpConcurrentEnabled,
+        geodataLoader: geodataLoader,
+        findProcessMode: findProcessMode,
+        clashCoreLogLevel: clashCoreLogLevel,
+        externalController: externalController,
+        isUnifiedDelayEnabled: isUnifiedDelayEnabled,
+        outboundMode: outboundMode,
+        socksPort: socksPort,
+        httpPort: httpPort,
+        enableFallback: false, // 禁用回退以避免递归
+        onOverridesFailed: null,
+        onThirdLevelFallback: null, // 内部调用不需要回调
+      );
+
+      if (success) {
+        Logger.info('默认配置启动成功');
+
+        // 调用成功回调（用于清除 currentSubscription）
+        if (onDefaultConfigSuccess != null) {
+          try {
+            await onDefaultConfigSuccess();
+          } catch (e) {
+            Logger.error('默认配置启动成功回调执行失败：$e');
+          }
+        }
+      } else {
+        Logger.error('默认配置启动失败，这不应该发生！请检查 Clash 核心文件或系统环境');
+      }
+
+      return success;
+    } finally {
+      _isFallbackRetry = false;
+    }
   }
 
   // 停止 Clash 核心（不触碰系统代理）

@@ -302,11 +302,16 @@ class ClashProvider extends ChangeNotifier with WidgetsBindingObserver {
         Logger.info('Clash 已启动，从 API 重新加载代理列表');
         await loadProxies();
 
-        // 如果启用了配置重载且指定了配置文件路径，启动配置文件监听
+        // 获取实际使用的配置路径（可能因回退而与传入的 configPath 不同）
+        final actualConfigPath = _clashManager.currentConfigPath;
+
+        // 如果启用了配置重载且实际使用了配置文件（非默认配置），启动配置文件监听
         if (_isConfigReloadEnabled &&
-            configPath != null &&
-            configPath.isNotEmpty) {
-          await _startConfigWatcher(configPath);
+            actualConfigPath != null &&
+            actualConfigPath.isNotEmpty) {
+          await _startConfigWatcher(actualConfigPath);
+        } else if (actualConfigPath == null) {
+          Logger.info('核心使用默认配置启动，跳过配置文件监听');
         }
       } else {
         Logger.error('Clash 启动失败');

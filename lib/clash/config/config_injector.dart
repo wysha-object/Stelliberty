@@ -62,23 +62,33 @@ class ConfigInjector {
     try {
       // 1. 获取配置内容（优先级：configContent > configPath > 默认配置）
       String content;
+
+      // 优先使用直接提供的配置内容
       if (configContent != null && configContent.isNotEmpty) {
         content = configContent;
-      } else if (configPath != null && configPath.isNotEmpty) {
+      }
+      // 其次尝试从文件路径读取
+      else if (configPath != null && configPath.isNotEmpty) {
         final configFile = File(configPath);
-        if (!await configFile.exists()) {
-          Logger.warning('订阅配置文件不存在：$configPath');
-          return null;
-        }
 
-        try {
-          content = await configFile.readAsString();
-        } catch (e) {
-          Logger.error('读取配置文件失败：$configPath - $e');
-          return null;
+        // 文件不存在，使用默认配置
+        if (!await configFile.exists()) {
+          Logger.warning('订阅配置文件不存在：$configPath，使用默认配置');
+          content = getDefaultConfigContent();
         }
-      } else {
-        // 使用默认配置
+        // 文件存在，尝试读取
+        else {
+          try {
+            content = await configFile.readAsString();
+          } catch (e) {
+            Logger.error('读取配置文件失败：$configPath - $e');
+            Logger.info('回退到默认配置');
+            content = getDefaultConfigContent();
+          }
+        }
+      }
+      // 没有提供任何配置，使用默认配置
+      else {
         Logger.info('未提供配置路径，使用默认配置启动核心');
         content = getDefaultConfigContent();
       }

@@ -162,47 +162,27 @@ class ConfigManager {
         '重载参数：configPath=$configPath, isTunEnabled=$_isTunEnabled, ipv6=$_isIpv6Enabled, allowLan=$_isAllowLanEnabled',
       );
 
-      String? actualConfigPath;
+      // 第一次尝试：使用用户配置 + 覆写
+      String? runtimeConfigPath = await _generateConfig(configPath, overrides);
 
-      // 始终生成运行时配置（即使 configPath 为 null 也要生成，使用默认配置）
-      final runtimeConfigPath = await ConfigInjector.injectCustomConfigParams(
-        configPath: configPath, // 可以为 null，ConfigInjector 会使用默认配置
-        overrides: overrides,
-        httpPort: _mixedPort,
-        isIpv6Enabled: _isIpv6Enabled,
-        isTunEnabled: _isTunEnabled,
-        tunStack: _tunStack,
-        tunDevice: _tunDevice,
-        isTunAutoRouteEnabled: _isTunAutoRouteEnabled,
-        isTunAutoRedirectEnabled: _isTunAutoRedirectEnabled,
-        isTunAutoDetectInterfaceEnabled: _isTunAutoDetectInterfaceEnabled,
-        tunDnsHijack: _tunDnsHijack,
-        isTunStrictRouteEnabled: _isTunStrictRouteEnabled,
-        tunRouteExcludeAddress: _tunRouteExcludeAddress,
-        isTunIcmpForwardingDisabled: _isTunIcmpForwardingDisabled,
-        tunMtu: _tunMtu,
-        isAllowLanEnabled: _isAllowLanEnabled,
-        isTcpConcurrentEnabled: _isTcpConcurrentEnabled,
-        geodataLoader: _geodataLoader,
-        findProcessMode: _findProcessMode,
-        clashCoreLogLevel: _clashCoreLogLevel,
-        externalController: _externalController,
-        externalControllerSecret: ClashPreferences.instance
-            .getExternalControllerSecret(),
-        isUnifiedDelayEnabled: _isUnifiedDelayEnabled,
-        outboundMode: _outboundMode,
-      );
+      // 如果配置生成失败且有覆写，尝试禁用覆写重新生成
+      if (runtimeConfigPath == null && overrides.isNotEmpty) {
+        Logger.error('配置生成失败（可能由覆写导致），尝试禁用覆写重新生成');
+        runtimeConfigPath = await _generateConfig(configPath, const []);
 
-      // 临时配置生成失败说明原始配置有错误，直接返回失败
+        if (runtimeConfigPath != null) {
+          Logger.info('禁用覆写后配置生成成功');
+        }
+      }
+
+      // 如果仍然失败，直接返回 false（让上层 SubscriptionProvider 处理回退）
       if (runtimeConfigPath == null) {
-        Logger.error('临时配置生成失败，原始配置存在错误：$configPath');
+        Logger.error('配置生成失败，原始配置存在错误：$configPath');
         return false;
       }
 
-      actualConfigPath = runtimeConfigPath;
-
       final success = await _apiClient.reloadConfig(
-        configPath: actualConfigPath,
+        configPath: runtimeConfigPath,
         force: true,
       );
 
@@ -217,6 +197,40 @@ class ConfigManager {
       Logger.error('重载配置文件出错：$e');
       return false;
     }
+  }
+
+  // 生成运行时配置文件（辅助方法，避免重复代码）
+  Future<String?> _generateConfig(
+    String? configPath,
+    List<OverrideConfig> overrides,
+  ) async {
+    return await ConfigInjector.injectCustomConfigParams(
+      configPath: configPath,
+      overrides: overrides,
+      httpPort: _mixedPort,
+      isIpv6Enabled: _isIpv6Enabled,
+      isTunEnabled: _isTunEnabled,
+      tunStack: _tunStack,
+      tunDevice: _tunDevice,
+      isTunAutoRouteEnabled: _isTunAutoRouteEnabled,
+      isTunAutoRedirectEnabled: _isTunAutoRedirectEnabled,
+      isTunAutoDetectInterfaceEnabled: _isTunAutoDetectInterfaceEnabled,
+      tunDnsHijack: _tunDnsHijack,
+      isTunStrictRouteEnabled: _isTunStrictRouteEnabled,
+      tunRouteExcludeAddress: _tunRouteExcludeAddress,
+      isTunIcmpForwardingDisabled: _isTunIcmpForwardingDisabled,
+      tunMtu: _tunMtu,
+      isAllowLanEnabled: _isAllowLanEnabled,
+      isTcpConcurrentEnabled: _isTcpConcurrentEnabled,
+      geodataLoader: _geodataLoader,
+      findProcessMode: _findProcessMode,
+      clashCoreLogLevel: _clashCoreLogLevel,
+      externalController: _externalController,
+      externalControllerSecret: ClashPreferences.instance
+          .getExternalControllerSecret(),
+      isUnifiedDelayEnabled: _isUnifiedDelayEnabled,
+      outboundMode: _outboundMode,
+    );
   }
 
   // 设置局域网代理状态
