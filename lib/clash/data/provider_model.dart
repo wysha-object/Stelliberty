@@ -46,13 +46,6 @@ enum ProviderType {
 
   final String value;
   final String displayName;
-
-  static ProviderType fromString(String value) {
-    for (final type in ProviderType.values) {
-      if (type.value == value) return type;
-    }
-    return ProviderType.proxy;
-  }
 }
 
 // 提供者配置
@@ -79,8 +72,12 @@ class Provider {
     this.subscriptionInfo,
   });
 
-  // 从 Clash API 响应创建 Provider
-  factory Provider.fromClashApi(String name, Map<String, dynamic> json) {
+  // 从 Clash API 响应构建（providerType 需由调用方根据 API 端点指定）
+  factory Provider.fromClashApi(
+    String name,
+    Map<String, dynamic> json, {
+    required ProviderType providerType,
+  }) {
     // 解析更新时间
     DateTime updateAt = DateTime.now();
     final updateAtStr = json['updatedAt'];
@@ -96,14 +93,12 @@ class Provider {
       }
     }
 
-    // 计算数量：代理提供者从 proxies 列表获取长度，规则提供者从 ruleCount 字段获取
+    // 计算数量
     int count = 0;
     if (json['proxies'] != null && json['proxies'] is List) {
-      // 代理提供者：proxies 是列表
       count = (json['proxies'] as List).length;
     } else if (json['ruleCount'] != null) {
-      // 规则提供者：ruleCount 是数字
-      count = json['ruleCount'] as int;
+      count = (json['ruleCount'] as num).toInt();
     }
 
     // 解析订阅信息
@@ -113,7 +108,7 @@ class Provider {
 
     return Provider(
       name: name,
-      type: ProviderType.fromString(json['type'] ?? 'Proxy'),
+      type: providerType,
       path: json['path'],
       count: count,
       updateAt: updateAt,
