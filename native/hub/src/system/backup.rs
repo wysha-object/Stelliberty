@@ -14,15 +14,29 @@ use tokio::fs as async_fs;
 #[derive(Deserialize, DartSignal)]
 pub struct CreateBackupRequest {
     pub target_path: String,
-    pub app_data_path: String,
     pub app_version: String,
+    // 路径配置
+    pub preferences_path: String,
+    pub subscriptions_dir: String,
+    pub subscriptions_list_path: String,
+    pub overrides_dir: String,
+    pub overrides_list_path: String,
+    pub dns_config_path: String,
+    pub pac_file_path: String,
 }
 
 // Dart → Rust：还原备份请求
 #[derive(Deserialize, DartSignal)]
 pub struct RestoreBackupRequest {
     pub backup_path: String,
-    pub app_data_path: String,
+    // 路径配置
+    pub preferences_path: String,
+    pub subscriptions_dir: String,
+    pub subscriptions_list_path: String,
+    pub overrides_dir: String,
+    pub overrides_list_path: String,
+    pub dns_config_path: String,
+    pub pac_file_path: String,
 }
 
 // Rust → Dart：备份操作响应
@@ -38,7 +52,18 @@ impl CreateBackupRequest {
     pub async fn handle(self) {
         log::info!("收到创建备份请求：{}", self.target_path);
 
-        let result = create_backup(&self.target_path, &self.app_data_path, &self.app_version).await;
+        let result = create_backup(
+            &self.target_path,
+            &self.app_version,
+            &self.preferences_path,
+            &self.subscriptions_dir,
+            &self.subscriptions_list_path,
+            &self.overrides_dir,
+            &self.overrides_list_path,
+            &self.dns_config_path,
+            &self.pac_file_path,
+        )
+        .await;
 
         let response = match result {
             Ok(path) => {
@@ -68,7 +93,17 @@ impl RestoreBackupRequest {
     pub async fn handle(self) {
         log::info!("收到还原备份请求：{}", self.backup_path);
 
-        let result = restore_backup(&self.backup_path, &self.app_data_path).await;
+        let result = restore_backup(
+            &self.backup_path,
+            &self.preferences_path,
+            &self.subscriptions_dir,
+            &self.subscriptions_list_path,
+            &self.overrides_dir,
+            &self.overrides_list_path,
+            &self.dns_config_path,
+            &self.pac_file_path,
+        )
+        .await;
 
         let response = match result {
             Ok(()) => {
@@ -132,40 +167,38 @@ pub struct OverrideBackup {
 }
 
 // 创建备份
-//
-// 参数：
-// - target_path: 备份文件保存路径
-// - app_data_path: 应用数据目录
-// - app_version: 应用版本号
-//
-// 返回：备份文件路径
 pub async fn create_backup(
     target_path: &str,
-    app_data_path: &str,
     app_version: &str,
+    preferences_path: &str,
+    subscriptions_dir: &str,
+    subscriptions_list_path: &str,
+    overrides_dir: &str,
+    overrides_list_path: &str,
+    dns_config_path: &str,
+    pac_file_path: &str,
 ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
     log::info!("开始创建备份到：{}", target_path);
 
-    // 1. 收集应用配置（Dev 模式使用 shared_preferences_dev.json，Release 模式需要从系统读取）
-    let app_prefs =
-        collect_preferences(&format!("{}/shared_preferences_dev.json", app_data_path)).await?;
+    // 收集应用配置
+    let app_prefs = collect_preferences(preferences_path).await?;
 
-    // 2. Clash 配置与应用配置共享同一个文件
-    let clash_prefs = HashMap::new(); // Clash 配置已包含在 app_prefs 中
+    // Clash 配置与应用配置共享同一文件
+    let clash_prefs = HashMap::new();
 
-    // 3. 收集订阅数据
-    let subscriptions = collect_subscriptions(app_data_path).await?;
+    // 收集订阅数据
+    let subscriptions = collect_subscriptions(subscriptions_dir, subscriptions_list_path).await?;
 
-    // 4. 收集覆写数据
-    let overrides = collect_overrides(app_data_path).await?;
+    // 收集覆写数据
+    let overrides = collect_overrides(overrides_dir, overrides_list_path).await?;
 
-    // 5. 收集 DNS 配置
-    let dns_config = collect_file_base64(&format!("{}/dns_config.json", app_data_path)).await;
+    // 收集 DNS 配置
+    let dns_config = collect_file_base64(dns_config_path).await;
 
-    // 6. 收集 PAC 文件
-    let pac_file = collect_file_base64(&format!("{}/proxy.pac", app_data_path)).await;
+    // 收集 PAC 文件
+    let pac_file = collect_file_base64(pac_file_path).await;
 
-    // 7. 构建备份数据
+    // 构建备份数据
     let backup_data = BackupData {
         version: BACKUP_VERSION.to_string(),
         timestamp: chrono::Utc::now().to_rfc3339(),
@@ -181,7 +214,7 @@ pub async fn create_backup(
         },
     };
 
-    // 8. 写入文件
+    // 写入文件
     let output_path = Path::new(target_path);
     if let Some(parent) = output_path.parent() {
         async_fs::create_dir_all(parent).await?;
@@ -195,21 +228,23 @@ pub async fn create_backup(
 }
 
 // 还原备份
-//
-// 参数：
-// - backup_path: 备份文件路径
-// - app_data_path: 应用数据目录
 pub async fn restore_backup(
     backup_path: &str,
-    app_data_path: &str,
+    preferences_path: &str,
+    subscriptions_dir: &str,
+    subscriptions_list_path: &str,
+    overrides_dir: &str,
+    overrides_list_path: &str,
+    dns_config_path: &str,
+    pac_file_path: &str,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     log::info!("开始还原备份：{}", backup_path);
 
-    // 1. 读取并验证备份文件
+    // 读取并验证备份文件
     let json_str = async_fs::read_to_string(backup_path).await?;
     let backup_data: BackupData = serde_json::from_str(&json_str)?;
 
-    // 2. 验证版本兼容性
+    // 验证版本兼容性
     if backup_data.version != BACKUP_VERSION {
         log::warn!(
             "备份版本不匹配：{} != {}",
@@ -227,29 +262,33 @@ pub async fn restore_backup(
         backup_data.timestamp
     );
 
-    // 3. 还原应用配置（包含 Clash 配置）
-    restore_preferences(
-        &backup_data.data.app_preferences,
-        &format!("{}/shared_preferences_dev.json", app_data_path),
+    // 还原应用配置
+    restore_preferences(&backup_data.data.app_preferences, preferences_path).await?;
+
+    // 还原订阅数据
+    restore_subscriptions(
+        &backup_data.data.subscriptions,
+        subscriptions_dir,
+        subscriptions_list_path,
     )
     .await?;
 
-    // 4. Clash 配置已包含在 app_preferences 中，无需单独还原
+    // 还原覆写数据
+    restore_overrides(
+        &backup_data.data.overrides,
+        overrides_dir,
+        overrides_list_path,
+    )
+    .await?;
 
-    // 5. 还原订阅数据
-    restore_subscriptions(&backup_data.data.subscriptions, app_data_path).await?;
-
-    // 6. 还原覆写数据
-    restore_overrides(&backup_data.data.overrides, app_data_path).await?;
-
-    // 7. 还原 DNS 配置
+    // 还原 DNS 配置
     if let Some(dns_config) = &backup_data.data.dns_config {
-        restore_file_base64(dns_config, &format!("{}/dns_config.json", app_data_path)).await?;
+        restore_file_base64(dns_config, dns_config_path).await?;
     }
 
-    // 8. 还原 PAC 文件
+    // 还原 PAC 文件
     if let Some(pac_file) = &backup_data.data.pac_file {
-        restore_file_base64(pac_file, &format!("{}/proxy.pac", app_data_path)).await?;
+        restore_file_base64(pac_file, pac_file_path).await?;
     }
 
     log::info!("备份还原成功");
@@ -271,24 +310,22 @@ async fn collect_preferences(
 
 // 收集订阅数据
 async fn collect_subscriptions(
-    app_data_path: &str,
+    subscriptions_dir: &str,
+    subscriptions_list_path: &str,
 ) -> Result<SubscriptionBackup, Box<dyn std::error::Error + Send + Sync>> {
-    let subscriptions_dir = format!("{}/subscriptions", app_data_path);
-    let list_path = format!("{}/list.json", subscriptions_dir);
-
     let mut backup = SubscriptionBackup {
         list: None,
         configs: HashMap::new(),
     };
 
     // 读取订阅列表
-    if Path::new(&list_path).exists() {
-        backup.list = Some(async_fs::read_to_string(&list_path).await?);
+    if Path::new(subscriptions_list_path).exists() {
+        backup.list = Some(async_fs::read_to_string(subscriptions_list_path).await?);
     }
 
     // 读取所有订阅配置文件
-    if Path::new(&subscriptions_dir).exists() {
-        let mut entries = async_fs::read_dir(&subscriptions_dir).await?;
+    if Path::new(subscriptions_dir).exists() {
+        let mut entries = async_fs::read_dir(subscriptions_dir).await?;
         while let Some(entry) = entries.next_entry().await? {
             let path = entry.path();
             if path.extension().and_then(|s| s.to_str()) == Some("yaml")
@@ -308,24 +345,22 @@ async fn collect_subscriptions(
 
 // 收集覆写数据
 async fn collect_overrides(
-    app_data_path: &str,
+    overrides_dir: &str,
+    overrides_list_path: &str,
 ) -> Result<OverrideBackup, Box<dyn std::error::Error + Send + Sync>> {
-    let overrides_dir = format!("{}/overrides", app_data_path);
-    let list_path = format!("{}/list.json", overrides_dir);
-
     let mut backup = OverrideBackup {
         list: None,
         files: HashMap::new(),
     };
 
     // 读取覆写列表
-    if Path::new(&list_path).exists() {
-        backup.list = Some(async_fs::read_to_string(&list_path).await?);
+    if Path::new(overrides_list_path).exists() {
+        backup.list = Some(async_fs::read_to_string(overrides_list_path).await?);
     }
 
     // 读取所有覆写文件
-    if Path::new(&overrides_dir).exists() {
-        let mut entries = async_fs::read_dir(&overrides_dir).await?;
+    if Path::new(overrides_dir).exists() {
+        let mut entries = async_fs::read_dir(overrides_dir).await?;
         while let Some(entry) = entries.next_entry().await? {
             let path = entry.path();
             if path.is_file()
@@ -377,14 +412,12 @@ async fn restore_preferences(
 // 还原订阅数据
 async fn restore_subscriptions(
     backup: &SubscriptionBackup,
-    app_data_path: &str,
+    subscriptions_dir: &str,
+    subscriptions_list_path: &str,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let subscriptions_dir = format!("{}/subscriptions", app_data_path);
-    let list_path = format!("{}/list.json", subscriptions_dir);
-
     // 清空现有订阅配置文件
-    if Path::new(&subscriptions_dir).exists() {
-        let mut entries = async_fs::read_dir(&subscriptions_dir).await?;
+    if Path::new(subscriptions_dir).exists() {
+        let mut entries = async_fs::read_dir(subscriptions_dir).await?;
         while let Some(entry) = entries.next_entry().await? {
             let path = entry.path();
             if path.extension().and_then(|s| s.to_str()) == Some("yaml") {
@@ -395,8 +428,8 @@ async fn restore_subscriptions(
 
     // 还原订阅列表
     if let Some(list_content) = &backup.list {
-        async_fs::create_dir_all(&subscriptions_dir).await?;
-        async_fs::write(&list_path, list_content).await?;
+        async_fs::create_dir_all(subscriptions_dir).await?;
+        async_fs::write(subscriptions_list_path, list_content).await?;
     }
 
     // 还原订阅配置文件
@@ -413,14 +446,12 @@ async fn restore_subscriptions(
 // 还原覆写数据
 async fn restore_overrides(
     backup: &OverrideBackup,
-    app_data_path: &str,
+    overrides_dir: &str,
+    overrides_list_path: &str,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let overrides_dir = format!("{}/overrides", app_data_path);
-    let list_path = format!("{}/list.json", overrides_dir);
-
     // 清空现有覆写文件
-    if Path::new(&overrides_dir).exists() {
-        let mut entries = async_fs::read_dir(&overrides_dir).await?;
+    if Path::new(overrides_dir).exists() {
+        let mut entries = async_fs::read_dir(overrides_dir).await?;
         while let Some(entry) = entries.next_entry().await? {
             let path = entry.path();
             if path.is_file() {
@@ -431,8 +462,8 @@ async fn restore_overrides(
 
     // 还原覆写列表
     if let Some(list_content) = &backup.list {
-        async_fs::create_dir_all(&overrides_dir).await?;
-        async_fs::write(&list_path, list_content).await?;
+        async_fs::create_dir_all(overrides_dir).await?;
+        async_fs::write(overrides_list_path, list_content).await?;
     }
 
     // 还原覆写文件

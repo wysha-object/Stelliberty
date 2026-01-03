@@ -41,11 +41,22 @@ class BackupService {
         // 获取应用版本
         final packageInfo = await PackageInfo.fromPlatform();
 
+        // 获取所有路径
+        final pathService = PathService.instance;
+        final preferencesPath =
+            '${pathService.appDataPath}/shared_preferences_dev.json';
+
         // 发送创建备份请求到 Rust
         final request = CreateBackupRequest(
           targetPath: targetPath,
-          appDataPath: PathService.instance.appDataPath,
           appVersion: packageInfo.version,
+          preferencesPath: preferencesPath,
+          subscriptionsDir: pathService.subscriptionsDir,
+          subscriptionsListPath: pathService.subscriptionListPath,
+          overridesDir: pathService.overridesDir,
+          overridesListPath: pathService.overrideListPath,
+          dnsConfigPath: pathService.dnsConfigPath,
+          pacFilePath: pathService.pacFilePath,
         );
         request.sendSignalToRust();
 
@@ -95,10 +106,21 @@ class BackupService {
           }
         });
 
+        // 获取所有路径
+        final pathService = PathService.instance;
+        final preferencesPath =
+            '${pathService.appDataPath}/shared_preferences_dev.json';
+
         // 发送还原备份请求到 Rust
         final request = RestoreBackupRequest(
           backupPath: backupPath,
-          appDataPath: PathService.instance.appDataPath,
+          preferencesPath: preferencesPath,
+          subscriptionsDir: pathService.subscriptionsDir,
+          subscriptionsListPath: pathService.subscriptionListPath,
+          overridesDir: pathService.overridesDir,
+          overridesListPath: pathService.overrideListPath,
+          dnsConfigPath: pathService.dnsConfigPath,
+          pacFilePath: pathService.pacFilePath,
         );
         request.sendSignalToRust();
 

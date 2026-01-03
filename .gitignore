@@ -55,6 +55,13 @@ CLAUDE.md
 **/*.g.dart
 **/*.freezed.dart
 
+# Flutter 自动生成的插件注册文件
+**/GeneratedPluginRegistrant.swift
+**/GeneratedPluginRegistrant.java
+**/GeneratedPluginRegistrant.m
+**/generated_plugin_registrant.cc
+**/generated_plugin_registrant.h
+
 # Dart 编译缓存
 *.dill
 
