@@ -638,21 +638,11 @@ class ConfigManager {
   // 设置虚拟网卡自动路由
   Future<bool> setTunAutoRoute(bool enabled) async {
     try {
-      if (!_isCoreRunning()) {
-        _isTunAutoRouteEnabled = enabled;
-        await ClashPreferences.instance.setTunAutoRoute(enabled);
-        _notifyListeners();
-        return true;
-      }
-
-      final success = await _apiClient.setTunAutoRoute(enabled);
-      if (success) {
-        _isTunAutoRouteEnabled = enabled;
-        await ClashPreferences.instance.setTunAutoRoute(enabled);
-        _notifyListeners();
-        Logger.info('虚拟网卡自动路由（支持重载）：${enabled ? "启用" : "禁用"}');
-      }
-      return success;
+      _isTunAutoRouteEnabled = enabled;
+      await ClashPreferences.instance.setTunAutoRoute(enabled);
+      _notifyListeners();
+      Logger.info('虚拟网卡自动路由（支持重载）：${enabled ? "启用" : "禁用"}');
+      return true;
     } catch (e) {
       Logger.error('设置虚拟网卡自动路由失败：$e');
       return false;
@@ -686,21 +676,11 @@ class ConfigManager {
   // 设置虚拟网卡自动检测接口
   Future<bool> setTunAutoDetectInterface(bool enabled) async {
     try {
-      if (!_isCoreRunning()) {
-        _isTunAutoDetectInterfaceEnabled = enabled;
-        await ClashPreferences.instance.setTunAutoDetectInterface(enabled);
-        _notifyListeners();
-        return true;
-      }
-
-      final success = await _apiClient.setTunAutoDetectInterface(enabled);
-      if (success) {
-        _isTunAutoDetectInterfaceEnabled = enabled;
-        await ClashPreferences.instance.setTunAutoDetectInterface(enabled);
-        _notifyListeners();
-        Logger.info('虚拟网卡自动检测接口（支持重载）：${enabled ? "启用" : "禁用"}');
-      }
-      return success;
+      _isTunAutoDetectInterfaceEnabled = enabled;
+      await ClashPreferences.instance.setTunAutoDetectInterface(enabled);
+      _notifyListeners();
+      Logger.info('虚拟网卡自动检测接口（支持重载）：${enabled ? "启用" : "禁用"}');
+      return true;
     } catch (e) {
       Logger.error('设置虚拟网卡自动检测接口失败：$e');
       return false;
@@ -734,21 +714,11 @@ class ConfigManager {
   // 设置虚拟网卡严格路由
   Future<bool> setTunStrictRoute(bool enabled) async {
     try {
-      if (!_isCoreRunning()) {
-        _isTunStrictRouteEnabled = enabled;
-        await ClashPreferences.instance.setTunStrictRoute(enabled);
-        _notifyListeners();
-        return true;
-      }
-
-      final success = await _apiClient.setTunStrictRoute(enabled);
-      if (success) {
-        _isTunStrictRouteEnabled = enabled;
-        await ClashPreferences.instance.setTunStrictRoute(enabled);
-        _notifyListeners();
-        Logger.info('虚拟网卡严格路由（支持重载）：${enabled ? "启用" : "禁用"}');
-      }
-      return success;
+      _isTunStrictRouteEnabled = enabled;
+      await ClashPreferences.instance.setTunStrictRoute(enabled);
+      _notifyListeners();
+      Logger.info('虚拟网卡严格路由（支持重载）：${enabled ? "启用" : "禁用"}');
+      return true;
     } catch (e) {
       Logger.error('设置虚拟网卡严格路由失败：$e');
       return false;

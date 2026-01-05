@@ -354,7 +354,7 @@ class ClashPreferences {
       _setBool(_kTunAutoRedirect, enabled);
 
   // 获取虚拟网卡自动检测接口是否启用
-  bool getTunAutoDetectInterface() => _getBool(_kTunAutoDetectInterface, false);
+  bool getTunAutoDetectInterface() => _getBool(_kTunAutoDetectInterface, true);
 
   // 保存虚拟网卡自动检测接口启用状态
   Future<void> setTunAutoDetectInterface(bool enabled) =>

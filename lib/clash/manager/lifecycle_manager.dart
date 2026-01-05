@@ -9,6 +9,7 @@ import 'package:stelliberty/clash/services/geo_service.dart';
 import 'package:stelliberty/clash/providers/service_provider.dart';
 import 'package:stelliberty/clash/storage/preferences.dart';
 import 'package:stelliberty/clash/core/core_state.dart';
+import 'package:stelliberty/services/permission_service.dart';
 import 'package:stelliberty/src/bindings/signals/signals.dart';
 import 'package:stelliberty/utils/logger.dart';
 
@@ -142,13 +143,22 @@ class LifecycleManager {
     _coreStateManager.setStarting(reason: '开始启动核心');
 
     try {
+      // 检查 TUN 权限（如果 TUN 已启用）
+      bool actualTunEnabled = isTunEnabled;
+      if (isTunEnabled) {
+        final hasTunPermission = await _checkTunPermission();
+        if (!hasTunPermission) {
+          Logger.warning('TUN 已启用但没有权限，自动禁用 TUN');
+          actualTunEnabled = false;
+        }
+      }
       // 生成运行时配置（支持无配置路径时使用默认配置）
       final generatedConfigPath = await ConfigInjector.injectCustomConfigParams(
         configPath: configPath,
         overrides: overrides,
         mixedPort: mixedPort,
         isIpv6Enabled: isIpv6Enabled,
-        isTunEnabled: isTunEnabled,
+        isTunEnabled: actualTunEnabled,
         tunStack: tunStack,
         tunDevice: tunDevice,
         isTunAutoRouteEnabled: isTunAutoRouteEnabled,
@@ -887,5 +897,23 @@ class LifecycleManager {
 
   void dispose() {
     _serviceHeartbeatTimer?.cancel();
+  }
+
+  // 检查 TUN 权限
+  Future<bool> _checkTunPermission() async {
+    try {
+      // 检查服务模式是否已安装
+      final serviceProvider = ServiceProvider();
+      if (serviceProvider.isServiceModeInstalled) {
+        return true;
+      }
+
+      // 检查是否以管理员/root 权限运行
+      final isElevated = await PermissionService.isElevated();
+      return isElevated;
+    } catch (e) {
+      Logger.error('检查 TUN 权限失败：$e');
+      return false;
+    }
   }
 }
