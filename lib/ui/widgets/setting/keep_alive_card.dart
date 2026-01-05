@@ -49,7 +49,6 @@ class _KeepAliveCardState extends State<KeepAliveCard> {
     if (interval == null || interval <= 0) {
       if (mounted) {
         ModernToast.error(
-          context,
           trans.clash_features.keep_alive.interval_error,
         );
       }
@@ -65,7 +64,6 @@ class _KeepAliveCardState extends State<KeepAliveCard> {
 
       if (mounted) {
         ModernToast.success(
-          context,
           trans.clash_features.keep_alive.save_success,
         );
       }
@@ -73,7 +71,6 @@ class _KeepAliveCardState extends State<KeepAliveCard> {
       Logger.error('保存 TCP 保持活动配置失败: $e');
       if (mounted) {
         ModernToast.error(
-          context,
           trans.clash_features.keep_alive.save_failed.replaceAll(
             '{error}',
             e.toString(),

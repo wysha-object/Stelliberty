@@ -104,11 +104,11 @@ class _AppUpdateSettingsPageState extends State<AppUpdateSettingsPage> {
         await AppUpdateDialog.show(context, updateInfo);
       } else {
         // 已是最新版本
-        ModernToast.success(context, trans.app_update.up_to_date);
+        ModernToast.success(trans.app_update.up_to_date);
       }
     } else {
       // 检查失败
-      ModernToast.error(context, trans.app_update.network_error);
+      ModernToast.error(trans.app_update.network_error);
     }
   }
 

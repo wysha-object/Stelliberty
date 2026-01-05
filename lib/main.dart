@@ -281,7 +281,7 @@ Future<ProviderBundle> createProviders(String appDataPath) async {
     themeProvider.initialize(),
     windowEffectProvider.initialize(),
     languageProvider.initialize(),
-    subscriptionProvider.initialize(appDataPath),
+    subscriptionProvider.initialize(),
     overrideProvider.initialize(),
     appUpdateProvider.initialize(),
   ];

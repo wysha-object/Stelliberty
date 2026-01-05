@@ -58,13 +58,12 @@ class _SystemProxyCardState extends State<SystemProxyCard> {
       await _viewModel.saveConfig();
 
       if (mounted) {
-        ModernToast.success(context, trans.system_proxy.save_success);
+        ModernToast.success(trans.system_proxy.save_success);
       }
     } catch (e) {
       Logger.error('保存系统代理配置失败: $e');
       if (mounted) {
         ModernToast.error(
-          context,
           trans.system_proxy.save_failed.replaceAll('{error}', e.toString()),
         );
       }

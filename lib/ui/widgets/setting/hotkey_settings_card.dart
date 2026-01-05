@@ -159,7 +159,7 @@ class _HotkeySettingsCardState extends State<HotkeySettingsCard> {
       }
     }
 
-    // 处理 LogicalKeyboardKey（向后兼容）
+    // 处理 LogicalKeyboardKey
     if (key == LogicalKeyboardKey.f1) return 'F1';
     if (key == LogicalKeyboardKey.f2) return 'F2';
     if (key == LogicalKeyboardKey.f3) return 'F3';

@@ -161,7 +161,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
     try {
       // 显示更新中提示
       if (mounted) {
-        ModernToast.info(context, trans.tun_config.updating);
+        ModernToast.info(trans.tun_config.updating);
       }
 
       // 1. 停止核心（如果正在运行）
@@ -190,7 +190,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
       _checkServiceVersion();
 
       if (mounted) {
-        ModernToast.success(context, trans.tun_config.update_success);
+        ModernToast.success(trans.tun_config.update_success);
       }
     } catch (e) {
       Logger.error('更新服务失败：$e');
@@ -209,7 +209,6 @@ class _TunConfigCardState extends State<TunConfigCard> {
 
       if (mounted) {
         ModernToast.error(
-          context,
           trans.tun_config.update_failed.replaceAll('{error}', e.toString()),
         );
       }
@@ -282,13 +281,12 @@ class _TunConfigCardState extends State<TunConfigCard> {
       ClashManager.instance.setTunRouteExcludeAddress(addresses);
 
       if (mounted) {
-        ModernToast.success(context, trans.tun_config.save_success);
+        ModernToast.success(trans.tun_config.save_success);
       }
     } catch (e) {
       Logger.error('保存 TUN 配置失败: $e');
       if (mounted) {
         ModernToast.error(
-          context,
           trans.tun_config.save_failed.replaceAll('{error}', e.toString()),
         );
       }
@@ -471,7 +469,6 @@ class _TunConfigCardState extends State<TunConfigCard> {
                               if (mounted) {
                                 if (success) {
                                   ModernToast.success(
-                                    context,
                                     trans.tun_config.service_install_success,
                                   );
                                   _checkServiceVersion(); // 安装后重新检查版本
@@ -479,7 +476,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
                                   final errorMsg =
                                       serviceProvider.lastOperationError ??
                                       trans.tun_config.service_install_failed;
-                                  ModernToast.error(context, errorMsg);
+                                  ModernToast.error(errorMsg);
                                 }
                                 serviceProvider.clearLastOperationResult();
                               }
@@ -490,7 +487,6 @@ class _TunConfigCardState extends State<TunConfigCard> {
                               if (mounted) {
                                 if (success) {
                                   ModernToast.success(
-                                    context,
                                     trans.tun_config.service_uninstall_success,
                                   );
                                   _checkServiceVersion(); // 卸载后重新检查版本
@@ -498,7 +494,7 @@ class _TunConfigCardState extends State<TunConfigCard> {
                                   final errorMsg =
                                       serviceProvider.lastOperationError ??
                                       trans.tun_config.service_uninstall_failed;
-                                  ModernToast.error(context, errorMsg);
+                                  ModernToast.error(errorMsg);
                                 }
                                 serviceProvider.clearLastOperationResult();
                               }

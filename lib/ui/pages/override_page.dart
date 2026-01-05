@@ -230,7 +230,6 @@ class _OverridePageState extends State<OverridePage> {
     if (result == null || !mounted) return;
 
     ModernToast.success(
-      context,
       translate.kOverride.add_success.replaceAll('{name}', result.name),
     );
   }
@@ -296,12 +295,11 @@ class _OverridePageState extends State<OverridePage> {
     if (!context.mounted) return;
 
     if (errors.isEmpty) {
-      ModernToast.success(context, translate.kOverride.update_all_success);
+      ModernToast.success(translate.kOverride.update_all_success);
       return;
     }
 
     ModernToast.warning(
-      context,
       translate.kOverride.update_partial_failed.replaceAll(
         '{errors}',
         errors.join('\n'),

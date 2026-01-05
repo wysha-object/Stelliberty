@@ -49,7 +49,6 @@ class _TestUrlCardState extends State<TestUrlCard> {
 
       if (mounted) {
         ModernToast.success(
-          context,
           trans.clash_features.test_url.save_success,
         );
       }
@@ -57,7 +56,6 @@ class _TestUrlCardState extends State<TestUrlCard> {
       Logger.error('保存延迟测试网址失败: $e');
       if (mounted) {
         ModernToast.error(
-          context,
           trans.clash_features.test_url.save_failed.replaceAll(
             '{error}',
             e.toString(),

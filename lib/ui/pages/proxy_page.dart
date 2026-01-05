@@ -387,7 +387,7 @@ class _ProxyPageWidgetState extends State<ProxyPage> {
 
     // 如果切换失败（如代理组类型不支持手动切换），给用户提示
     if (!success && context.mounted) {
-      ModernToast.warning(context, trans.proxy.unsupported_group_type);
+      ModernToast.warning(trans.proxy.unsupported_group_type);
     }
 
     // 移除 setState(),让 ClashProvider.notifyListeners() 触发 Selector 更新

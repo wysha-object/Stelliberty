@@ -561,14 +561,14 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
                 ? trans.subscription_dialog.local_import_failed
                 : trans.subscription_dialog.remote_import_failed;
 
-            ModernToast.error(context, errorMessage ?? defaultErrorMessage);
+            ModernToast.error(errorMessage ?? defaultErrorMessage);
           }
         }
       } else {
         // 没有回调，直接返回结果（编辑模式）
         await Future.delayed(const Duration(milliseconds: 300));
         if (mounted) {
-          ModernToast.success(context, trans.subscription_dialog.save_success);
+          ModernToast.success(trans.subscription_dialog.save_success);
           Navigator.of(context).pop(result);
         }
       }
@@ -577,7 +577,6 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
       if (mounted) {
         setState(() => _isLoading = false);
         ModernToast.error(
-          context,
           trans.subscription_dialog.operation_error.replaceAll(
             '{error}',
             error.toString(),

@@ -203,14 +203,13 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   // 初始化 Provider
-  // baseDir 参数保留以向后兼容，但实际不再使用
-  Future<void> initialize(String baseDir) async {
+  Future<void> initialize() async {
     _stateManager.setLoading(reason: '初始化订阅管理');
     notifyListeners();
 
     try {
       // 初始化服务
-      await _service.initialize(baseDir);
+      await _service.initialize();
 
       // 初始化覆写服务（共享实例，已在 main.dart 初始化）
       // await _overrideService.initialize(); // 不再需要这里初始化
@@ -1346,7 +1345,6 @@ class SubscriptionProvider extends ChangeNotifier {
         _showToast((context) {
           final trans = context.translate;
           ModernToast.error(
-            context,
             trans.subscription.config_abnormal.replaceAll(
               '{name}',
               subscriptionName,
@@ -1364,7 +1362,6 @@ class SubscriptionProvider extends ChangeNotifier {
           _showToast((context) {
             final trans = context.translate;
             ModernToast.success(
-              context,
               trans.subscription.fallback_to_default_config,
             );
           });
@@ -1380,7 +1377,6 @@ class SubscriptionProvider extends ChangeNotifier {
             _showToast((context) {
               final trans = context.translate;
               ModernToast.success(
-                context,
                 trans.subscription.core_restarted_with_default_config,
               );
             });
@@ -1389,7 +1385,6 @@ class SubscriptionProvider extends ChangeNotifier {
             _showToast((context) {
               final trans = context.translate;
               ModernToast.error(
-                context,
                 trans.subscription.core_restart_failed,
               );
             });

@@ -159,13 +159,12 @@ class _PortSettingsCardState extends State<PortSettingsCard> {
       }
 
       if (mounted) {
-        ModernToast.success(context, trans.port_settings.save_success);
+        ModernToast.success(trans.port_settings.save_success);
       }
     } catch (e) {
       Logger.error('保存端口配置失败: $e');
       if (mounted) {
         ModernToast.error(
-          context,
           trans.port_settings.save_failed.replaceAll('{error}', e.toString()),
         );
       }

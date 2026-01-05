@@ -50,10 +50,7 @@ class SubscriptionService {
   }
 
   // 初始化服务
-  // baseDir 参数保留以向后兼容，但实际不再使用
-  Future<void> initialize(String baseDir) async {
-    // 目录创建已由 PathService 统一管理
-    // 这里只需记录日志
+  Future<void> initialize() async {
     final subscriptionDir = PathService.instance.subscriptionsDir;
     Logger.info('订阅服务初始化完成，路径：$subscriptionDir');
   }

@@ -486,7 +486,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
     if (success) {
       ModernToast.success(
-        context,
         trans.subscription.update_success.replaceAll(
           '{name}',
           subscription.name,
@@ -500,7 +499,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       );
       final errorMsg = _getErrorMessage(context, updatedSubscription.lastError);
 
-      ModernToast.error(context, '${subscription.name}: $errorMsg');
+      ModernToast.error('${subscription.name}: $errorMsg');
     }
   }
 
@@ -543,19 +542,18 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     if (!context.mounted) return;
 
     if (errors.isEmpty) {
-      ModernToast.success(context, trans.subscription.update_all_success);
+      ModernToast.success(trans.subscription.update_all_success);
     } else {
       // 只显示成功/失败统计，不显示具体错误
       final successCount = provider.subscriptions.length - errors.length;
       if (successCount > 0) {
         ModernToast.warning(
-          context,
           trans.subscription.update_partial_success
               .replaceAll('{success}', successCount.toString())
               .replaceAll('{failed}', errors.length.toString()),
         );
       } else {
-        ModernToast.error(context, trans.subscription.update_all_failed);
+        ModernToast.error(trans.subscription.update_all_failed);
       }
     }
   }
@@ -676,7 +674,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       if (!context.mounted) return;
 
       ModernToast.error(
-        context,
         trans.file_editor.read_error.replaceAll('{error}', error.toString()),
       );
     }
@@ -729,7 +726,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       if (!context.mounted) return;
 
       ModernToast.error(
-        context,
         trans.file_editor.read_error.replaceAll('{error}', error.toString()),
       );
     }

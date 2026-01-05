@@ -663,13 +663,13 @@ class _FileEditorDialogState extends State<FileEditorDialog> {
       if (!mounted) return;
 
       if (success) {
-        ModernToast.success(context, trans.file_editor.save_success);
+        ModernToast.success(trans.file_editor.save_success);
         Navigator.of(context).pop();
       } else {
         setState(() {
           _isSaving = false;
         });
-        ModernToast.error(context, trans.file_editor.save_failed);
+        ModernToast.error(trans.file_editor.save_failed);
       }
     } catch (e) {
       if (!mounted) return;
@@ -680,7 +680,6 @@ class _FileEditorDialogState extends State<FileEditorDialog> {
 
       Logger.error('保存文件失败: $e');
       ModernToast.error(
-        context,
         trans.file_editor.save_error.replaceAll('{error}', e.toString()),
       );
     }

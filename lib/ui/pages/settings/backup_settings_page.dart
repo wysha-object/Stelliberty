@@ -130,7 +130,6 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
       setState(() => _isCreating = false);
 
       ModernToast.show(
-        context,
         trans.backup.backup_success,
         type: ToastType.success,
       );
@@ -155,7 +154,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
       if (!mounted) return;
       setState(() => _isCreating = false);
 
-      ModernToast.show(context, _getErrorMessage(e), type: ToastType.error);
+      ModernToast.show(_getErrorMessage(e), type: ToastType.error);
     }
   }
 
@@ -211,7 +210,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
       );
 
       // 重新初始化 Provider 以加载还原的数据
-      await subscriptionProvider.initialize('');
+      await subscriptionProvider.initialize();
       await overrideProvider.initialize();
 
       // 如果核心正在运行，重启核心以应用新配置
@@ -224,7 +223,6 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
       setState(() => _isRestoring = false);
 
       ModernToast.show(
-        context,
         trans.backup.restore_success,
         type: ToastType.success,
       );
@@ -233,7 +231,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
       if (!mounted) return;
       setState(() => _isRestoring = false);
 
-      ModernToast.show(context, _getErrorMessage(e), type: ToastType.error);
+      ModernToast.show(_getErrorMessage(e), type: ToastType.error);
     }
   }
 

@@ -383,7 +383,7 @@ class _OverrideDialogState extends State<OverrideDialog> {
         if (success) {
           Logger.info('添加成功，关闭对话框');
           if (mounted) {
-            ModernToast.success(context, trans.override_dialog.add_success);
+            ModernToast.success(trans.override_dialog.add_success);
             Navigator.of(context).pop(override);
           }
         } else {
@@ -391,7 +391,6 @@ class _OverrideDialogState extends State<OverrideDialog> {
           setState(() => _isLoading = false);
           if (mounted) {
             ModernToast.error(
-              context,
               trans.kOverride.add_failed.replaceAll('{error}', override.name),
             );
           }
@@ -401,7 +400,6 @@ class _OverrideDialogState extends State<OverrideDialog> {
         if (!mounted) return;
         setState(() => _isLoading = false);
         ModernToast.error(
-          context,
           trans.kOverride.add_failed.replaceAll('{error}', error.toString()),
         );
       }

@@ -84,13 +84,12 @@ class _ExternalControllerCardState extends State<ExternalControllerCard> {
       await prefs.setExternalControllerSecret(secret);
 
       if (mounted) {
-        ModernToast.success(context, trans.external_controller.save_success);
+        ModernToast.success(trans.external_controller.save_success);
       }
     } catch (e) {
       Logger.error('保存外部控制器配置失败: $e');
       if (mounted) {
         ModernToast.error(
-          context,
           trans.external_controller.save_failed.replaceAll(
             '{error}',
             e.toString(),

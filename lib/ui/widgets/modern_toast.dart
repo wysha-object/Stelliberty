@@ -36,12 +36,10 @@ class ModernToast {
 
   // 显示 Toast 提示
   //
-  // [context] - BuildContext（可选，用于向后兼容，实际使用 navigatorKey）
   // [message] - 提示消息
   // [type] - Toast 类型，默认为 info
   // [duration] - 显示时长，默认 3 秒
   static void show(
-    BuildContext? context,
     String message, {
     ToastType type = ToastType.info,
     Duration duration = const Duration(seconds: 3),
@@ -118,23 +116,23 @@ class ModernToast {
   }
 
   // 显示成功提示
-  static void success(BuildContext? context, String message) {
-    show(context, message, type: ToastType.success);
+  static void success(String message) {
+    show(message, type: ToastType.success);
   }
 
   // 显示错误提示
-  static void error(BuildContext? context, String message) {
-    show(context, message, type: ToastType.error);
+  static void error(String message) {
+    show(message, type: ToastType.error);
   }
 
   // 显示警告提示
-  static void warning(BuildContext? context, String message) {
-    show(context, message, type: ToastType.warning);
+  static void warning(String message) {
+    show(message, type: ToastType.warning);
   }
 
   // 显示信息提示
-  static void info(BuildContext? context, String message) {
-    show(context, message, type: ToastType.info);
+  static void info(String message) {
+    show(message, type: ToastType.info);
   }
 }
 

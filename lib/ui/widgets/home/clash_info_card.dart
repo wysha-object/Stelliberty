@@ -160,7 +160,7 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
 
     // 显示开始更新提示
     if (context.mounted) {
-      ModernToast.info(context, trans.home.updating_core);
+      ModernToast.info(trans.home.updating_core);
     }
 
     // 记录核心状态（用于更新后恢复）
@@ -188,7 +188,7 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
           // 当前版本已是最新或更新
           Logger.info('核心已是最新版本: $currentVersion');
           if (context.mounted) {
-            ModernToast.info(context, trans.home.core_already_latest);
+            ModernToast.info(trans.home.core_already_latest);
           }
           return;
         }
@@ -229,7 +229,6 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
       // 9. 显示成功消息
       if (context.mounted) {
         ModernToast.success(
-          context,
           trans.home.core_updated_to.replaceAll('{version}', version),
         );
       }
@@ -252,7 +251,6 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
 
       if (context.mounted) {
         ModernToast.error(
-          context,
           trans.home.core_update_error.replaceAll('{error}', e.toString()),
         );
       }
@@ -282,7 +280,7 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
 
       // 显示成功提示
       if (context.mounted) {
-        ModernToast.success(context, trans.proxy.core_restarted);
+        ModernToast.success(trans.proxy.core_restarted);
       }
     } catch (e) {
       Logger.error('重启核心失败: $e');
@@ -290,7 +288,6 @@ class _ClashInfoCardState extends State<ClashInfoCard> {
       // 显示错误提示
       if (context.mounted) {
         ModernToast.error(
-          context,
           trans.proxy.restart_failed_with_error.replaceAll(
             '{error}',
             e.toString(),

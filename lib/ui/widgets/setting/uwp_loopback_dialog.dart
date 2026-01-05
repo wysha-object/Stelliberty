@@ -463,7 +463,7 @@ class _UwpLoopbackDialogState extends State<UwpLoopbackDialog> {
       if (result.message.isSuccessful) {
         // 成功，显示提示并关闭对话框
         if (mounted) {
-          ModernToast.success(context, trans.uwp_loopback.save_success);
+          ModernToast.success(trans.uwp_loopback.save_success);
           Navigator.of(context).pop();
         }
       } else {
@@ -489,7 +489,7 @@ class _UwpLoopbackDialogState extends State<UwpLoopbackDialog> {
             userFriendlyMsg = t.save_failed;
           }
 
-          ModernToast.error(context, userFriendlyMsg);
+          ModernToast.error(userFriendlyMsg);
         }
       }
     } catch (e) {
@@ -498,7 +498,6 @@ class _UwpLoopbackDialogState extends State<UwpLoopbackDialog> {
           _isSaving = false;
         });
         ModernToast.error(
-          context,
           trans.uwp_loopback.apply_failed.replaceAll('{error}', e.toString()),
         );
       }

@@ -434,14 +434,12 @@ class SubscriptionCard extends StatelessWidget {
 
     if (result.isSuccessful) {
       ModernToast.success(
-        context,
         trans.subscription.external_open.open_success,
       );
       return;
     }
 
     ModernToast.error(
-      context,
       trans.subscription.external_open.open_failed.replaceAll(
         '{error}',
         _formatExternalOpenError(trans, result),
@@ -477,12 +475,11 @@ class SubscriptionCard extends StatelessWidget {
       await Clipboard.setData(ClipboardData(text: subscription.url));
       if (!context.mounted) return;
 
-      ModernToast.success(context, trans.subscription.link_copied);
+      ModernToast.success(trans.subscription.link_copied);
     } catch (e) {
       if (!context.mounted) return;
 
       ModernToast.error(
-        context,
         trans.subscription.copy_failed.replaceAll('{error}', e.toString()),
       );
     }
