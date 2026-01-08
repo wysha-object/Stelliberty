@@ -8,6 +8,5 @@ pub use updater::{
 };
 
 pub fn init_listeners() {
-    log::info!("初始化核心更新监听器");
     updater::init_dart_signal_listeners();
 }

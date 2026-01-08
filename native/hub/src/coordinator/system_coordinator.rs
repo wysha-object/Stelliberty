@@ -19,8 +19,6 @@ impl SystemCoordinator {
 
 // 初始化系统协调器
 pub fn init() {
-    log::info!("初始化系统协调器");
-
     // 初始化原子层监听器
     system_proxy::init();
     network_interfaces::init();

@@ -51,7 +51,9 @@ class ProcessManager {
           maxWait: const Duration(seconds: 5),
         );
       }
-      Logger.debug('端口已释放 (${portsToRelease.join(", ")}) - 耗时：${stopwatch.elapsedMilliseconds}ms');
+      Logger.debug(
+        '端口已释放 (${portsToRelease.join(", ")}) - 耗时：${stopwatch.elapsedMilliseconds}ms',
+      );
     }
 
     Logger.info('Clash 进程已停止');

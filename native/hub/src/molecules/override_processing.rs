@@ -16,7 +16,6 @@ pub use yaml_merger::YamlMerger;
 pub use super::{OverrideConfig, OverrideFormat};
 
 pub fn init_listeners() {
-    log::info!("初始化覆写处理监听器");
     processor::init_dart_signal_listeners();
     downloader::init_dart_signal_listeners();
 }

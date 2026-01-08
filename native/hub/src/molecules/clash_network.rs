@@ -19,6 +19,5 @@ pub use ipc_client::{HttpResponse, IpcClient};
 pub use ws_client::WebSocketClient;
 
 pub fn init_listeners() {
-    log::info!("初始化 Clash 网络管理监听器");
     init_rest_api_listeners();
 }

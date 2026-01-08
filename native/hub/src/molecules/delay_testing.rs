@@ -8,6 +8,5 @@ pub use tester::{
 };
 
 pub fn init_listeners() {
-    log::info!("初始化延迟测试监听器");
     tester::init_dart_signal_listeners();
 }

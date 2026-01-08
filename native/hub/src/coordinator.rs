@@ -7,9 +7,9 @@ pub use clash_coordinator::ClashCoordinator;
 pub use system_coordinator::SystemCoordinator;
 
 pub fn init_all() {
-    log::info!("初始化协调层");
     clash_coordinator::init();
     system_coordinator::init();
+    log::info!("协调层初始化完成");
 }
 
 pub fn cleanup() {

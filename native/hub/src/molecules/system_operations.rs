@@ -23,7 +23,6 @@ pub use power_event::{
 pub use url_launcher::{OpenUrl, OpenUrlResult};
 
 pub fn init_listeners() {
-    log::info!("初始化系统操作监听器");
     app_update::init_dart_signal_listeners();
     auto_start::init_dart_signal_listeners();
     backup::init_dart_signal_listeners();

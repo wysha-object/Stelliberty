@@ -9,6 +9,5 @@ pub use downloader::{
 pub use parser::ProxyParser;
 
 pub fn init_listeners() {
-    log::info!("初始化订阅管理监听器");
     downloader::init_dart_signal_listeners();
 }

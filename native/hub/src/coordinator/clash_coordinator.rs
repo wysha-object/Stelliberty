@@ -21,8 +21,6 @@ impl ClashCoordinator {
 
 // 初始化 Clash 协调器
 pub fn init() {
-    log::info!("初始化 Clash 协调器");
-
     // 初始化进程管理
     clash_process::init_listeners();
 
@@ -47,6 +45,5 @@ pub fn init() {
 
 // 清理资源
 pub fn cleanup() {
-    log::info!("清理 Clash 协调器资源");
     clash_process::cleanup();
 }

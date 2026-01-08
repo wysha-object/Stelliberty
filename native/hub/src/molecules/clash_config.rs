@@ -9,6 +9,5 @@ pub use injector::inject_runtime_params;
 pub use runtime_params::RuntimeConfigParams;
 
 pub fn init_listeners() {
-    log::info!("初始化 Clash 配置管理监听器");
     generator::init_dart_signal_listeners();
 }
