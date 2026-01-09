@@ -61,7 +61,7 @@ class ConfigState {
     this.httpPort,
   });
 
-  // 从持久化存储构建配置状态（状态构建逻辑在 state 层）
+  // 从持久化存储构建配置状态
   static ConfigState fromPreferences(ClashPreferences prefs) {
     return ConfigState(
       isAllowLanEnabled: prefs.getAllowLan(),

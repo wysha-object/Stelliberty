@@ -516,6 +516,7 @@ class OverrideProvider extends ChangeNotifier {
   void dispose() {
     // 清理回调，避免内存泄漏
     _onOverrideDeleted = null;
+    _onOverrideContentUpdated = null;
     super.dispose();
   }
 }

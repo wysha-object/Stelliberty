@@ -417,11 +417,22 @@ class ConfigManager {
   // 设置虚拟网卡模式启用状态
   Future<bool> setTunEnabled(bool enabled) async {
     try {
-      // 保存到持久化（不管核心是否运行）
+      // 先保存到持久化
       await ClashPreferences.instance.setTunEnable(enabled);
-      Logger.info(
-        '虚拟网卡模式配置已更新：${enabled ? "启用" : "禁用"}（${_isCoreRunning() ? "将通过配置重载生效" : "将在下次启动时生效"}）',
-      );
+
+      // 如果核心正在运行，异步调用 API（不阻塞返回）
+      if (_isCoreRunning()) {
+        unawaited(
+          _apiClient.setTunEnable(enabled).then((success) {
+            if (success) {
+              Logger.info('虚拟网卡模式（支持重载）：${enabled ? "启用" : "禁用"}');
+            }
+          }).catchError((e) {
+            Logger.error('虚拟网卡模式 API 调用失败：$e');
+          }),
+        );
+      }
+
       return true;
     } catch (e) {
       Logger.error('设置虚拟网卡模式失败：$e');
@@ -476,9 +487,22 @@ class ConfigManager {
   // 设置虚拟网卡自动路由
   Future<bool> setTunAutoRoute(bool enabled) async {
     try {
-      // 保存到持久化
+      // 先保存到持久化
       await ClashPreferences.instance.setTunAutoRoute(enabled);
-      Logger.info('虚拟网卡自动路由（支持重载）：${enabled ? "启用" : "禁用"}');
+
+      // 如果核心正在运行，异步调用 API（不阻塞返回）
+      if (_isCoreRunning()) {
+        unawaited(
+          _apiClient.setTunAutoRoute(enabled).then((success) {
+            if (success) {
+              Logger.info('虚拟网卡自动路由（支持重载）：${enabled ? "启用" : "禁用"}');
+            }
+          }).catchError((e) {
+            Logger.error('虚拟网卡自动路由 API 调用失败：$e');
+          }),
+        );
+      }
+
       return true;
     } catch (e) {
       Logger.error('设置虚拟网卡自动路由失败：$e');
@@ -511,9 +535,22 @@ class ConfigManager {
   // 设置虚拟网卡自动检测接口
   Future<bool> setTunAutoDetectInterface(bool enabled) async {
     try {
-      // 保存到持久化
+      // 先保存到持久化
       await ClashPreferences.instance.setTunAutoDetectInterface(enabled);
-      Logger.info('虚拟网卡自动检测接口（支持重载）：${enabled ? "启用" : "禁用"}');
+
+      // 如果核心正在运行，异步调用 API（不阻塞返回）
+      if (_isCoreRunning()) {
+        unawaited(
+          _apiClient.setTunAutoDetectInterface(enabled).then((success) {
+            if (success) {
+              Logger.info('虚拟网卡自动检测接口（支持重载）：${enabled ? "启用" : "禁用"}');
+            }
+          }).catchError((e) {
+            Logger.error('虚拟网卡自动检测接口 API 调用失败：$e');
+          }),
+        );
+      }
+
       return true;
     } catch (e) {
       Logger.error('设置虚拟网卡自动检测接口失败：$e');
@@ -546,9 +583,22 @@ class ConfigManager {
   // 设置虚拟网卡严格路由
   Future<bool> setTunStrictRoute(bool enabled) async {
     try {
-      // 保存到持久化
+      // 先保存到持久化
       await ClashPreferences.instance.setTunStrictRoute(enabled);
-      Logger.info('虚拟网卡严格路由（支持重载）：${enabled ? "启用" : "禁用"}');
+
+      // 如果核心正在运行，异步调用 API（不阻塞返回）
+      if (_isCoreRunning()) {
+        unawaited(
+          _apiClient.setTunStrictRoute(enabled).then((success) {
+            if (success) {
+              Logger.info('虚拟网卡严格路由（支持重载）：${enabled ? "启用" : "禁用"}');
+            }
+          }).catchError((e) {
+            Logger.error('虚拟网卡严格路由 API 调用失败：$e');
+          }),
+        );
+      }
+
       return true;
     } catch (e) {
       Logger.error('设置虚拟网卡严格路由失败：$e');

@@ -98,7 +98,7 @@ class ConfigInjector {
         tunDevice: tunDevice,
         isTunAutoRouteEnabled: isTunAutoRouteEnabled,
         isTunAutoRedirectEnabled: isTunAutoRedirectEnabled,
-        isTunAutoDetectInterfaceEnabled: isTunAutoDetectInterfaceEnabled,
+        isTunAutoDetectInterfaceEnabled: true, // 固定为 true
         tunDnsHijacks: tunDnsHijacks,
         isTunStrictRouteEnabled: isTunStrictRouteEnabled,
         tunRouteExcludeAddresses: tunRouteExcludeAddresses,

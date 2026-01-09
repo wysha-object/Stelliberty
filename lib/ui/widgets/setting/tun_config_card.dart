@@ -62,10 +62,10 @@ class _TunConfigCardState extends State<TunConfigCard> {
   TunStack _tunStack = TunStack.mixed;
   final TextEditingController _tunDeviceController = TextEditingController();
   bool _tunAutoRoute = true;
-  bool _tunAutoDetectInterface = true;
   bool _tunStrictRoute = true;
   final TextEditingController _tunMtuController = TextEditingController();
-  final TextEditingController _tunDnsHijacksController = TextEditingController();
+  final TextEditingController _tunDnsHijacksController =
+      TextEditingController();
   bool _tunAutoRedirect = false;
   final TextEditingController _tunRouteExcludeAddressesController =
       TextEditingController();
@@ -130,7 +130,6 @@ class _TunConfigCardState extends State<TunConfigCard> {
       _tunStack = TunStack.fromString(configState.tunStack);
       _tunDeviceController.text = configState.tunDevice;
       _tunAutoRoute = configState.isTunAutoRouteEnabled;
-      _tunAutoDetectInterface = configState.isTunAutoDetectInterfaceEnabled;
       _tunStrictRoute = configState.isTunStrictRouteEnabled;
       _tunMtuController.text = configState.tunMtu.toString();
       _tunDnsHijacksController.text = configState.tunDnsHijacks.join('，');
@@ -323,9 +322,9 @@ class _TunConfigCardState extends State<TunConfigCard> {
           ),
         ),
         const SizedBox(height: 16),
-        // 开关选项（自动路由、自动检测、严格路由）
+        // 开关选项（自动路由、严格路由）
         Container(
-          height: 120,
+          height: 80,
           decoration: BoxDecoration(
             color: skeletonColor,
             borderRadius: BorderRadius.circular(8),
@@ -603,26 +602,6 @@ class _TunConfigCardState extends State<TunConfigCard> {
             onChanged: (value) {
               setState(() => _tunAutoRoute = value);
               ClashManager.instance.setTunAutoRoute(value);
-            },
-          ),
-        ],
-      ),
-
-      const SizedBox(height: 12),
-
-      // 自动检测接口
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            trans.clash_features.tun_mode.auto_detect_interface,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          ModernSwitch(
-            value: _tunAutoDetectInterface,
-            onChanged: (value) {
-              setState(() => _tunAutoDetectInterface = value);
-              ClashManager.instance.setTunAutoDetectInterface(value);
             },
           ),
         ],

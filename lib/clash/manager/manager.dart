@@ -473,41 +473,15 @@ class ClashManager {
   }
 
   Future<bool> setTunEnabled(bool enabled) async {
-    // 先更新本地状态和持久化
-    final success = await _configManager.setTunEnabled(enabled);
-
-    // 如果核心正在运行且更新成功，重新生成配置并重载
-    // 即使 currentConfigPath 为 null（无订阅），也支持重载（使用默认配置）
-    if (success && isCoreRunning) {
-      Logger.debug(
-        'TUN 状态已更新，重新生成配置文件并重载（${currentConfigPath != null ? "使用订阅配置" : "使用默认配置"}）…',
-      );
-      await reloadConfig(
-        configPath: currentConfigPath, // 可能为 null（无订阅时使用默认配置）
-        overrides: getOverrides(),
-      );
-    }
-
-    return success;
+    return await _configManager.setTunEnabled(enabled);
   }
 
-  // 通用的 TUN 子配置修改方法（自动触发配置重载）
+  // 通用的 TUN 子配置修改方法
   Future<bool> _setTunSubConfig(
     Future<bool> Function() setter,
     String configName,
   ) async {
-    final success = await setter();
-
-    // 如果核心正在运行且 TUN 已启用，重新生成配置并重载
-    if (success && isCoreRunning && ClashPreferences.instance.getTunEnable()) {
-      Logger.debug('TUN 子配置已更新（$configName），重新生成配置文件并重载…');
-      await reloadConfig(
-        configPath: currentConfigPath,
-        overrides: getOverrides(),
-      );
-    }
-
-    return success;
+    return await setter();
   }
 
   Future<bool> setTunStack(String stack) async {
@@ -619,6 +593,7 @@ class ClashManager {
 
   // 清理资源（应用关闭时调用）
   void dispose() {
+    _configReloadDebounceTimer?.cancel();
     _lifecycleManager.dispose();
 
     Logger.info('应用关闭，检查并清理系统代理…');
