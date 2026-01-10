@@ -35,16 +35,21 @@ class CoreLogState {
   CoreLogState copyWith({
     List<ClashLogMessage>? logs,
     bool? isMonitoringPaused,
-    ClashLogLevel? filterLevel,
+    Object? filterLevel = _undefined,
     String? searchKeyword,
     bool? isLoading,
   }) {
     return CoreLogState(
       logs: logs ?? this.logs,
       isMonitoringPaused: isMonitoringPaused ?? this.isMonitoringPaused,
-      filterLevel: filterLevel ?? this.filterLevel,
+      filterLevel: filterLevel == _undefined
+          ? this.filterLevel
+          : filterLevel as ClashLogLevel?,
       searchKeyword: searchKeyword ?? this.searchKeyword,
       isLoading: isLoading ?? this.isLoading,
     );
   }
 }
+
+// Sentinel 值，用于区分"未传入参数"和"传入 null"
+const Object _undefined = Object();
