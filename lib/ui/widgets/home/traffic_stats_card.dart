@@ -41,14 +41,15 @@ class _TrafficStatsCardState extends State<TrafficStatsCard> {
         ? StreamBuilder<TrafficData>(
             stream: context.read<ClashProvider>().trafficStream,
             builder: (context, snapshot) {
-              // 优先使用流中的数据，如果没有则使用缓存的最后数据
-              final traffic =
-                  snapshot.data ?? _trafficDataCache ?? TrafficData.zero;
+              // 使用流中的实时速度数据
+              final streamData = snapshot.data ?? TrafficData.zero;
 
-              // 缓存数据（仅在有新数据时更新）
-              if (snapshot.hasData) {
-                _trafficDataCache = snapshot.data;
-              }
+              // 累计流量从 TrafficProvider 读取
+              final trafficProvider = context.read<TrafficProvider>();
+              final traffic = streamData.copyWithTotal(
+                totalUpload: trafficProvider.totalUpload,
+                totalDownload: trafficProvider.totalDownload,
+              );
 
               return BaseCard(
                 icon: Icons.data_usage,

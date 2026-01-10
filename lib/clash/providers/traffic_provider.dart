@@ -11,6 +11,7 @@ import 'package:stelliberty/services/log_print_service.dart';
 class TrafficProvider extends ChangeNotifier {
   final ClashManager _clashManager = ClashManager.instance;
   StreamSubscription<TrafficData>? _trafficSubscription;
+  Timer? _retryTimer;
 
   TrafficState _state = TrafficState.initial();
   DateTime? _lastTimestamp;
@@ -29,14 +30,23 @@ class TrafficProvider extends ChangeNotifier {
 
   // 订阅流量数据流
   void _subscribeToTrafficStream() {
-    _trafficSubscription = _clashManager.trafficStream?.listen(
-      (trafficData) {
-        _handleTrafficData(trafficData);
-      },
-      onError: (error) {
-        Logger.error('流量数据流错误：$error');
-      },
-    );
+    final stream = _clashManager.trafficStream;
+
+    if (stream != null) {
+      _trafficSubscription = stream.listen(
+        (trafficData) {
+          _handleTrafficData(trafficData);
+        },
+        onError: (error) {
+          Logger.error('流量数据流错误：$error');
+        },
+      );
+      _retryTimer?.cancel();
+      _retryTimer = null;
+    } else {
+      _retryTimer?.cancel();
+      _retryTimer = Timer(const Duration(seconds: 1), _subscribeToTrafficStream);
+    }
   }
 
   // 处理流量数据
@@ -90,6 +100,7 @@ class TrafficProvider extends ChangeNotifier {
   @override
   void dispose() {
     _trafficSubscription?.cancel();
+    _retryTimer?.cancel();
     super.dispose();
   }
 }
