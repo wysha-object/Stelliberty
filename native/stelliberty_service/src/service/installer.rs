@@ -397,7 +397,6 @@ StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=stelliberty
 
-# 安全加固：限制服务权限
 # 只授予 Clash 核心所需的最小权限集
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW CAP_NET_BIND_SERVICE CAP_SYS_TIME CAP_SYS_PTRACE CAP_DAC_READ_SEARCH CAP_DAC_OVERRIDE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW CAP_NET_BIND_SERVICE CAP_SYS_TIME CAP_SYS_PTRACE CAP_DAC_READ_SEARCH CAP_DAC_OVERRIDE
@@ -730,8 +729,6 @@ fn get_launchd_plist(binary_path: &str) -> String {
     <true/>
     <key>KeepAlive</key>
     <true/>
-    <key>Umask</key>
-    <integer>63</integer>
     <key>StandardOutPath</key>
     <string>/var/log/stelliberty-service.log</string>
     <key>StandardErrorPath</key>
