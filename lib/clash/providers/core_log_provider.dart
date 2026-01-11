@@ -155,7 +155,7 @@ class LogProvider extends ChangeNotifier {
   void _startBatchUpdateTimer() {
     _batchUpdateTimer = Timer.periodic(_batchUpdateInterval, (_) {
       // 动态批量策略：
-      // 1. 累积足够日志（>=5条）立即更新
+      // 1. 累积足够日志（>=5 条）立即更新
       // 2. 或超过最大间隔（500ms）强制更新
       // 3. 保证日志即时显示的同时减少高频更新
       final shouldFlush =

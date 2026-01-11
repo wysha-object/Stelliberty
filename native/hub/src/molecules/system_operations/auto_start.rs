@@ -124,7 +124,7 @@ fn generate_task_xml(binary_path: &str) -> String {
         r#"<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
-    <Description>登录时自动启动应用（5秒延迟）</Description>
+    <Description>登录时自动启动应用（5 秒延迟）</Description>
   </RegistrationInfo>
   <Triggers>
     <LogonTrigger>

@@ -331,7 +331,7 @@ pub fn start_connection_pool_health_check() {
         }
     });
 
-    log::info!("连接池健康检查已启动（30秒间隔）");
+    log::info!("连接池健康检查已启动（30 秒间隔）");
 }
 
 // 连接获取通用逻辑宏（消除 Windows 和 Unix 平台的重复代码）
@@ -498,7 +498,7 @@ pub async fn cleanup_all_network_resources() {
     let ipc_count = cleanup_ipc_connection_pool().await;
 
     log::info!(
-        "网络资源已清理（WebSocket={}, IPC连接池={}个）",
+        "网络资源已清理（WebSocket={}, IPC 连接池={}个）",
         if ws_cleaned { "是" } else { "否" },
         ipc_count
     );

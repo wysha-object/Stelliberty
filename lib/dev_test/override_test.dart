@@ -104,7 +104,7 @@ class OverrideTest {
         .timeout(
           const Duration(seconds: 30),
           onTimeout: () {
-            throw Exception('Rust 订阅解析超时（30秒）');
+            throw Exception('Rust 订阅解析超时（30 秒）');
           },
         );
 
@@ -185,7 +185,7 @@ class OverrideTest {
         .timeout(
           const Duration(seconds: 30),
           onTimeout: () {
-            throw Exception('Rust 覆写处理超时（30秒）');
+            throw Exception('Rust 覆写处理超时（30 秒）');
           },
         );
 

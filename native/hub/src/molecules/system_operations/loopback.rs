@@ -224,7 +224,7 @@ impl SaveLoopbackConfiguration {
         if skipped_count > 0 {
             message_parts.push(format!("跳过系统保护应用：{}个", skipped_count));
             if skipped.len() <= 3 {
-                // 如果跳过的应用少于等于3个，显示具体名称
+                // 如果跳过的应用少于等于 3 个，显示具体名称
                 message_parts.push(format!("（{}）", skipped.join("、")));
             }
         }

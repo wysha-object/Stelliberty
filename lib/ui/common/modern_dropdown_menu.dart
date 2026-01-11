@@ -25,7 +25,7 @@ class _DropdownMenuStyle {
 }
 
 // 现代化下拉菜单路由
-// 基于 ModernPopupRoute 的架构，实现 Q弹效果
+// 基于 ModernPopupRoute 的架构，实现 Q 弹效果
 class _ModernDropdownRoute<T> extends PopupRoute<T> {
   final WidgetBuilder builder;
   final ValueNotifier<Offset> offsetNotifier;
@@ -166,7 +166,7 @@ class _DropdownLayoutDelegate extends SingleChildLayoutDelegate {
   }
 }
 
-// Q弹风格的下拉菜单组件
+// Q 弹风格的下拉菜单组件
 //
 // 特性：
 // - Curves.easeOutBack 回弹动画（参考 modern_popup_menu）
@@ -333,7 +333,7 @@ class _DropdownMenuUIState<T> extends State<_DropdownMenuUI<T>> {
     _currentPage = 0;
   }
 
-  // 每页显示的项目数（最多7项 + 1行翻页按钮）
+  // 每页显示的项目数（最多7 项 + 1 行翻页按钮）
   static const int _itemsPerPage = 7;
 
   // 计算总页数

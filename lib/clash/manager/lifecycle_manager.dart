@@ -417,7 +417,7 @@ class LifecycleManager {
   }
 
   // 检查服务是否可用
-  // 直接使用 ServiceProvider 的缓存状态，避免重复 IPC 调用
+  // 直接使用 ServiceProvider 的缓存状态，避免重复 IPC调用
   bool _checkServiceAvailable() {
     try {
       // 使用 ServiceManager 单例
@@ -425,7 +425,7 @@ class LifecycleManager {
       final isServiceModeInstalled = serviceManager.isServiceModeInstalled;
 
       // 关键：只要服务已安装（stopped 或 running 都可以），就可以使用服务模式
-      // 因为通过 IPC 发送 StartClash 命令时，服务会自动启动
+      // 因为通过 IPC发送 StartClash 命令时，服务会自动启动
       return isServiceModeInstalled;
     } catch (e) {
       Logger.error('检查服务状态失败：$e');
@@ -456,7 +456,7 @@ class LifecycleManager {
       final signal = await ClashProcessResult.rustSignalStream.first.timeout(
         const Duration(seconds: 30),
         onTimeout: () {
-          throw TimeoutException('服务启动核心超时（30秒）');
+          throw TimeoutException('服务启动核心超时（30 秒）');
         },
       );
 
@@ -469,8 +469,8 @@ class LifecycleManager {
       _currentStartMode = ClashStartMode.service;
       _onStartModeChanged?.call(ClashStartMode.service);
 
-      // 等待 IPC API 就绪（与普通模式保持一致）
-      Logger.info('等待服务模式下的 IPC API 就绪…');
+      // 等待 IPCAPI 就绪（与普通模式保持一致）
+      Logger.info('等待服务模式下的 IPCAPI 就绪…');
       await _apiClient.waitForReady(
         maxRetries: ClashDefaults.apiReadyMaxRetries,
         retryInterval: Duration(
@@ -573,13 +573,13 @@ class LifecycleManager {
   ) async {
     try {
       // API 已在并行启动时就绪，但 Named Pipe 可能还需要一点时间创建
-      // 等待 IPC 就绪（通过重试获取版本号）
+      // 等待 IPC就绪（通过重试获取版本号）
       final version = await _waitForIpcReady();
       if (version != null) {
         _coreVersion = version;
         _onCoreVersionChanged?.call(version);
       } else {
-        Logger.warning('未能通过 IPC 获取版本号');
+        Logger.warning('未能通过 IPC获取版本号');
         _coreVersion = 'Unknown';
         _onCoreVersionChanged?.call('Unknown');
       }
@@ -668,16 +668,16 @@ class LifecycleManager {
     }
   }
 
-  // 等待 IPC (Named Pipe) 就绪
+  // 等待 IPC(Named Pipe) 就绪
   // Clash 核心启动后，Named Pipe 的创建需要 1-2 秒
   // 返回获取到的版本号（如果成功）
   Future<String?> _waitForIpcReady() async {
     for (int i = 0; i < ClashDefaults.ipcReadyMaxRetries; i++) {
       try {
-        // 尝试调用一个简单的 API 来检查 IPC 是否可用
+        // 尝试调用一个简单的 API 来检查 IPC是否可用
         final version = await _apiClient.getVersion();
-        Logger.debug('IPC 已就绪（第 ${i + 1} 次尝试），版本：$version');
-        return version; // IPC 可用，返回版本号
+        Logger.debug('IPC已就绪（第 ${i + 1} 次尝试），版本：$version');
+        return version; // IPC可用，返回版本号
       } catch (e) {
         if (i < ClashDefaults.ipcReadyMaxRetries - 1) {
           // 还有重试机会，继续等待
@@ -686,7 +686,7 @@ class LifecycleManager {
           );
         } else {
           // 最后一次尝试也失败了
-          Logger.warning('等待 IPC 就绪超时，继续初始化（可能导致部分功能不可用）');
+          Logger.warning('等待 IPC就绪超时，继续初始化（可能导致部分功能不可用）');
         }
       }
     }
@@ -861,7 +861,7 @@ class LifecycleManager {
       final signal = await ClashProcessResult.rustSignalStream.first.timeout(
         const Duration(seconds: 10),
         onTimeout: () {
-          throw TimeoutException('服务停止核心超时（10秒）');
+          throw TimeoutException('服务停止核心超时（10 秒）');
         },
       );
 
@@ -896,7 +896,7 @@ class LifecycleManager {
   void startServiceHeartbeat() {
     _serviceHeartbeatTimer?.cancel();
 
-    // 立即发送第一次心跳，避免服务启动后等待30秒导致超时
+    // 立即发送第一次心跳，避免服务启动后等待30 秒导致超时
     Logger.debug('发送服务心跳（立即）');
     SendServiceHeartbeat().sendSignalToRust();
 
@@ -906,7 +906,7 @@ class LifecycleManager {
       Logger.debug('发送服务心跳');
       SendServiceHeartbeat().sendSignalToRust();
     });
-    Logger.info('服务心跳定时器已启动（30秒间隔）');
+    Logger.info('服务心跳定时器已启动（30 秒间隔）');
   }
 
   // 停止服务心跳定时器

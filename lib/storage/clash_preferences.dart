@@ -161,7 +161,7 @@ class ClashPreferences {
   // 订阅配置键
   static const String _kCurrentSubscriptionId = 'clash_current_subscription_id';
 
-  // 节点选择配置键前缀（格式：clash_proxy_selection_{订阅ID}_{代理组名}）
+  // 节点选择配置键前缀（格式：clash_proxy_selection_{订阅 ID}_{代理组名}）
   static const String _kProxySelectionPrefix = 'clash_proxy_selection_';
 
   // 出站模式配置键
@@ -569,11 +569,11 @@ class ClashPreferences {
 
   // ==================== 订阅配置 ====================
 
-  // 获取当前选中的订阅ID
+  // 获取当前选中的订阅 ID
   String? getCurrentSubscriptionId() =>
       _getStringNullable(_kCurrentSubscriptionId);
 
-  // 设置当前选中的订阅ID
+  // 设置当前选中的订阅 ID
   Future<void> setCurrentSubscriptionId(String? subscriptionId) =>
       _setStringNullable(_kCurrentSubscriptionId, subscriptionId);
 

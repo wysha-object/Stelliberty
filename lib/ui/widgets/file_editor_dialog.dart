@@ -12,7 +12,7 @@ import 'package:stelliberty/ui/common/modern_dialog.dart';
 
 // 订阅文件编辑器对话框
 //
-// 支持编辑订阅配置文件（YAML格式），提供：
+// 支持编辑订阅配置文件（YAML 格式），提供：
 // - 代码高亮和行号显示
 // - 异步加载优化（大文件友好）
 // - 修改状态跟踪和警告

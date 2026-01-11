@@ -357,7 +357,7 @@ impl ClashManager {
                             }
                         }
                         Ok(Err(_)) => {
-                            log::error!("等待进程超时 (3秒)，强制清理 PID={}", pid);
+                            log::error!("等待进程超时 (3 秒)，强制清理 PID={}", pid);
                             #[cfg(windows)]
                             {
                                 let _ = Self::force_kill_windows(pid);

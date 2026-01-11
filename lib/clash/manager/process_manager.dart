@@ -79,7 +79,7 @@ class ProcessManager {
     }
 
     for (final port in occupiedPorts) {
-      // 端口被占用，尝试清理（最多3次）
+      // 端口被占用，尝试清理（最多3 次）
       for (int attempt = 1; attempt <= 3; attempt++) {
         Logger.warning('端口 $port 被占用（尝试 $attempt/3），查找并终止占用进程…');
         await _killProcessUsingPort(port);

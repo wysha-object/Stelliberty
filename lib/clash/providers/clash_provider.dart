@@ -250,7 +250,7 @@ class ClashProvider extends ChangeNotifier with WidgetsBindingObserver {
         lowerType == 'fallback';
   }
 
-  // 检查是否为 IPC 未就绪错误
+  // 检查是否为 IPC未就绪错误
   // 这类错误在 Clash 启动期间或系统唤醒后是正常的临时状态
   static bool _isIpcNotReadyError(String errorMessage) {
     // Windows: os error 2 (系统找不到指定的文件)
@@ -566,21 +566,21 @@ class ClashProvider extends ChangeNotifier with WidgetsBindingObserver {
           final errorMsg = e.toString();
           final isLastAttempt = attemptCount > maxRetries;
 
-          // 检查是否为 IPC 未就绪错误（启动时的正常情况）
+          // 检查是否为 IPC未就绪错误（启动时的正常情况）
           final isIpcNotReady = _isIpcNotReadyError(errorMsg);
 
           if (!isLastAttempt) {
             // 还有重试机会
             if (isIpcNotReady) {
-              Logger.debug('IPC 尚未就绪（第 $attemptCount 次尝试），1秒后重试');
+              Logger.debug('IPC 尚未就绪（第 $attemptCount 次尝试），1 秒后重试');
             } else {
-              Logger.warning('获取代理数据失败（第 $attemptCount 次尝试），1秒后重试：$e');
+              Logger.warning('获取代理数据失败（第 $attemptCount 次尝试），1 秒后重试：$e');
             }
             await Future.delayed(const Duration(seconds: 1));
           } else {
             // 最后一次尝试失败
             if (isIpcNotReady) {
-              Logger.debug('IPC 仍未就绪，稍后自动重试（不显示错误）');
+              Logger.debug('IPC仍未就绪，稍后自动重试（不显示错误）');
               return; // 静默失败，不设置 errorMessage
             } else {
               Logger.error('获取代理数据失败，已尝试 $attemptCount 次：$e');
@@ -716,15 +716,15 @@ class ClashProvider extends ChangeNotifier with WidgetsBindingObserver {
           final errorMsg = e.toString();
           final isLastAttempt = attemptCount > maxRetries;
 
-          // 检查是否为 IPC 未就绪或连接失效错误
+          // 检查是否为 IPC未就绪或连接失效错误
           final isIpcNotReady = _isIpcNotReadyError(errorMsg);
 
           if (!isLastAttempt) {
             // 还有重试机会
             if (isIpcNotReady) {
-              Logger.debug('IPC 连接失效（第 $attemptCount 次尝试），1秒后重试');
+              Logger.debug('IPC 连接失效（第 $attemptCount 次尝试），1 秒后重试');
             } else {
-              Logger.warning('获取代理数据失败（第 $attemptCount 次尝试），1秒后重试：$e');
+              Logger.warning('获取代理数据失败（第 $attemptCount 次尝试），1 秒后重试：$e');
             }
             await Future.delayed(const Duration(seconds: 1));
           } else {
@@ -1048,7 +1048,7 @@ class ClashProvider extends ChangeNotifier with WidgetsBindingObserver {
           Logger.error('配置重载失败，跳过代理列表更新');
         }
       },
-      debounceMs: 1000, // 1秒防抖
+      debounceMs: 1000, // 1 秒防抖
     );
 
     await _configWatcher!.watch(configPath);
@@ -1315,7 +1315,7 @@ class ClashProvider extends ChangeNotifier with WidgetsBindingObserver {
           concurrency: concurrency,
         ).sendSignalToRust();
 
-        // 等待测试完成（最多等待：节点数 × 单个超时 + 10秒缓冲）
+        // 等待测试完成（最多等待：节点数 × 单个超时 + 10 秒缓冲）
         final maxWaitTime = Duration(
           milliseconds: (proxyNames.length * timeoutMs) + 10000,
         );

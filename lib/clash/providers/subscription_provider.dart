@@ -125,9 +125,9 @@ class SubscriptionProvider extends ChangeNotifier {
 
     Logger.error('覆写导致启动失败，执行回退');
     Logger.error('订阅：${subscription.name}');
-    Logger.error('失败的覆写ID：${subscription.overrideIds}');
+    Logger.error('失败的覆写 ID：${subscription.overrideIds}');
 
-    // 记录失败的覆写ID并清空当前覆写
+    // 记录失败的覆写 ID并清空当前覆写
     final index = _subscriptions.indexWhere((s) => s.id == subscription.id);
     if (index != -1) {
       _subscriptions[index] = subscription.copyWith(
@@ -138,17 +138,17 @@ class SubscriptionProvider extends ChangeNotifier {
       // 保存到持久化存储
       await _manager.saveSubscriptionList(_subscriptions);
 
-      // 通知UI更新
+      // 通知 UI更新
       notifyListeners();
 
       Logger.info('已禁用订阅 ${subscription.name} 的所有覆写');
-      Logger.info('失败的覆写ID已记录：${subscription.overrideIds}');
+      Logger.info('失败的覆写 ID已记录：${subscription.overrideIds}');
     }
 
     Logger.info('覆写回退完成');
   }
 
-  // 清理订阅中无效的覆写ID引用
+  // 清理订阅中无效的覆写 ID引用
   // 用于在初始化时移除已删除的覆写引用
   Future<void> cleanupInvalidOverrideReferences(
     Future<List<app_override.OverrideConfig>> Function(List<String>)
@@ -928,7 +928,7 @@ class SubscriptionProvider extends ChangeNotifier {
     Logger.info('订阅排序已更新：${subscription.name} 从 $oldIndex 移动到 $newIndex');
   }
 
-  // 从所有订阅中移除指定的覆写ID引用
+  // 从所有订阅中移除指定的覆写 ID引用
   // 用于在删除覆写时清理订阅配置
   Future<void> removeOverrideFromAllSubscriptions(String overrideId) async {
     Logger.info('从所有订阅中移除覆写引用：$overrideId');
@@ -1236,7 +1236,7 @@ class SubscriptionProvider extends ChangeNotifier {
           );
         }
 
-        // 检测无效的覆写ID（文件已被删除但订阅仍引用）
+        // 检测无效的覆写 ID（文件已被删除但订阅仍引用）
         final validOverrideIds = appOverrides.map((o) => o.id).toSet();
         final invalidIds = currentSubscription!.overrideIds
             .where((id) => !validOverrideIds.contains(id))
@@ -1246,7 +1246,7 @@ class SubscriptionProvider extends ChangeNotifier {
           Logger.warning('检测到 ${invalidIds.length} 个无效的覆写引用：$invalidIds');
           Logger.info('自动清理无效的覆写引用…');
 
-          // 更新订阅配置，移除无效的覆写ID
+          // 更新订阅配置，移除无效的覆写 ID
           final validIds = currentSubscription!.overrideIds
               .where((id) => validOverrideIds.contains(id))
               .toList();

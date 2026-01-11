@@ -439,7 +439,7 @@ impl ProxyParser {
                 .decode(password_b64.as_bytes())
                 .map_err(|e| format!("密码解码失败：{}", e))?,
         )
-        .map_err(|e| format!("密码UTF-8转换失败：{}", e))?;
+        .map_err(|e| format!("密码UTF-8 转换失败：{}", e))?;
 
         let params = Self::parse_query_params(params_part);
         let name = params

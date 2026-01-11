@@ -202,7 +202,7 @@ fn run_service_windows() -> Result<(), Box<dyn std::error::Error>> {
                 log::error!("停止 Clash 失败: {}, 服务将继续退出", e);
             }
             Err(_) => {
-                log::error!("停止 Clash 超时 (5秒)，服务将强制退出");
+                log::error!("停止 Clash 超时 (5 秒)，服务将强制退出");
                 // 超时后尝试通过 drop 清理
                 drop(clash_manager);
             }

@@ -198,7 +198,7 @@
     "update_on_startup_desc": "应用启动时自动更新此订阅",
     "update_interval_label": "更新间隔（分钟）",
     "update_interval_hint": "60",
-    "update_interval_error": "请输入有效的分钟数（最少1分钟）",
+    "update_interval_error": "请输入有效的分钟数（最少 1 分钟）",
     "proxy_mode_title": "更新代理模式",
     "proxy_mode_direct": "直接连接，不使用代理",
     "proxy_mode_direct_title": "直连",

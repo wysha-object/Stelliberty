@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:stelliberty/src/bindings/signals/signals.dart';
 import 'package:stelliberty/services/log_print_service.dart';
 
-// IPC 请求超时配置
+// IPC请求超时配置
 class _IpcTimeouts {
   // 快速查询操作（GET）：8 秒
-  // 注：延迟测试需要 5 秒 + IPC 往返 ~2 秒 + 缓冲 1 秒
+  // 注：延迟测试需要 5 秒 + IPC往返 ~2 秒 + 缓冲 1 秒
   static const Duration quick = Duration(seconds: 8);
 
   // 普通操作（POST/PATCH/DELETE）：15 秒
@@ -17,7 +17,7 @@ class _IpcTimeouts {
   static const Duration long = Duration(seconds: 30);
 }
 
-// IPC 重试配置
+// IPC重试配置
 class _IpcRetryConfig {
   // 最大重试次数
   static const int maxRetries = 3;
@@ -25,7 +25,7 @@ class _IpcRetryConfig {
   // 重试间隔
   static const Duration retryDelay = Duration(seconds: 1);
 
-  // 判断是否应该重试（排除超时和 IPC 未就绪）
+  // 判断是否应该重试（排除超时和 IPC未就绪）
   static bool shouldRetry(dynamic error) {
     final errorMsg = error.toString();
 
@@ -34,7 +34,7 @@ class _IpcRetryConfig {
       return false;
     }
 
-    // IPC 未就绪不重试（等待 Clash 启动）
+    // IPC未就绪不重试（等待 Clash 启动）
     if (_isIpcNotReadyError(errorMsg)) {
       return false;
     }
@@ -57,13 +57,13 @@ bool _isIpcNotReadyError(String errorMsg) {
       errorMsg.contains('Connection refused');
 }
 
-// IPC 请求辅助类
+// IPC请求辅助类
 //
-// 简化 Dart → Rust IPC 请求/响应处理
+// 简化 Dart → Rust IPC请求/响应处理
 class IpcRequestHelper {
   static final IpcRequestHelper _instance = IpcRequestHelper._();
   IpcRequestHelper._() {
-    // 监听所有 IPC 响应
+    // 监听所有 IPC响应
     _startResponseListener();
   }
   static IpcRequestHelper get instance => _instance;
@@ -80,7 +80,7 @@ class IpcRequestHelper {
     return id;
   }
 
-  // 监听 IPC 响应
+  // 监听 IPC响应
   void _startResponseListener() {
     IpcResponse.rustSignalStream.listen((signalPack) {
       // 从 RustSignalPack 中提取实际的消息
@@ -115,7 +115,7 @@ class IpcRequestHelper {
 
         // 记录重试
         Logger.warning(
-          'IPC 请求失败，${_IpcRetryConfig.retryDelay.inSeconds}秒后重试（$attempt/$maxRetries）：$e',
+          'IPC请求失败，${_IpcRetryConfig.retryDelay.inSeconds}秒后重试（$attempt/$maxRetries）：$e',
         );
 
         // 等待后重试
@@ -135,11 +135,11 @@ class IpcRequestHelper {
         // 发送请求（带 request_id）
         IpcGetRequest(requestId: id, path: path).sendSignalToRust();
 
-        // 等待响应（8秒超时 - 快速查询）
+        // 等待响应（8 秒超时 - 快速查询）
         final response = await completer.future.timeout(_IpcTimeouts.quick);
 
         if (!response.isSuccessful) {
-          throw Exception(response.errorMessage ?? 'IPC 请求失败');
+          throw Exception(response.errorMessage ?? 'IPC请求失败');
         }
 
         // 解析 JSON 响应体
@@ -149,17 +149,17 @@ class IpcRequestHelper {
         return json.decode(response.body) as Map<String, dynamic>;
       } on TimeoutException {
         _pendingRequests.remove(id);
-        Logger.error('IPC GET 请求超时（8秒）：$path');
+        Logger.error('IPCGET 请求超时（8 秒）：$path');
         rethrow;
       } catch (e) {
         _pendingRequests.remove(id);
 
-        // 区分 IPC 未就绪（正常等待）和真正的错误
+        // 区分 IPC未就绪（正常等待）和真正的错误
         final errorMsg = e.toString();
         if (_isIpcNotReadyError(errorMsg)) {
           // IPC 尚未就绪，静默处理（不打印日志）
         } else {
-          Logger.error('IPC GET 请求失败：$path，error：$e');
+          Logger.error('IPCGET 请求失败：$path，error：$e');
         }
         rethrow;
       }
@@ -184,11 +184,11 @@ class IpcRequestHelper {
           body: bodyStr,
         ).sendSignalToRust();
 
-        // 等待响应（15秒超时 - 普通操作）
+        // 等待响应（15 秒超时 - 普通操作）
         final response = await completer.future.timeout(_IpcTimeouts.normal);
 
         if (!response.isSuccessful) {
-          throw Exception(response.errorMessage ?? 'IPC 请求失败');
+          throw Exception(response.errorMessage ?? 'IPC请求失败');
         }
 
         if (response.body.isEmpty) {
@@ -197,7 +197,7 @@ class IpcRequestHelper {
         return json.decode(response.body) as Map<String, dynamic>;
       } on TimeoutException {
         _pendingRequests.remove(id);
-        Logger.error('IPC POST 请求超时（15秒）：$path');
+        Logger.error('IPCPOST 请求超时（15 秒）：$path');
         rethrow;
       } catch (e) {
         _pendingRequests.remove(id);
@@ -206,7 +206,7 @@ class IpcRequestHelper {
         if (_isIpcNotReadyError(errorMsg)) {
           // IPC 尚未就绪，静默处理
         } else {
-          Logger.error('IPC POST 请求失败：$path，error：$e');
+          Logger.error('IPCPOST 请求失败：$path，error：$e');
         }
         rethrow;
       }
@@ -231,11 +231,11 @@ class IpcRequestHelper {
           body: bodyStr,
         ).sendSignalToRust();
 
-        // 等待响应（30秒超时 - 长操作，用于配置更新）
+        // 等待响应（30 秒超时 - 长操作，用于配置更新）
         final response = await completer.future.timeout(_IpcTimeouts.long);
 
         if (!response.isSuccessful) {
-          throw Exception(response.errorMessage ?? 'IPC 请求失败');
+          throw Exception(response.errorMessage ?? 'IPC请求失败');
         }
 
         if (response.body.isEmpty) {
@@ -244,7 +244,7 @@ class IpcRequestHelper {
         return json.decode(response.body) as Map<String, dynamic>;
       } on TimeoutException {
         _pendingRequests.remove(id);
-        Logger.error('IPC PUT 请求超时（30秒）：$path');
+        Logger.error('IPCPUT 请求超时（30 秒）：$path');
         rethrow;
       } catch (e) {
         _pendingRequests.remove(id);
@@ -253,7 +253,7 @@ class IpcRequestHelper {
         if (_isIpcNotReadyError(errorMsg)) {
           // IPC 尚未就绪，静默处理
         } else {
-          Logger.error('IPC PUT 请求失败：$path，error：$e');
+          Logger.error('IPCPUT 请求失败：$path，error：$e');
         }
         rethrow;
       }
@@ -278,11 +278,11 @@ class IpcRequestHelper {
           body: bodyStr,
         ).sendSignalToRust();
 
-        // 等待响应（15秒超时 - 普通操作）
+        // 等待响应（15 秒超时 - 普通操作）
         final response = await completer.future.timeout(_IpcTimeouts.normal);
 
         if (!response.isSuccessful) {
-          throw Exception(response.errorMessage ?? 'IPC 请求失败');
+          throw Exception(response.errorMessage ?? 'IPC请求失败');
         }
 
         if (response.body.isEmpty) {
@@ -291,7 +291,7 @@ class IpcRequestHelper {
         return json.decode(response.body) as Map<String, dynamic>;
       } on TimeoutException {
         _pendingRequests.remove(id);
-        Logger.error('IPC PATCH 请求超时（15秒）：$path');
+        Logger.error('IPCPATCH 请求超时（15 秒）：$path');
         rethrow;
       } catch (e) {
         _pendingRequests.remove(id);
@@ -300,7 +300,7 @@ class IpcRequestHelper {
         if (_isIpcNotReadyError(errorMsg)) {
           // IPC 尚未就绪，静默处理
         } else {
-          Logger.error('IPC PATCH 请求失败：$path，error：$e');
+          Logger.error('IPCPATCH 请求失败：$path，error：$e');
         }
         rethrow;
       }
@@ -317,11 +317,11 @@ class IpcRequestHelper {
       try {
         IpcDeleteRequest(requestId: id, path: path).sendSignalToRust();
 
-        // 等待响应（15秒超时 - 普通操作）
+        // 等待响应（15 秒超时 - 普通操作）
         final response = await completer.future.timeout(_IpcTimeouts.normal);
 
         if (!response.isSuccessful) {
-          throw Exception(response.errorMessage ?? 'IPC 请求失败');
+          throw Exception(response.errorMessage ?? 'IPC请求失败');
         }
 
         if (response.body.isEmpty) {
@@ -330,7 +330,7 @@ class IpcRequestHelper {
         return json.decode(response.body) as Map<String, dynamic>;
       } on TimeoutException {
         _pendingRequests.remove(id);
-        Logger.error('IPC DELETE 请求超时（15秒）：$path');
+        Logger.error('IPCDELETE 请求超时（15 秒）：$path');
         rethrow;
       } catch (e) {
         _pendingRequests.remove(id);
@@ -339,7 +339,7 @@ class IpcRequestHelper {
         if (_isIpcNotReadyError(errorMsg)) {
           // IPC 尚未就绪，静默处理
         } else {
-          Logger.error('IPC DELETE 请求失败：$path，error：$e');
+          Logger.error('IPCDELETE 请求失败：$path，error：$e');
         }
         rethrow;
       }

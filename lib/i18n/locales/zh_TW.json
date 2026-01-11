@@ -197,7 +197,7 @@
     "update_on_startup_desc": "應用程式啟動時自動更新此訂閱",
     "update_interval_label": "更新間隔（分鐘）",
     "update_interval_hint": "60",
-    "update_interval_error": "請輸入有效的分鐘數（最少1分鐘）",
+    "update_interval_error": "請輸入有效的分鐘數（最少 1 分鐘）",
     "proxy_mode_title": "更新代理模式",
     "proxy_mode_direct": "直接連線，不使用代理",
     "proxy_mode_direct_title": "直接連線",

@@ -41,7 +41,7 @@ impl WebSocketClient {
 
     // 生成 WebSocket Key（符合 RFC 6455）
     fn generate_websocket_key() -> String {
-        // RFC 6455 要求：16字节随机数据的 base64 编码
+        // RFC 6455 要求：16 字节随机数据的 base64 编码
         use rand::RngCore;
         let mut key_bytes = [0u8; 16];
         rand::rng().fill_bytes(&mut key_bytes);

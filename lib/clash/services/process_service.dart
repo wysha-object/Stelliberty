@@ -36,7 +36,7 @@ class ProcessService {
     // 指定数据目录（Geodata 文件位置）
     args.addAll(['-d', geoDataDir]);
 
-    // IPC 端点从配置文件读取：
+    // IPC端点从配置文件读取：
     // Windows: external-controller-pipe
     // Unix: external-controller-unix
     // HTTP API: external-controller (如果启用)
@@ -220,7 +220,7 @@ class ProcessService {
       Logger.debug('发送 StopClash 信号到服务…');
       StopClash().sendSignalToRust();
 
-      // 等待服务响应（5秒超时）
+      // 等待服务响应（5 秒超时）
       final signal = await ClashProcessResult.rustSignalStream.first.timeout(
         const Duration(seconds: 5),
         onTimeout: () {

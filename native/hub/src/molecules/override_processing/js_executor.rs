@@ -153,39 +153,14 @@ impl JsExecutor {
             format!("转换为 YAML 失败：{}", e)
         })?;
 
-        let mut final_yaml = serde_yaml_ng::to_string(&yaml_result).map_err(|e| {
+        let final_yaml = serde_yaml_ng::to_string(&yaml_result).map_err(|e| {
             log::error!("✗ 序列化 YAML 失败：{}", e);
             format!("序列化 YAML 失败：{}", e)
         })?;
 
-        // 修复可能被误解析为科学计数法的字符串值
-        // 例如：short-id: 6314e825 会被解析为 6314 × 10^825 = Infinity
-        // 需要改为：short-id: "6314e825"
-        final_yaml = Self::fix_scientific_notation_strings(&final_yaml);
-
-        log::info!("✓ YAML 序列化成功，最终长度：{}字节", final_yaml.len());
+        log::info!("✓ YAML 序列化成功，最终长度：{} 字节", final_yaml.len());
 
         log::info!("JavaScript 覆写成功");
         Ok(final_yaml)
-    }
-
-    // 修复可能被误解析为科学计数法的字符串值
-    //
-    // 将形如 `key: 123e456` 的值改为 `key: "123e456"`
-    fn fix_scientific_notation_strings(yaml: &str) -> String {
-        // 匹配模式：键名: 数字+字母e/E+数字（可能有+/-）
-        // 例如：short-id: 6314e825
-        // 注意：此正则表达式是硬编码的字面量，编译时已验证正确性
-        #[allow(clippy::expect_used)]
-        let re = regex::Regex::new(r"(?m)^(\s*)(\S+):\s*([+-]?\d+[eE][+-]?\d+)\s*$")
-            .expect("正则表达式编译失败：这是编译时错误，不应该在运行时发生");
-
-        re.replace_all(yaml, |caps: &regex::Captures| {
-            let indent = &caps[1];
-            let key = &caps[2];
-            let value = &caps[3];
-            format!("{}{}: \"{}\"", indent, key, value)
-        })
-        .to_string()
     }
 }

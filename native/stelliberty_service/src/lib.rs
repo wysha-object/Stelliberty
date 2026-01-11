@@ -184,7 +184,7 @@ pub async fn run_console_mode() -> Result<()> {
         Ok(Ok(())) => log::info!("Clash 已正常停止"),
         Ok(Err(e)) => log::error!("停止 Clash 失败: {e}, 服务将继续退出"),
         Err(_) => {
-            log::error!("停止 Clash 超时 (5秒)，服务将强制退出");
+            log::error!("停止 Clash 超时 (5 秒)，服务将强制退出");
             drop(clash_manager);
         }
     }
