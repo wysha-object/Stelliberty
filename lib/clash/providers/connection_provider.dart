@@ -128,17 +128,17 @@ class ConnectionProvider extends ChangeNotifier {
 
   // 获取过滤后的连接列表
   List<ConnectionInfo> _getFilteredConnections() {
-    List<ConnectionInfo> filtered = _state.connections;
+    List<ConnectionInfo> filteredConnections = _state.connections;
 
     // 1. 按过滤级别筛选
     switch (_state.filterLevel) {
       case state.ConnectionFilterLevel.direct:
-        filtered = filtered
+        filteredConnections = filteredConnections
             .where((conn) => conn.proxyNode == _directProxy)
             .toList();
         break;
       case state.ConnectionFilterLevel.proxy:
-        filtered = filtered
+        filteredConnections = filteredConnections
             .where((conn) => conn.proxyNode != _directProxy)
             .toList();
         break;
@@ -150,7 +150,7 @@ class ConnectionProvider extends ChangeNotifier {
     // 2. 按关键字筛选（优化：避免每个连接都重复调用 toLowerCase）
     if (_state.searchKeyword.isNotEmpty) {
       final keyword = _state.searchKeyword.toLowerCase();
-      filtered = filtered.where((conn) {
+      filteredConnections = filteredConnections.where((conn) {
         // 缓存 toLowerCase 结果，避免重复计算
         final descLower = conn.metadata.description.toLowerCase();
         final proxyLower = conn.proxyNode.toLowerCase();
@@ -164,7 +164,7 @@ class ConnectionProvider extends ChangeNotifier {
       }).toList();
     }
 
-    return filtered;
+    return filteredConnections;
   }
 
   // 刷新连接列表
@@ -188,14 +188,17 @@ class ConnectionProvider extends ChangeNotifier {
         errorMessage: null,
       );
 
-      // 只在数据真正变化时才通知
-      if (hasChanged) {
+      // 如果数据变化或有连接存在，都需要通知更新
+      // 数据变化时需要更新列表，有连接时需要更新计时显示
+      if (hasChanged || connections.isNotEmpty) {
         _cachedFilteredConnections = null;
         notifyListeners();
-        final filteredCount = _getFilteredConnections().length;
-        Logger.debug(
-          '连接列表已更新：原始 ${connections.length} 个，过滤后 $filteredCount 个（过滤级别：${_state.filterLevel.name}，搜索关键字：${_state.searchKeyword.isEmpty ? "无" : _state.searchKeyword}）',
-        );
+        if (hasChanged) {
+          final filteredCount = _getFilteredConnections().length;
+          Logger.debug(
+            '连接列表已更新：原始 ${connections.length} 个，过滤后 $filteredCount 个（过滤级别：${_state.filterLevel.name}，搜索关键字：${_state.searchKeyword.isEmpty ? "无" : _state.searchKeyword}）',
+          );
+        }
       }
     } catch (e) {
       _state = _state.copyWith(isLoading: false, errorMessage: '刷新连接列表失败: $e');
@@ -206,22 +209,22 @@ class ConnectionProvider extends ChangeNotifier {
 
   // 检查连接列表是否发生变化
   bool _hasConnectionsChanged(
-    List<ConnectionInfo> oldList,
-    List<ConnectionInfo> newList,
+    List<ConnectionInfo> oldConnections,
+    List<ConnectionInfo> newConnections,
   ) {
     // 数量不同，肯定有变化
-    if (oldList.length != newList.length) {
+    if (oldConnections.length != newConnections.length) {
       return true;
     }
 
     // 数量相同但为空，认为没变化
-    if (oldList.isEmpty) {
+    if (oldConnections.isEmpty) {
       return false;
     }
 
     // 创建 ID 集合进行快速比较
-    final oldIds = oldList.map((c) => c.id).toSet();
-    final newIds = newList.map((c) => c.id).toSet();
+    final oldIds = oldConnections.map((c) => c.id).toSet();
+    final newIds = newConnections.map((c) => c.id).toSet();
 
     // 比较 ID 集合是否相同
     return !oldIds.containsAll(newIds) || !newIds.containsAll(oldIds);
