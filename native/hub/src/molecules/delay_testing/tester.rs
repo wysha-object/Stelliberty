@@ -204,8 +204,10 @@ async fn test_single_node(node_name: &str, test_url: &str, timeout_ms: u32) -> i
 
     log::debug!("测试节点延迟：{}", node_name);
 
-    let max_retries = 3;
-    for attempt in 0..=max_retries {
+    let max_http_retries = 5;
+    let mut http_retry_count = 0;
+
+    loop {
         match IpcClient::get(&path).await {
             Ok(body) => match serde_json::from_str::<serde_json::Value>(&body) {
                 Ok(json) => {
@@ -228,14 +230,13 @@ async fn test_single_node(node_name: &str, test_url: &str, timeout_ms: u32) -> i
                 }
             },
             Err(e) => {
-                let should_retry = e.contains("HTTP 503")
-                    || e.contains("HTTP 504")
-                    || e.contains("os error 231")
-                    || e.contains("Named Pipe");
-
-                if attempt < max_retries && should_retry {
-                    tokio::time::sleep(std::time::Duration::from_millis(80 * (attempt as u64 + 1)))
-                        .await;
+                let is_http_busy = e.contains("HTTP 503") || e.contains("HTTP 504");
+                if is_http_busy && http_retry_count < max_http_retries {
+                    http_retry_count += 1;
+                    tokio::time::sleep(std::time::Duration::from_millis(
+                        80 * http_retry_count as u64,
+                    ))
+                    .await;
                     continue;
                 }
 
@@ -244,6 +245,4 @@ async fn test_single_node(node_name: &str, test_url: &str, timeout_ms: u32) -> i
             }
         }
     }
-
-    -1
 }
