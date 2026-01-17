@@ -290,8 +290,7 @@ pub struct UpdateCheckResult {
     pub html_url: Option<String>,
 }
 
-// 初始化 Dart 信号监听器
-pub fn init_dart_signal_listeners() {
+pub fn init() {
     use tokio::spawn;
 
     spawn(async {

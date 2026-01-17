@@ -375,8 +375,7 @@ pub async fn cleanup_process_manager() {
     }
 }
 
-// 初始化 Dart 信号监听器
-pub fn init_dart_signal_listeners() {
+pub fn init() {
     use tokio::spawn;
 
     // 启动 Clash 进程

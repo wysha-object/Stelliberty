@@ -11,10 +11,10 @@ pub use process_manager::{ClashProcessResult, StartClashProcess, StopClashProces
 pub use service_manager::ServiceManager;
 
 pub fn init_listeners() {
-    process_manager::init_dart_signal_listeners();
+    process_manager::init();
 
     #[cfg(any(target_os = "windows", target_os = "linux", target_os = "macos"))]
-    service_manager::init_dart_signal_listeners();
+    service_manager::init();
 }
 
 pub fn cleanup() {

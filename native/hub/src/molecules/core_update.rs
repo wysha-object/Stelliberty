@@ -8,5 +8,5 @@ pub use updater::{
 };
 
 pub fn init_listeners() {
-    updater::init_dart_signal_listeners();
+    updater::init();
 }

@@ -9,5 +9,5 @@ pub use injector::inject_runtime_params;
 pub use runtime_params::RuntimeConfigParams;
 
 pub fn init_listeners() {
-    generator::init_dart_signal_listeners();
+    generator::init();
 }

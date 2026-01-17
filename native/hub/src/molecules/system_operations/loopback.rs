@@ -607,7 +607,6 @@ pub fn set_loopback_exemption(package_family_name: &str, enabled: bool) -> Resul
 
 // 初始化 UWP 回环豁免消息监听器
 pub fn init() {
-    // 修复：避免嵌套 spawn，直接在监听循环中处理消息
     spawn(async {
         let receiver = GetAppContainers::get_dart_signal_receiver();
         while let Some(dart_signal) = receiver.recv().await {
@@ -626,41 +625,6 @@ pub fn init() {
         let receiver = SaveLoopbackConfiguration::get_dart_signal_receiver();
         while let Some(dart_signal) = receiver.recv().await {
             dart_signal.message.handle();
-        }
-    });
-}
-
-// 初始化 Dart 信号监听器
-pub fn init_dart_signal_listeners() {
-    use tokio::spawn;
-
-    spawn(async {
-        let receiver = GetAppContainers::get_dart_signal_receiver();
-        while let Some(dart_signal) = receiver.recv().await {
-            let message = dart_signal.message;
-            spawn(async move {
-                message.handle();
-            });
-        }
-    });
-
-    spawn(async {
-        let receiver = SetLoopback::get_dart_signal_receiver();
-        while let Some(dart_signal) = receiver.recv().await {
-            let message = dart_signal.message;
-            spawn(async move {
-                message.handle();
-            });
-        }
-    });
-
-    spawn(async {
-        let receiver = SaveLoopbackConfiguration::get_dart_signal_receiver();
-        while let Some(dart_signal) = receiver.recv().await {
-            let message = dart_signal.message;
-            spawn(async move {
-                message.handle();
-            });
         }
     });
 }

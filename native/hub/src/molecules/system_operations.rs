@@ -28,12 +28,12 @@ pub fn init_listeners() {
     system_proxy::init();
     network_interfaces::init();
 
-    app_update::init_dart_signal_listeners();
-    auto_start::init_dart_signal_listeners();
-    backup::init_dart_signal_listeners();
+    app_update::init();
+    auto_start::init();
+    backup::init();
     #[cfg(windows)]
-    loopback::init_dart_signal_listeners();
-    url_launcher::init_dart_signal_listeners();
+    loopback::init();
+    url_launcher::init();
 
     power_event::start_power_event_listener();
 }

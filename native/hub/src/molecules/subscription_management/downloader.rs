@@ -205,7 +205,7 @@ fn parse_subscription_info(headers: &reqwest::header::HeaderMap) -> Option<Subsc
 }
 
 // 初始化 Dart 信号监听器
-pub fn init_dart_signal_listeners() {
+pub fn init() {
     use tokio::spawn;
 
     // 订阅下载请求监听器

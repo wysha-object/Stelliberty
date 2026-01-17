@@ -18,6 +18,6 @@ pub use super::{OverrideConfig, OverrideFormat};
 pub use crate::atoms::OverrideProcessor;
 
 pub fn init_listeners() {
-    processor::init_dart_signal_listeners();
-    downloader::init_dart_signal_listeners();
+    processor::init();
+    downloader::init();
 }

@@ -7,5 +7,4 @@ pub use detector::{
     GetNetworkInterfaces, NetworkInterfacesInfo, get_hostname, get_network_addresses,
 };
 
-// 导出初始化函数（统一命名）
-pub use detector::init_dart_signal_listeners as init;
+pub use detector::init;

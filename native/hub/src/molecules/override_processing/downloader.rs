@@ -149,8 +149,7 @@ fn create_http_client(
     Ok(builder.build()?)
 }
 
-// 初始化 Dart 信号监听器
-pub fn init_dart_signal_listeners() {
+pub fn init() {
     use tokio::spawn;
 
     // 覆写文件下载请求监听器

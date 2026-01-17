@@ -372,8 +372,7 @@ fn send_progress(progress: f64, message: &str, downloaded: u64, total: u64) {
 
 // 消息监听器
 
-// 初始化消息监听器
-pub fn init_dart_signal_listeners() {
+pub fn init() {
     // 监听获取最新版本信号
     spawn(async {
         let receiver = GetLatestCoreVersionRequest::get_dart_signal_receiver();

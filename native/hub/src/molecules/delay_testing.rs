@@ -8,5 +8,5 @@ pub use tester::{
 };
 
 pub fn init_listeners() {
-    tester::init_dart_signal_listeners();
+    tester::init();
 }

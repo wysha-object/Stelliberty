@@ -56,8 +56,7 @@ pub struct BatchTestResult {
     pub delay_ms: i32,
 }
 
-// 初始化延迟测试消息监听器
-pub fn init_dart_signal_listeners() {
+pub fn init() {
     // 单节点延迟测试请求监听器
     spawn(async {
         let receiver = SingleDelayTestRequest::get_dart_signal_receiver();

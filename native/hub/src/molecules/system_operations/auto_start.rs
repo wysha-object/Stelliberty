@@ -515,10 +515,7 @@ pub fn init() {
         // 移动平台不支持开机自启
         log::debug!("Auto-start module not available on mobile platforms");
     }
-}
 
-// 初始化 Dart 信号监听器
-pub fn init_dart_signal_listeners() {
     use tokio::spawn;
 
     spawn(async {

@@ -139,8 +139,7 @@ impl ParseSubscriptionRequest {
     }
 }
 
-// 初始化 Dart 信号监听器
-pub fn init_dart_signal_listeners() {
+pub fn init() {
     use tokio::spawn;
 
     // 应用覆写请求监听器
