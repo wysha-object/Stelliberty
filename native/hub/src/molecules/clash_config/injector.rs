@@ -9,7 +9,7 @@ pub fn inject_runtime_params(
     yaml_content: &str,
     params: &RuntimeConfigParams,
 ) -> Result<String, String> {
-    // 1. 解析 YAML
+    // 解析 YAML
     let mut config: YamlValue = serde_yaml_ng::from_str(yaml_content).map_err(|e| {
         log::error!("解析配置失败：{}", e);
         format!("解析配置失败：{}", e)
@@ -20,7 +20,7 @@ pub fn inject_runtime_params(
         "配置根节点必须是 Map".to_string()
     })?;
 
-    // 2. 注入 IPC 端点
+    // 注入 IPC 端点
     #[cfg(windows)]
     {
         #[cfg(debug_assertions)]
@@ -49,7 +49,7 @@ pub fn inject_runtime_params(
         log::info!("注入 Unix Socket：{}", socket_path);
     }
 
-    // 3. 注入外部控制器
+    // 注入外部控制器
     if let Some(ref external_controller) = params.external_controller {
         if !external_controller.is_empty() {
             config_map.insert(
@@ -79,13 +79,13 @@ pub fn inject_runtime_params(
         config_map.remove(YamlValue::String("secret".to_string()));
     }
 
-    // 4. 注入端口
+    // 注入端口
     config_map.insert(
         YamlValue::String("mixed-port".to_string()),
         YamlValue::Number(params.mixed_port.into()),
     );
 
-    // 5. 注入 bind-address
+    // 注入 bind-address
     let bind_address = if params.is_allow_lan_enabled {
         "0.0.0.0"
     } else {
@@ -101,19 +101,49 @@ pub fn inject_runtime_params(
     config_map.remove(YamlValue::String("port".to_string()));
     config_map.remove(YamlValue::String("socks-port".to_string()));
 
-    // 6. 注入出站模式
+    // 注入出站模式
     config_map.insert(
         YamlValue::String("mode".to_string()),
         YamlValue::String(params.outbound_mode.clone()),
     );
 
-    // 7. 注入统一延迟
+    // 注入 IPv6
+    config_map.insert(
+        YamlValue::String("ipv6".to_string()),
+        YamlValue::Bool(params.is_ipv6_enabled),
+    );
+
+    // 注入 TCP 并发
+    config_map.insert(
+        YamlValue::String("tcp-concurrent".to_string()),
+        YamlValue::Bool(params.is_tcp_concurrent_enabled),
+    );
+
+    // 注入统一延迟
     config_map.insert(
         YamlValue::String("unified-delay".to_string()),
         YamlValue::Bool(params.is_unified_delay_enabled),
     );
 
-    // 8. 注入 Keep-Alive
+    // 注入查找进程模式
+    config_map.insert(
+        YamlValue::String("find-process-mode".to_string()),
+        YamlValue::String(params.find_process_mode.clone()),
+    );
+
+    // 注入 GeoData 加载器
+    config_map.insert(
+        YamlValue::String("geodata-loader".to_string()),
+        YamlValue::String(params.geodata_loader.clone()),
+    );
+
+    // 注入日志级别
+    config_map.insert(
+        YamlValue::String("log-level".to_string()),
+        YamlValue::String(params.clash_core_log_level.clone()),
+    );
+
+    // 注入 Keep-Alive
     if params.is_keep_alive_enabled {
         if let Some(interval) = params.keep_alive_interval {
             config_map.insert(
@@ -125,7 +155,7 @@ pub fn inject_runtime_params(
         config_map.remove(YamlValue::String("keep-alive-interval".to_string()));
     }
 
-    // 9. 注入 TUN 配置
+    // 注入 TUN 配置
     log::debug!(
         "TUN 参数：enabled={}, stack={}, device={}, mtu={}",
         params.is_tun_enabled,
@@ -201,14 +231,14 @@ pub fn inject_runtime_params(
     );
     log::info!("TUN 配置已注入（enabled={}）", params.is_tun_enabled);
 
-    // 10. 注入 DNS（优先级：用户覆写 > TUN 默认 > 不注入）
+    // 注入 DNS（优先级：用户覆写 > TUN 默认 > 不注入）
     if params.is_dns_override_enabled {
         inject_user_dns_override(config_map, params)?;
     } else if params.is_tun_enabled {
         inject_dns_config(config_map, params)?;
     }
 
-    // 11. 序列化输出
+    // 序列化输出
     let yaml_string = serde_yaml_ng::to_string(&config).map_err(|e| {
         log::error!("序列化配置失败：{}", e);
         format!("序列化配置失败：{}", e)
