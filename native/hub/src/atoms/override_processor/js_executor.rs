@@ -1,50 +1,50 @@
-// JavaScript 覆写执行器：使用 Boa 引擎执行用户脚本。
-// 脚本需提供 `main(config)` 入口函数。
+// JavaScript 覆写执行器：负责在 QuickJS 中执行覆写脚本并返回结果。
+// 入口约定： main(config) 返回可 JSON 序列化的配置对象。
 
-use boa_engine::{Context, Source};
+use rquickjs::{Context, Runtime};
 use serde_json::Value as JsonValue;
 use serde_yaml_ng::Value as YamlValue;
 
 // JavaScript 执行器
 pub struct JsExecutor {
+    runtime: Runtime,
     context: Context,
 }
 
 impl JsExecutor {
-    // 创建 JavaScript 执行器并初始化 Boa 上下文。
+    // 创建 JavaScript 执行器并初始化 QuickJS 上下文。
     pub fn new() -> Result<Self, String> {
-        let context = Context::default();
+        let runtime = Runtime::new().map_err(|e| format!("初始化 JavaScript 运行时失败：{}", e))?;
+        let context =
+            Context::full(&runtime).map_err(|e| format!("初始化 JavaScript 上下文失败：{}", e))?;
 
-        Ok(Self { context })
+        Ok(Self { runtime, context })
     }
 
-    // 应用 JavaScript 覆写：YAML→JSON→执行 main(config)→YAML。
+    // 应用 JavaScript 覆写：YAML 转 JSON，执行 main(config)，再转换为 YAML。
     // 返回覆写后的配置内容。
     pub fn apply(&mut self, base_content: &str, js_code: &str) -> Result<String, String> {
         log::info!("JavaScript 覆写开始");
         log::info!("基础配置长度：{}字节", base_content.len());
         log::info!("JS 脚本长度：{}字节", js_code.len());
 
-        // 1. 解析 YAML → JSON
+        // 1. 解析 YAML 转 JSON
         let yaml_val: YamlValue = serde_yaml_ng::from_str(base_content).map_err(|e| {
-            log::error!("✗ 解析 YAML 配置失败：{}", e);
+            log::error!("解析 YAML 配置失败：{}", e);
             format!("解析配置失败：{}", e)
         })?;
 
         let json_val: JsonValue = serde_json::to_value(&yaml_val).map_err(|e| {
-            log::error!("✗ 转换为 JSON 失败：{}", e);
+            log::error!("转换为 JSON 失败：{}", e);
             format!("转换为 JSON 失败：{}", e)
         })?;
 
         let config_json = serde_json::to_string(&json_val).map_err(|e| {
-            log::error!("✗ 序列化 JSON 失败：{}", e);
+            log::error!("序列化 JSON 失败：{}", e);
             format!("序列化 JSON 失败：{}", e)
         })?;
 
-        log::info!(
-            "✓ YAML → JSON 转换成功，JSON 长度：{}字节",
-            config_json.len()
-        );
+        log::info!("YAML 转 JSON 成功，JSON 长度：{}字节", config_json.len());
 
         // 检查 proxies 字段
         if let Some(proxies) = json_val.get("proxies") {
@@ -90,41 +90,28 @@ impl JsExecutor {
         );
 
         log::info!(
-            "✓ JavaScript 代码构建完成，总长度：{}字节",
+            "JavaScript 代码构建完成，总长度：{}字节",
             full_js_code.len()
         );
 
         // 3. 执行 JavaScript
-        log::info!("→ 开始执行 JavaScript…");
-        let source = Source::from_bytes(&full_js_code);
-        let result = self.context.eval(source).map_err(|e| {
-            log::error!("✗ JavaScript 执行失败：{}", e);
-            format!("JavaScript 执行失败：{}", e)
+        log::info!("开始执行 JavaScript");
+        let result_str = self.execute_js(&full_js_code).map_err(|e| {
+            log::error!("JavaScript 执行失败：{}", e);
+            e
         })?;
 
-        log::info!("✓ JavaScript 执行成功");
+        log::info!("JavaScript 执行成功");
+        log::info!("JavaScript 结果长度：{}字节", result_str.len());
 
-        // 4. 提取结果字符串
-        let result_str = result.to_string(&mut self.context).map_err(|e| {
-            log::error!("✗ 提取 JavaScript 结果失败：{}", e);
-            format!("提取 JavaScript 结果失败：{}", e)
-        })?;
-
-        let result_str = result_str.to_std_string().map_err(|e| {
-            log::error!("✗ 转换结果字符串失败：{}", e);
-            format!("转换结果字符串失败：{}", e)
-        })?;
-
-        log::info!("✓ JavaScript 结果长度：{}字节", result_str.len());
-
-        // 5. JSON → YAML
+        // 4. JSON 转 YAML
         let json_result: JsonValue = serde_json::from_str(&result_str).map_err(|e| {
-            log::error!("✗ 解析 JavaScript 结果失败：{}", e);
-            log::error!("✗ 错误的 JSON 内容：{}", result_str);
+            log::error!("解析 JavaScript 结果失败：{}", e);
+            log::error!("错误的 JSON 内容：{}", result_str);
             format!("解析 JavaScript 结果失败：{}", e)
         })?;
 
-        log::info!("✓ JSON 解析成功");
+        log::info!("JSON 解析成功");
 
         // 检查返回的 proxies 字段
         if let Some(proxies) = json_result.get("proxies") {
@@ -142,18 +129,26 @@ impl JsExecutor {
         }
 
         let yaml_result: YamlValue = serde_json::from_value(json_result).map_err(|e| {
-            log::error!("✗ 转换为 YAML 失败：{}", e);
+            log::error!("转换为 YAML 失败：{}", e);
             format!("转换为 YAML 失败：{}", e)
         })?;
 
         let final_yaml = serde_yaml_ng::to_string(&yaml_result).map_err(|e| {
-            log::error!("✗ 序列化 YAML 失败：{}", e);
+            log::error!("序列化 YAML 失败：{}", e);
             format!("序列化 YAML 失败：{}", e)
         })?;
 
-        log::info!("✓ YAML 序列化成功，最终长度：{} 字节", final_yaml.len());
+        log::info!("YAML 序列化成功，最终长度：{} 字节", final_yaml.len());
 
         log::info!("JavaScript 覆写成功");
         Ok(final_yaml)
+    }
+
+    fn execute_js(&self, full_js_code: &str) -> Result<String, String> {
+        // 保持运行时生命周期，避免上下文提前释放
+        let _runtime = &self.runtime;
+        self.context
+            .with(|ctx| ctx.eval::<String, _>(full_js_code))
+            .map_err(|e| format!("JavaScript 执行失败：{}", e))
     }
 }
