@@ -44,12 +44,13 @@ class _HomePageContentState extends State<HomePageContent> {
                     SpacingConstants.scrollbarPaddingBottom,
               ),
               child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  25.0,
-                  24.0,
-                  25.0 - SpacingConstants.scrollbarRightCompensation,
-                  2.0, // 距底2px
-                ),
+            padding: EdgeInsets.fromLTRB(
+              25.0,
+              // 抵消外层滚动条上边距，避免内容刚好溢出触发滚动抖动
+              24.0 - SpacingConstants.scrollbarPaddingTop,
+              25.0 - SpacingConstants.scrollbarRightCompensation,
+              2.0, // 距底2px
+            ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.start,
