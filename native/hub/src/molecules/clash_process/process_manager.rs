@@ -33,9 +33,9 @@ struct ClashProcess {
     #[cfg(unix)]
     child: std::process::Child,
     #[cfg(windows)]
-    process_handle: winapi::um::winnt::HANDLE,
+    process_handle: windows::Win32::Foundation::HANDLE,
     #[cfg(windows)]
-    job_handle: winapi::um::winnt::HANDLE,
+    job_handle: windows::Win32::Foundation::HANDLE,
     #[cfg(windows)]
     pid: u32,
 }
@@ -67,20 +67,18 @@ impl ClashProcess {
         {
             use std::ffi::OsStr;
             use std::os::windows::ffi::OsStrExt;
-            use std::ptr;
-            use winapi::shared::minwindef::FALSE;
-            use winapi::um::handleapi::CloseHandle;
-            use winapi::um::jobapi2::{
-                AssignProcessToJobObject, CreateJobObjectW, SetInformationJobObject,
+            use windows::Win32::Foundation::CloseHandle;
+            use windows::Win32::System::JobObjects::{
+                AssignProcessToJobObject, CreateJobObjectW, JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+                JOBOBJECT_EXTENDED_LIMIT_INFORMATION, JobObjectExtendedLimitInformation,
+                SetInformationJobObject,
             };
-            use winapi::um::processthreadsapi::{
-                CreateProcessW, PROCESS_INFORMATION, ResumeThread, STARTUPINFOW, TerminateProcess,
+            use windows::Win32::System::Threading::{
+                CREATE_NO_WINDOW, CREATE_SUSPENDED, CreateProcessW, PROCESS_INFORMATION,
+                ResumeThread, STARTF_USESHOWWINDOW, STARTUPINFOW, TerminateProcess,
             };
-            use winapi::um::winbase::{CREATE_NO_WINDOW, CREATE_SUSPENDED, STARTF_USESHOWWINDOW};
-            use winapi::um::winnt::{
-                JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
-            };
-            use winapi::um::winuser::SW_HIDE;
+            use windows::Win32::UI::WindowsAndMessaging::SW_HIDE;
+            use windows::core::{PCWSTR, PWSTR};
 
             unsafe {
                 // 构建命令行
@@ -98,24 +96,24 @@ impl ClashProcess {
                     .encode_wide()
                     .chain(std::iter::once(0))
                     .collect();
+                let command_line_ptr = PWSTR(command_line_wide.as_mut_ptr());
 
                 // 创建 Job Object（确保子进程跟随父进程终止）
-                let job_handle = CreateJobObjectW(ptr::null_mut(), ptr::null());
-                if job_handle.is_null() {
-                    return Err("创建 Job Object 失败".to_string());
-                }
+                let job_handle = CreateJobObjectW(None, PCWSTR::null())
+                    .map_err(|_| "创建 Job Object 失败".to_string())?;
 
                 let mut job_info: JOBOBJECT_EXTENDED_LIMIT_INFORMATION = std::mem::zeroed();
                 job_info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
 
                 if SetInformationJobObject(
                     job_handle,
-                    winapi::um::winnt::JobObjectExtendedLimitInformation,
-                    &mut job_info as *mut _ as *mut _,
+                    JobObjectExtendedLimitInformation,
+                    &job_info as *const _ as *const _,
                     std::mem::size_of::<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>() as u32,
-                ) == FALSE
+                )
+                .is_err()
                 {
-                    CloseHandle(job_handle);
+                    let _ = CloseHandle(job_handle);
                     return Err("设置 Job Object 信息失败".to_string());
                 }
 
@@ -123,48 +121,49 @@ impl ClashProcess {
                 let mut startup_info: STARTUPINFOW = std::mem::zeroed();
                 startup_info.cb = std::mem::size_of::<STARTUPINFOW>() as u32;
                 startup_info.dwFlags = STARTF_USESHOWWINDOW;
-                startup_info.wShowWindow = SW_HIDE as u16;
+                startup_info.wShowWindow = SW_HIDE.0 as u16;
 
                 let mut process_info: PROCESS_INFORMATION = std::mem::zeroed();
 
                 // 创建进程（挂起状态）
                 if CreateProcessW(
-                    ptr::null(),
-                    command_line_wide.as_mut_ptr(),
-                    ptr::null_mut(),
-                    ptr::null_mut(),
-                    FALSE,
+                    PCWSTR::null(),
+                    Some(command_line_ptr),
+                    None,
+                    None,
+                    false,
                     CREATE_NO_WINDOW | CREATE_SUSPENDED,
-                    ptr::null_mut(),
-                    ptr::null(),
-                    &mut startup_info,
+                    None,
+                    PCWSTR::null(),
+                    &startup_info,
                     &mut process_info,
-                ) == FALSE
+                )
+                .is_err()
                 {
-                    CloseHandle(job_handle);
+                    let _ = CloseHandle(job_handle);
                     return Err("创建进程失败".to_string());
                 }
 
                 // 将进程分配到 Job Object
-                if AssignProcessToJobObject(job_handle, process_info.hProcess) == FALSE {
-                    TerminateProcess(process_info.hProcess, 1);
-                    CloseHandle(process_info.hProcess);
-                    CloseHandle(process_info.hThread);
-                    CloseHandle(job_handle);
+                if AssignProcessToJobObject(job_handle, process_info.hProcess).is_err() {
+                    let _ = TerminateProcess(process_info.hProcess, 1);
+                    let _ = CloseHandle(process_info.hProcess);
+                    let _ = CloseHandle(process_info.hThread);
+                    let _ = CloseHandle(job_handle);
                     return Err("分配进程到 Job Object 失败".to_string());
                 }
 
                 // 恢复进程运行
                 if ResumeThread(process_info.hThread) == u32::MAX {
-                    TerminateProcess(process_info.hProcess, 1);
-                    CloseHandle(process_info.hProcess);
-                    CloseHandle(process_info.hThread);
-                    CloseHandle(job_handle);
+                    let _ = TerminateProcess(process_info.hProcess, 1);
+                    let _ = CloseHandle(process_info.hProcess);
+                    let _ = CloseHandle(process_info.hThread);
+                    let _ = CloseHandle(job_handle);
                     return Err("恢复进程线程失败".to_string());
                 }
 
                 let pid = process_info.dwProcessId;
-                CloseHandle(process_info.hThread);
+                let _ = CloseHandle(process_info.hThread);
 
                 Ok(ClashProcess {
                     process_handle: process_info.hProcess,
@@ -222,13 +221,12 @@ impl ClashProcess {
         log::info!("正在停止 Clash 进程，PID：{}", pid);
 
         use std::time::Duration;
-        use winapi::um::handleapi::CloseHandle;
-        use winapi::um::synchapi::WaitForSingleObject;
-        use winapi::um::winbase::WAIT_OBJECT_0;
+        use windows::Win32::Foundation::{CloseHandle, WAIT_OBJECT_0};
+        use windows::Win32::System::Threading::WaitForSingleObject;
 
         unsafe {
             // 关闭 Job Object 触发子进程自动终止
-            CloseHandle(self.job_handle);
+            let _ = CloseHandle(self.job_handle);
 
             // 等待进程退出（最多 5 秒）
             let timeout_ms = Duration::from_secs(5).as_millis() as u32;
@@ -237,12 +235,12 @@ impl ClashProcess {
             match wait_result {
                 WAIT_OBJECT_0 => {
                     log::info!("进程已安全退出");
-                    CloseHandle(self.process_handle);
+                    let _ = CloseHandle(self.process_handle);
                     Ok(())
                 }
                 _ => {
                     log::warn!("进程在 5 秒后仍未退出");
-                    CloseHandle(self.process_handle);
+                    let _ = CloseHandle(self.process_handle);
                     Ok(())
                 }
             }

@@ -16,7 +16,7 @@ const MAX_PIPE_BUSY_RETRIES: u32 = 2;
 pub async fn connect_named_pipe(
     pipe_path: &str,
 ) -> Result<tokio::net::windows::named_pipe::NamedPipeClient, String> {
-    use windows_sys::Win32::Foundation::ERROR_PIPE_BUSY;
+    use windows::Win32::Foundation::ERROR_PIPE_BUSY;
 
     let mut retry_count = 0;
 
@@ -26,7 +26,7 @@ pub async fn connect_named_pipe(
                 log::trace!("已连接到 Named Pipe：{}", pipe_path);
                 return Ok(client);
             }
-            Err(e) if e.raw_os_error() == Some(ERROR_PIPE_BUSY as i32) => {
+            Err(e) if e.raw_os_error() == Some(ERROR_PIPE_BUSY.0 as i32) => {
                 if retry_count >= MAX_PIPE_BUSY_RETRIES {
                     return Err(format!(
                         "Named Pipe 连接超时：管道繁忙，重试 {} 次后仍无法连接（{}）",

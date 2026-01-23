@@ -435,7 +435,6 @@ jobs:
             | **包名** | `${{ needs.prepare.outputs.pkg }}` |
             | **版本号** | `${{ needs.prepare.outputs.version }}` |
             | **Mihomo 核心** | `${{ needs.prepare.outputs.mihomo_version }}` |
-            | **提交哈希** | [`${{ github.sha }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}) |
             
             ${{ steps.decode_changelog.outputs.changelog }}
             
