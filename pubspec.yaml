@@ -74,6 +74,9 @@ dependencies:
   # Markdown 渲染支持
   gpt_markdown: ^1.1.4
 
+  # 品牌图标支持
+  font_awesome_flutter: ^10.8.0
+
   # 网络图片缓存
   cached_network_image: ^3.4.1
   flutter_cache_manager: ^3.4.1
