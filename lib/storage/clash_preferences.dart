@@ -356,7 +356,7 @@ class ClashPreferences {
   Future<void> setTunDevice(String device) => _setString(_kTunDevice, device);
 
   // 获取虚拟网卡自动路由是否启用
-  bool getTunAutoRoute() => _getBool(_kTunAutoRoute, false);
+  bool getTunAutoRoute() => _getBool(_kTunAutoRoute, true);
 
   // 保存虚拟网卡自动路由启用状态
   Future<void> setTunAutoRoute(bool enabled) =>
@@ -384,7 +384,7 @@ class ClashPreferences {
       _setStringList(_kTunDnsHijack, dnsHijack);
 
   // 获取虚拟网卡严格路由是否启用
-  bool getTunStrictRoute() => _getBool(_kTunStrictRoute, false);
+  bool getTunStrictRoute() => _getBool(_kTunStrictRoute, true);
 
   // 保存虚拟网卡严格路由启用状态
   Future<void> setTunStrictRoute(bool enabled) =>
